@@ -76,7 +76,7 @@
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIconFile</key>
-	<string></string>
+	<string>GemStone.icns</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.VMware.${PRODUCT_NAME:rfc1034identifier}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -101,5 +101,10 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>SMPrivilegedExecutables</key>
+	<dict>
+		<key>com.VMware.GemStone.Helper</key>
+		<string>identifier com.VMware.GemStone.Helper and certificate leaf[subject.CN] = "GemStone"</string>
+	</dict>
 </dict>
 </plist>
