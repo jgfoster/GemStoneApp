@@ -7,14 +7,20 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "TaskProgressController.h"
 #import "Versions.h"
 
 @class Versions;
 
-@interface VersionsController : NSWindowController {
-	Versions *versions;
+@interface VersionsController : NSObject <NSOpenSavePanelDelegate> {
+	IBOutlet TaskProgressController	*taskProgressController;
+	IBOutlet NSTextField			*dateField;
+	IBOutlet NSTableView			*versionsTable;
+	
+	Versions						*versions;
 }
 
-@property	Versions *versions;
+- (IBAction)importVersion:(id)sender;
+- (IBAction)updateVersions:(id)sender;
 
 @end

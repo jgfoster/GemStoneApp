@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E509B09C154B8BE700994476 /* TaskProgressController.m in Sources */ = {isa = PBXBuildFile; fileRef = E509B09B154B8BE700994476 /* TaskProgressController.m */; };
+		E50D858A154B119A00E5FDB6 /* HelperController.m in Sources */ = {isa = PBXBuildFile; fileRef = E50D8589154B119A00E5FDB6 /* HelperController.m */; };
 		E554E9711541C4C800A08D05 /* AppController.m in Sources */ = {isa = PBXBuildFile; fileRef = E554E9701541C4C800A08D05 /* AppController.m */; };
 		E554E9831541D22D00A08D05 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = E554E9821541D22D00A08D05 /* main.c */; };
 		E554E9861541D23A00A08D05 /* Utilties.c in Sources */ = {isa = PBXBuildFile; fileRef = E554E9851541D23A00A08D05 /* Utilties.c */; };
@@ -14,12 +16,11 @@
 		E554E9911541D8E400A08D05 /* Helper.m in Sources */ = {isa = PBXBuildFile; fileRef = E554E9901541D8E400A08D05 /* Helper.m */; };
 		E554E9991541FC5300A08D05 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E554E9981541FC5300A08D05 /* ServiceManagement.framework */; };
 		E554E99B1541FC6600A08D05 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E554E99A1541FC6600A08D05 /* Security.framework */; };
+		E555C918154F9F56006EE30F /* LoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = E555C917154F9F55006EE30F /* LoginController.m */; };
 		E593F57A1540C1CA00CA44CE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E593F5791540C1CA00CA44CE /* Cocoa.framework */; };
 		E593F5841540C1CA00CA44CE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E593F5821540C1CA00CA44CE /* InfoPlist.strings */; };
 		E593F5861540C1CA00CA44CE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E593F5851540C1CA00CA44CE /* main.m */; };
 		E593F58A1540C1CA00CA44CE /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = E593F5881540C1CA00CA44CE /* Credits.rtf */; };
-		E593F58D1540C1CA00CA44CE /* Document.m in Sources */ = {isa = PBXBuildFile; fileRef = E593F58C1540C1CA00CA44CE /* Document.m */; };
-		E593F5901540C1CA00CA44CE /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = E593F58E1540C1CA00CA44CE /* Document.xib */; };
 		E593F5931540C1CA00CA44CE /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = E593F5911540C1CA00CA44CE /* MainMenu.xib */; };
 		E593F5961540C1CA00CA44CE /* Document.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E593F5941540C1CA00CA44CE /* Document.xcdatamodeld */; };
 		E593F59E1540C1CB00CA44CE /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E593F59D1540C1CB00CA44CE /* SenTestingKit.framework */; };
@@ -66,6 +67,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E509B09A154B8BE700994476 /* TaskProgressController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TaskProgressController.h; sourceTree = "<group>"; };
+		E509B09B154B8BE700994476 /* TaskProgressController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TaskProgressController.m; sourceTree = "<group>"; };
+		E50D8588154B119A00E5FDB6 /* HelperController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelperController.h; sourceTree = "<group>"; };
+		E50D8589154B119A00E5FDB6 /* HelperController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HelperController.m; sourceTree = "<group>"; };
 		E554E96F1541C4C800A08D05 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
 		E554E9701541C4C800A08D05 /* AppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppController.m; sourceTree = "<group>"; };
 		E554E9761541CFE200A08D05 /* com.VMware.GemStone.Helper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = com.VMware.GemStone.Helper; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -78,6 +83,8 @@
 		E554E9901541D8E400A08D05 /* Helper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Helper.m; sourceTree = "<group>"; };
 		E554E9981541FC5300A08D05 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
 		E554E99A1541FC6600A08D05 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		E555C916154F9F55006EE30F /* LoginController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginController.h; sourceTree = "<group>"; };
+		E555C917154F9F55006EE30F /* LoginController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginController.m; sourceTree = "<group>"; };
 		E593F5751540C1CA00CA44CE /* GemStone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GemStone.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E593F5791540C1CA00CA44CE /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		E593F57C1540C1CA00CA44CE /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -88,9 +95,6 @@
 		E593F5851540C1CA00CA44CE /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		E593F5871540C1CA00CA44CE /* GemStone-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GemStone-Prefix.pch"; sourceTree = "<group>"; };
 		E593F5891540C1CA00CA44CE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
-		E593F58B1540C1CA00CA44CE /* Document.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Document.h; sourceTree = "<group>"; };
-		E593F58C1540C1CA00CA44CE /* Document.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Document.m; sourceTree = "<group>"; };
-		E593F58F1540C1CA00CA44CE /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/Document.xib; sourceTree = "<group>"; };
 		E593F5921540C1CA00CA44CE /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		E593F5951540C1CA00CA44CE /* Document.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Document.xcdatamodel; sourceTree = "<group>"; };
 		E593F59C1540C1CB00CA44CE /* GemStoneTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GemStoneTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -199,16 +203,19 @@
 		E593F57F1540C1CA00CA44CE /* GemStone */ = {
 			isa = PBXGroup;
 			children = (
+				E593F5911540C1CA00CA44CE /* MainMenu.xib */,
 				E554E96F1541C4C800A08D05 /* AppController.h */,
 				E554E9701541C4C800A08D05 /* AppController.m */,
-				E593F5911540C1CA00CA44CE /* MainMenu.xib */,
-				E593F58B1540C1CA00CA44CE /* Document.h */,
-				E593F58C1540C1CA00CA44CE /* Document.m */,
-				E593F58E1540C1CA00CA44CE /* Document.xib */,
+				E50D8588154B119A00E5FDB6 /* HelperController.h */,
+				E50D8589154B119A00E5FDB6 /* HelperController.m */,
 				E554E98F1541D8E400A08D05 /* Helper.h */,
 				E554E9901541D8E400A08D05 /* Helper.m */,
+				E555C916154F9F55006EE30F /* LoginController.h */,
+				E555C917154F9F55006EE30F /* LoginController.m */,
 				E5DDDEB415420816006F168D /* NSFileManager+DirectoryLocations.h */,
 				E5DDDEB515420816006F168D /* NSFileManager+DirectoryLocations.m */,
+				E509B09A154B8BE700994476 /* TaskProgressController.h */,
+				E509B09B154B8BE700994476 /* TaskProgressController.m */,
 				E5CEFEE21544DA1000DD64D1 /* Version.h */,
 				E5CEFEE31544DA1000DD64D1 /* Version.m */,
 				E5DDDEB715421320006F168D /* Versions.h */,
@@ -346,7 +353,6 @@
 			files = (
 				E593F5841540C1CA00CA44CE /* InfoPlist.strings in Resources */,
 				E593F58A1540C1CA00CA44CE /* Credits.rtf in Resources */,
-				E593F5901540C1CA00CA44CE /* Document.xib in Resources */,
 				E593F5931540C1CA00CA44CE /* MainMenu.xib in Resources */,
 				E593F5B41540C1E000CA44CE /* GemStone.icns in Resources */,
 				E5DDDEBB1542158A006F168D /* Versions.xib in Resources */,
@@ -394,7 +400,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E593F5861540C1CA00CA44CE /* main.m in Sources */,
-				E593F58D1540C1CA00CA44CE /* Document.m in Sources */,
 				E593F5961540C1CA00CA44CE /* Document.xcdatamodeld in Sources */,
 				E554E9711541C4C800A08D05 /* AppController.m in Sources */,
 				E554E9861541D23A00A08D05 /* Utilties.c in Sources */,
@@ -403,6 +408,9 @@
 				E5DDDEB915421321006F168D /* Versions.m in Sources */,
 				E5DDDEC115421FFE006F168D /* VersionsController.m in Sources */,
 				E5CEFEE41544DA1000DD64D1 /* Version.m in Sources */,
+				E50D858A154B119A00E5FDB6 /* HelperController.m in Sources */,
+				E509B09C154B8BE700994476 /* TaskProgressController.m in Sources */,
+				E555C918154F9F56006EE30F /* LoginController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -444,14 +452,6 @@
 				E593F5891540C1CA00CA44CE /* en */,
 			);
 			name = Credits.rtf;
-			sourceTree = "<group>";
-		};
-		E593F58E1540C1CA00CA44CE /* Document.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				E593F58F1540C1CA00CA44CE /* en */,
-			);
-			name = Document.xib;
 			sourceTree = "<group>";
 		};
 		E593F5911540C1CA00CA44CE /* MainMenu.xib */ = {

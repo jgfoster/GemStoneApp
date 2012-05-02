@@ -9,6 +9,6 @@
 #import <Foundation/Foundation.h>
 
 @interface Helper : NSObject
-- (BOOL)install;
+- (NSString *)install;
 - (BOOL)isCurrent;
 @end

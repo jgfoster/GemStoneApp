@@ -11,9 +11,9 @@
 #import "Version.h"
 
 @interface Versions ()
-- (NSString *)archiveFilePath;
+- (void)downloadTaskFinished;
+- (void)importTaskErrored:(NSString *)message;
 - (void)importTaskFinished;
-- (void)installTaskFinished;
 - (void)startTaskPath:(NSString *)path 
 			arguments:(NSArray *)arguments 
 			stdOutSel:(SEL)stdOutSel 
@@ -27,7 +27,7 @@
 @synthesize versions;
 @synthesize sortDescriptors;
 
-- (NSString *)archiveFilePath;
++ (NSString *)archiveFilePath;
 {
 	NSMutableString *path = [NSMutableString new];
 	[path appendString:[[NSFileManager defaultManager] applicationSupportDirectory]];
@@ -35,23 +35,133 @@
 	return [NSString stringWithString:path];
 }
 
-- (void)awakeFromNib;
+- (NSInteger)count;
 {
-	NSLog(@"Versions-awakeFromNib");
-	Versions *archive = [NSKeyedUnarchiver unarchiveObjectWithFile:[self archiveFilePath]];
-	if (archive) {
-		updateDate = [archive updateDate];
-		versions = [archive versions];
-		sortDescriptors = [archive sortDescriptors];
-		[self updateUI];
+	return [versions count];
+}
+
+- (NSString *)createZipFileForVersionAtRow:(NSInteger)rowIndex;
+{
+	Version *version = [versions objectAtIndex:rowIndex];
+	NSString *zippedFileName = [version zippedFileName];
+	zipFilePath = [NSMutableString new];
+	NSMutableString *path = [NSMutableString new];
+	[path appendString:[[NSFileManager defaultManager] applicationSupportDirectory]];
+	[path appendString:@"/"];
+	[path appendString:zippedFileName];
+	zipFilePath = [NSString stringWithString:path];
+	BOOL exists, isDirectory = NO, success;
+	exists = [[NSFileManager defaultManager] fileExistsAtPath:zipFilePath isDirectory:&isDirectory];
+	if (exists) {
+		if (isDirectory) {
+			return [@"Please delete directory at:" stringByAppendingString:zipFilePath];
+		}
+		NSError *error;
+		success = [[NSFileManager defaultManager] removeItemAtPath:zipFilePath error:&error];
+		if (!success) {
+			return [@"Unable to delete existing file: " stringByAppendingString:[error localizedDescription]];
+		}
+	}
+	success = [[NSFileManager defaultManager] 
+			   createFileAtPath:zipFilePath 
+			   contents:[NSData new] 
+			   attributes:nil];
+	if (!success) {
+		return [@"Unable to create file: " stringByAppendingString:zipFilePath];
+	}
+	zipFile = [NSFileHandle fileHandleForWritingAtPath:zipFilePath];
+	if (!zipFile) {
+		return [@"Unable to open file: " stringByAppendingString:zipFilePath];
+	}
+	return nil;
+}
+
+- (void)downloadTaskErr:(NSNotification *)inNotification {
+	NSData *data = [[inNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
+    NSString *string = [[NSString alloc] 
+						initWithData:data 
+						encoding:NSUTF8StringEncoding];
+	if ([string length]) {
+		NSDictionary *userInfo = [NSDictionary
+								  dictionaryWithObject:string
+								  forKey:@"string"];
+		NSNotification *outNotification = [NSNotification
+										notificationWithName:kVersionsTaskProgress 
+										object:self
+										userInfo:userInfo];
+		[[NSNotificationCenter defaultCenter] postNotification:outNotification];
+		[[inNotification object] readInBackgroundAndNotify];
+	} else {
+		[[NSNotificationCenter defaultCenter] 
+		 removeObserver:self 
+		 name:NSFileHandleReadCompletionNotification 
+		 object:[inNotification object]];
+		[self performSelector:@selector(downloadTaskFinished) withObject:nil afterDelay:0.5];
 	}
 }
 
-- (void)cancelTask
+- (void)downloadTaskFinished;
 {
-	[task terminate];
+	[zipFile closeFile];
+	zipFile = nil;
+	if (!task) return;		// task cancelled!
 	task = nil;
-	[[NSApp delegate] taskFinished];
+	int fileSize = [[[NSFileManager defaultManager] 
+					 attributesOfItemAtPath:zipFilePath 
+					 error:nil] fileSize];
+	if (fileSize) {
+		NSURL *url = [NSURL fileURLWithPath:zipFilePath isDirectory:NO];
+		zipFilePath = nil;
+		[self import:url];
+	} else {
+		[[NSFileManager defaultManager] removeItemAtPath:zipFilePath error:nil];
+		zipFilePath = nil;
+		NSString *message = @"'RETR 550' means that this version of GemStone/S 64 Bit is not available for the Macintosh.";
+		NSDictionary *userInfo = [NSDictionary
+								  dictionaryWithObject:message
+								  forKey:@"string"];
+		NSNotification *outNotification = [NSNotification
+										notificationWithName:kVersionsTaskError 
+										object:self
+										userInfo:userInfo];
+		[[NSNotificationCenter defaultCenter] postNotification:outNotification];
+	}
+}
+
+- (void)downloadTaskOut:(NSNotification *)inNotification {
+	NSData *data = [[inNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
+	if ([data length]) {
+		[zipFile writeData:data];
+		[[inNotification object] readInBackgroundAndNotify];
+	} else {
+		[[NSNotificationCenter defaultCenter] 
+		 removeObserver:self 
+		 name:NSFileHandleReadToEndOfFileCompletionNotification 
+		 object:[inNotification object]];
+	}
+}
+
+- (void)downloadVersionAtRow:(NSInteger)rowIndex;
+{
+	Version *version = [versions objectAtIndex:rowIndex];
+	NSString *zippedFileName = [version zippedFileName];
+	NSArray	*arguments;
+	NSMutableString *ftp = [NSMutableString new];
+	[ftp appendString:@"ftp://ftp.gemstone.com/pub/GemStone64/"];
+	[ftp appendString:version.version];
+	[ftp appendString:@"/"];
+	[ftp appendString:zippedFileName];
+	arguments = [NSArray arrayWithObjects:
+				 ftp, 
+				 @"--user",
+				 @"anonymous:password",
+				 nil];
+	[self 
+	 startTaskPath: @"/usr/bin/curl" 
+	 arguments:arguments 
+	 stdOutSel:@selector(downloadTaskOut:) 
+	 stdErrSel:@selector(downloadTaskErr:)];
+	return;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder;
@@ -59,6 +169,17 @@
 	[encoder encodeObject:updateDate forKey:@"updateDate"];
 	[encoder encodeObject:versions forKey:@"versions"];
 	[encoder encodeObject:sortDescriptors forKey:@"sortDescriptors"];
+}
+
+- (id)getRow:(NSInteger)rowIndex column:(NSString *)columnIdentifier;
+{
+	Version *version = [versions objectAtIndex:rowIndex];
+	SEL selector = NSSelectorFromString(columnIdentifier);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+	id object = [version performSelector:selector];
+#pragma clang diagnostic pop
+	return object;
 }
 
 - (void)import:(NSURL *)url
@@ -76,26 +197,33 @@
 	 stdErrSel:@selector(importTaskErr:)];
 }
 
-- (void)importTaskErr:(NSNotification *)notification {
-	NSData *data = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
+- (void)importTaskErr:(NSNotification *)inNotification {
+	[[NSNotificationCenter defaultCenter] 
+	 removeObserver:self 
+	 name:NSFileHandleReadCompletionNotification 
+	 object:[inNotification object]];
+	NSData *data = [[inNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
     NSString *string = [[NSString alloc] 
 						initWithData:data 
 						encoding:NSUTF8StringEncoding];
 	if ([string length]) {
-        NSAlert *alert = [[NSAlert alloc] init];
-        [alert setAlertStyle:NSCriticalAlertStyle];
-        [alert setMessageText:@"Import Failed"];
-        [alert setInformativeText:string];
-        [alert addButtonWithTitle:@"Dismiss"];
-        [alert runModal];
-		[self cancelTask];
+		[self importTaskErrored:string];
 	} else {
-		[[NSNotificationCenter defaultCenter] 
-		 removeObserver:self 
-		 name:NSFileHandleReadCompletionNotification 
-		 object:[notification object]];
-		[self performSelector:@selector(importTaskFinished) withObject:nil afterDelay:0.1];
+		[self importTaskFinished];
 	}
+}
+
+- (void)importTaskErrored:(NSString *)message;
+{
+	NSDictionary *userInfo = [NSDictionary
+							  dictionaryWithObject:message
+							  forKey:@"string"];
+	NSNotification *outNotification = [NSNotification
+									   notificationWithName:kVersionsTaskError 
+									   object:self
+									   userInfo:userInfo];
+	[[NSNotificationCenter defaultCenter] postNotification:outNotification];
+	[self terminateTask];
 }
 
 - (void)importTaskFinished;
@@ -105,26 +233,32 @@
 	if (0 == range.location) {
 		[[NSFileManager defaultManager] removeItemAtPath:zipFilePath error:nil];
 	}
-	zipFilePath = nil;
 	task = nil;
+	zipFilePath = nil;
 	[self updateIsInstalled];
-	[self updateUI];
-	[[NSApp delegate] taskFinished];
+	[[NSNotificationCenter defaultCenter] postNotificationName:kVersionsTaskDone object:self];
 }
 
-- (void)importTaskOut:(NSNotification *)notification {
-	NSData *data = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
+- (void)importTaskOut:(NSNotification *)inNotification {
+	NSData *data = [[inNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
     NSString *string = [[NSString alloc] 
 						initWithData:data 
 						encoding:NSUTF8StringEncoding];
 	if ([string length]) {
-		[[NSApp delegate] taskProgress:string];
-		[[notification object] readInBackgroundAndNotify];
+		NSDictionary *userInfo = [NSDictionary
+								  dictionaryWithObject:string
+								  forKey:@"string"];
+		NSNotification *outNotification = [NSNotification
+										   notificationWithName:kVersionsTaskProgress
+										   object:self
+										   userInfo:userInfo];
+		[[NSNotificationCenter defaultCenter] postNotification:outNotification];
+		[[inNotification object] readInBackgroundAndNotify];
 	} else {
 		[[NSNotificationCenter defaultCenter] 
 		 removeObserver:self 
 		 name:NSFileHandleReadCompletionNotification 
-		 object:[notification object]];
+		 object:[inNotification object]];
 	}
 }
 
@@ -160,194 +294,27 @@
 	return installedVersions;
 }
 
-- (void)installVersion:(Version *)version;
+- (NSString *)removeVersionAtRow:(NSInteger)rowIndex;
 {
-	NSString *zippedFileName = [version zippedFileName];
-	zipFilePath = [NSMutableString new];
-	NSMutableString *path = [NSMutableString new];
-	[path appendString:[[NSFileManager defaultManager] applicationSupportDirectory]];
-	[path appendString:@"/"];
-	[path appendString:zippedFileName];
-	zipFilePath = [NSString stringWithString:path];
-	BOOL exists, isDirectory = NO, success;
-	exists = [[NSFileManager defaultManager] fileExistsAtPath:zipFilePath isDirectory:&isDirectory];
-	if (exists) {
-		if (isDirectory) {
-			NSAlert *alert = [[NSAlert alloc] init];
-			[alert setAlertStyle:NSCriticalAlertStyle];
-			[alert setMessageText:@"Please delete directory at:"];
-			[alert setInformativeText:zipFilePath];
-			[alert addButtonWithTitle:@"Dismiss"];
-			[alert runModal];
-			return;
-		}
-		NSError *error;
-		success = [[NSFileManager defaultManager] removeItemAtPath:zipFilePath error:&error];
-		if (!success) {
-			NSAlert *alert = [[NSAlert alloc] init];
-			[alert setAlertStyle:NSCriticalAlertStyle];
-			[alert setMessageText:@"Unable to delete existing file"];
-			[alert setInformativeText:[error localizedDescription]];
-			[alert addButtonWithTitle:@"Dismiss"];
-			[alert runModal];
-			return;
-		}
-	}
-	success = [[NSFileManager defaultManager] 
-			   createFileAtPath:zipFilePath 
-			   contents:[NSData new] 
-			   attributes:nil];
-	if (!success) {
-		NSAlert *alert = [[NSAlert alloc] init];
-		[alert setAlertStyle:NSCriticalAlertStyle];
-		[alert setMessageText:@"Unable to create file"];
-		[alert setInformativeText:zipFilePath];
-		[alert addButtonWithTitle:@"Dismiss"];
-		[alert runModal];
-		return;
-	}
-	zipFile = [NSFileHandle fileHandleForWritingAtPath:zipFilePath];
-	if (!zipFile) {
-		NSAlert *alert = [[NSAlert alloc] init];
-		[alert setAlertStyle:NSCriticalAlertStyle];
-		[alert setMessageText:@"Unable to open file"];
-		[alert setInformativeText:zipFilePath];
-		[alert addButtonWithTitle:@"Dismiss"];
-		[alert runModal];
-		return;
-	}
-	[[NSApp delegate] cancelMethod:@selector(cancelInstallVersion)];
-	[[NSApp delegate] startTaskProgressSheet];
-	NSArray	*arguments;
-	NSMutableString *ftp = [NSMutableString new];
-	[ftp appendString:@"ftp://ftp.gemstone.com/pub/GemStone64/"];
-	[ftp appendString:version.version];
-	[ftp appendString:@"/"];
-	[ftp appendString:zippedFileName];
-	arguments = [NSArray arrayWithObjects:
-				 ftp, 
-				 @"--user",
-				 @"anonymous:password",
-				 nil];
-	[self 
-	 startTaskPath: @"/usr/bin/curl" 
-	 arguments:arguments 
-	 stdOutSel:@selector(installTaskOut:) 
-	 stdErrSel:@selector(installTaskErr:)];
-}
-
-- (void)installTaskErr:(NSNotification *)notification {
-	NSData *data = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
-    NSString *string = [[NSString alloc] 
-						initWithData:data 
-						encoding:NSUTF8StringEncoding];
-	if ([string length]) {
-		[[NSApp delegate] taskProgress:string];
-		[[notification object] readInBackgroundAndNotify];
-	} else {
-		[[NSNotificationCenter defaultCenter] 
-		 removeObserver:self 
-		 name:NSFileHandleReadCompletionNotification 
-		 object:[notification object]];
-		[self performSelector:@selector(installTaskFinished) withObject:nil afterDelay:0.1];
-	}
-}
-
-- (void)installTaskFinished;
-{
-	[zipFile closeFile];
-	zipFile = nil;
-	if (!task) return;		// task cancelled!
-	task = nil;
-	int fileSize = [[[NSFileManager defaultManager] 
-					 attributesOfItemAtPath:zipFilePath 
-					 error:nil] fileSize];
-	if (fileSize) {
-		NSURL *url = [NSURL fileURLWithPath:zipFilePath isDirectory:NO];
-		zipFilePath = nil;
-		[self import:url];
-	} else {
-		[[NSFileManager defaultManager] removeItemAtPath:zipFilePath error:nil];
-		zipFilePath = nil;
-		NSAlert *alert = [[NSAlert alloc] init];
-		[alert setAlertStyle:NSCriticalAlertStyle];
-		[alert setMessageText:@"Download Failed!"];
-		[alert setInformativeText:@"'RETR 550' means that this version of GemStone/S 64 Bit is not available for the Macintosh."];
-		[alert addButtonWithTitle:@"Dismiss"];
-		[alert runModal];
-		[[NSApp delegate] taskFinished];
-	}
-}
-
-- (void)installTaskOut:(NSNotification *)notification {
-	NSData *data = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
-	if ([data length]) {
-		[zipFile writeData:data];
-		[[notification object] readInBackgroundAndNotify];
-	} else {
-		[[NSNotificationCenter defaultCenter] 
-		 removeObserver:self 
-		 name:NSFileHandleReadToEndOfFileCompletionNotification 
-		 object:[notification object]];
-	}
-}
-
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
-{
-	return [versions count];
-}
-
-- (void)removeVersion:(Version *)version;
-{
+	Version *version = [versions objectAtIndex:rowIndex];
 	NSError *error = nil;
 	if ([version remove:&error]) {
 		[self updateIsInstalled];
-		return;
+		return nil;
 	}
-	NSAlert *alert = [[NSAlert alloc] init];
-	[alert setAlertStyle:NSCriticalAlertStyle];
-	[alert setMessageText:@"Removal Failed!"];
-	[alert setInformativeText:[error localizedDescription]];
-	[alert addButtonWithTitle:@"Dismiss"];
-	[alert runModal];
+	return [error localizedDescription];
 }
 
-// get table cell
-- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
+- (void)save;
 {
-	Version *version = [versions objectAtIndex:rowIndex];
-	NSString *columnIdentifier = [aTableColumn identifier];
-	SEL selector = NSSelectorFromString(columnIdentifier);
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-	id object = [version performSelector:selector];
-#pragma clang diagnostic pop
-	return object;
-}
-
-// set table cell
-- (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
-{
-	Version *version = [versions objectAtIndex:rowIndex];
-	NSString *columnIdentifier = [aTableColumn identifier];
-	SEL selector = NSSelectorFromString(columnIdentifier);
-	if (selector != @selector(isInstalledNumber)) {
-		NSLog(@"Invalid attempt to edit Versions-tableView:setObjectValue:%@ forTableColumn:%@ row:%ld", anObject, columnIdentifier, rowIndex);
-		return;
-	}
-	if ([anObject boolValue]) {
-		[self installVersion:version];
-	} else {
-		[self removeVersion:version];
-	}
+	[NSKeyedArchiver archiveRootObject:self toFile:[Versions archiveFilePath]];
 }
 
 // table sorting
-- (void)tableView:(NSTableView *)tableView sortDescriptorsDidChange:(NSArray *)oldDescriptors
+- (void)sortUsingDescriptors:(NSArray *)anArray;
 {
-	sortDescriptors = [tableView sortDescriptors];
+	sortDescriptors = anArray;
 	[versions sortUsingDescriptors:sortDescriptors];
-	[tableView reloadData];
 }
 
 - (void)startTaskPath:(NSString *)path arguments:(NSArray *)arguments stdOutSel:(SEL)stdOutSel stdErrSel:(SEL) stdErrSel
@@ -382,8 +349,16 @@
 	[task launch];
 }
 
+- (void)terminateTask;
+{
+	NSTask *myTask = task;
+	task = nil;
+	taskOutput = nil;
+	[myTask terminate];
+}
+
 // read list of directories from FTP distribution site
-- (void)update
+- (void)update;
 {
 	NSArray	*arguments;
 	NSString *path;
@@ -395,7 +370,7 @@
 						  @"anonymous:password",
 						  nil];
 #else
-	path = @"/bin/sleep";
+	path = @"/bin/sleep";	//	this allows testing cancel
 	arguments = [NSArray arrayWithObjects:@"5", nil];
 #endif
 	[self 
@@ -405,7 +380,7 @@
 	 stdErrSel:@selector(updateTaskErr:)];
 }
 
-- (NSString *)updateDateString
+- (NSString *)updateDateString;
 {
 	if (!updateDate) {
 		return @"";
@@ -422,20 +397,28 @@
 	}
 }
 
-- (void)updateTaskErr:(NSNotification *)notification {
-	NSData *data = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
+- (void)updateTaskErr:(NSNotification *)inNotification;
+{
+	NSData *data = [[inNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
     NSString *string = [[NSString alloc] 
 						initWithData:data 
 						encoding:NSUTF8StringEncoding];
 	if ([string length]) {
-		[[NSApp delegate] taskProgress:string];
-		[[notification object] readInBackgroundAndNotify];
+		NSDictionary *userInfo = [NSDictionary
+								  dictionaryWithObject:string
+								  forKey:@"string"];
+		NSNotification *outNotification = [NSNotification
+										   notificationWithName:kVersionsTaskProgress
+										   object:self
+										   userInfo:userInfo];
+		[[NSNotificationCenter defaultCenter] postNotification:outNotification];
+		[[inNotification object] readInBackgroundAndNotify];
 	} else {
 		[[NSNotificationCenter defaultCenter] 
 		 removeObserver:self 
 		 name:NSFileHandleReadCompletionNotification 
-		 object:[notification object]];
-		[self performSelector:@selector(updateTaskFinished) withObject:nil afterDelay:0.1];
+		 object:[inNotification object]];
+		[self performSelector:@selector(updateTaskFinished) withObject:nil afterDelay:0.5];
 	}
 }
 
@@ -490,33 +473,24 @@
 	if (sortDescriptors) {
 		[versions sortUsingDescriptors:sortDescriptors];
 	}
-	[self updateUI];
-	[[NSApp delegate] taskFinished];
+	[[NSNotificationCenter defaultCenter] postNotificationName:kVersionsTaskDone object:self];
 }
 
-- (void)updateTaskOut:(NSNotification *)notification {
-	NSData *data = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
+- (void)updateTaskOut:(NSNotification *)inNotification;
+{
+	NSData *data = [[inNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
     NSString *string = [[NSString alloc] 
 						initWithData:data 
 						encoding:NSUTF8StringEncoding];
 	if (task && [string length]) {
 		[taskOutput appendString:string];
-		[[notification object] readInBackgroundAndNotify];
+		[[inNotification object] readInBackgroundAndNotify];
 	} else {
 		[[NSNotificationCenter defaultCenter] 
 		 removeObserver:self 
 		 name:NSFileHandleReadToEndOfFileCompletionNotification 
-		 object:[notification object]];
+		 object:[inNotification object]];
 	}
 }
-
-- (void)updateUI
-{
-	[NSKeyedArchiver archiveRootObject:self toFile:[self archiveFilePath]];
-	[updateDateField setStringValue:[self updateDateString]];
-	[versionsTable reloadData];
-}
-
-
 
 @end

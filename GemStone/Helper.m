@@ -21,7 +21,8 @@
 @implementation Helper
 
 // returns 0 for success, 1 for error
-int sendMessage(const struct HelperMessage * messageOut, struct HelperMessage * messageIn) {
+int sendMessage(const struct HelperMessage * messageOut, struct HelperMessage * messageIn)
+{
     int socket_fd = socket(PF_UNIX, SOCK_STREAM, 0);
     if (socket_fd == -1) {
         NSLog(@"socket() failed!");
@@ -86,25 +87,19 @@ int sendMessage(const struct HelperMessage * messageOut, struct HelperMessage * 
 	return result;
 }
 
-- (BOOL)install
+- (NSString *)install;
 {
 	NSError *error = nil;
 	if (![self blessHelperWithLabel:@kHelperIdentifier error:&error]) {
 		NSLog(@"Helper tool installation failed: %@", [error localizedDescription]);
-        NSAlert *alert = [[NSAlert alloc] init];
-        [alert setAlertStyle:NSCriticalAlertStyle];
-        [alert setMessageText:@"Installation failed:"];
-        [alert setInformativeText:[error localizedDescription]];
-        [alert addButtonWithTitle:@"Dismiss"];
-        [alert runModal];
-		return NO;
+		return [error localizedDescription];
 	} else {
 		NSLog(@"Helper tool installed!");
-		return YES;
+		return nil;
     }
 }
 
-- (BOOL)isCurrent
+- (BOOL)isCurrent;
 {
     if (![[NSFileManager defaultManager] fileExistsAtPath:@kSocketPath]) {
 		return NO;	
