@@ -10,10 +10,13 @@
 
 @implementation LoginController
 
+@synthesize currentLogin;
+
 - (void)awakeFromNib;
 {
 	[self setGemType:nil];
 	[self setOsType:nil];
+	currentLogin = [Login new];
 }
 
 - (IBAction)deleteEntry:(id)sender;
@@ -24,6 +27,12 @@
 - (IBAction)login:(id)sender;
 {
 	NSLog(@"login:");
+}
+
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView;
+{
+	NSLog(@"LoginController-numberOfRowsInTableView");
+	return 0;
 }
 
 - (IBAction)saveEntry:(id)sender;
@@ -51,6 +60,16 @@
 	[osUserEntry setHidden:hidden];
 	[osPwdLabel  setHidden:hidden];
 	[osPwdEntry  setHidden:hidden];
+}
+
+- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex;
+{
+	return nil;
+}
+
+- (void)tableView:(NSTableView *)tableView sortDescriptorsDidChange:(NSArray *)oldDescriptors;
+{
+	return;
 }
 
 @end

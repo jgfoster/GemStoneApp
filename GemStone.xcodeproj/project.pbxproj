@@ -22,18 +22,18 @@
 		E593F5861540C1CA00CA44CE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E593F5851540C1CA00CA44CE /* main.m */; };
 		E593F58A1540C1CA00CA44CE /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = E593F5881540C1CA00CA44CE /* Credits.rtf */; };
 		E593F5931540C1CA00CA44CE /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = E593F5911540C1CA00CA44CE /* MainMenu.xib */; };
-		E593F5961540C1CA00CA44CE /* Document.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E593F5941540C1CA00CA44CE /* Document.xcdatamodeld */; };
 		E593F59E1540C1CB00CA44CE /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E593F59D1540C1CB00CA44CE /* SenTestingKit.framework */; };
 		E593F59F1540C1CB00CA44CE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E593F5791540C1CA00CA44CE /* Cocoa.framework */; };
 		E593F5A71540C1CB00CA44CE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E593F5A51540C1CB00CA44CE /* InfoPlist.strings */; };
 		E593F5AA1540C1CB00CA44CE /* GemStoneTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E593F5A91540C1CB00CA44CE /* GemStoneTests.m */; };
 		E593F5B41540C1E000CA44CE /* GemStone.icns in Resources */ = {isa = PBXBuildFile; fileRef = E593F5B31540C1E000CA44CE /* GemStone.icns */; };
-		E5CEFEE41544DA1000DD64D1 /* Version.m in Sources */ = {isa = PBXBuildFile; fileRef = E5CEFEE31544DA1000DD64D1 /* Version.m */; };
 		E5DDDEB3154202C7006F168D /* com.VMware.GemStone.Helper in CopyFiles */ = {isa = PBXBuildFile; fileRef = E554E9761541CFE200A08D05 /* com.VMware.GemStone.Helper */; };
 		E5DDDEB615420816006F168D /* NSFileManager+DirectoryLocations.m in Sources */ = {isa = PBXBuildFile; fileRef = E5DDDEB515420816006F168D /* NSFileManager+DirectoryLocations.m */; };
-		E5DDDEB915421321006F168D /* Versions.m in Sources */ = {isa = PBXBuildFile; fileRef = E5DDDEB815421320006F168D /* Versions.m */; };
 		E5DDDEBB1542158A006F168D /* Versions.xib in Resources */ = {isa = PBXBuildFile; fileRef = E5DDDEBA1542158A006F168D /* Versions.xib */; };
 		E5DDDEC115421FFE006F168D /* VersionsController.m in Sources */ = {isa = PBXBuildFile; fileRef = E5DDDEC015421FFE006F168D /* VersionsController.m */; };
+		E5E33C2815547ADF002B1E9F /* Version.m in Sources */ = {isa = PBXBuildFile; fileRef = E5E33C2515547ADF002B1E9F /* Version.m */; };
+		E5E33C2915547ADF002B1E9F /* Versions.m in Sources */ = {isa = PBXBuildFile; fileRef = E5E33C2715547ADF002B1E9F /* Versions.m */; };
+		E5FD633F1550CD4500D54088 /* Login.m in Sources */ = {isa = PBXBuildFile; fileRef = E5FD633E1550CD4500D54088 /* Login.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -96,7 +96,6 @@
 		E593F5871540C1CA00CA44CE /* GemStone-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GemStone-Prefix.pch"; sourceTree = "<group>"; };
 		E593F5891540C1CA00CA44CE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		E593F5921540C1CA00CA44CE /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		E593F5951540C1CA00CA44CE /* Document.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Document.xcdatamodel; sourceTree = "<group>"; };
 		E593F59C1540C1CB00CA44CE /* GemStoneTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GemStoneTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E593F59D1540C1CB00CA44CE /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		E593F5A41540C1CB00CA44CE /* GemStoneTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GemStoneTests-Info.plist"; sourceTree = "<group>"; };
@@ -104,15 +103,17 @@
 		E593F5A81540C1CB00CA44CE /* GemStoneTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GemStoneTests.h; sourceTree = "<group>"; };
 		E593F5A91540C1CB00CA44CE /* GemStoneTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GemStoneTests.m; sourceTree = "<group>"; };
 		E593F5B31540C1E000CA44CE /* GemStone.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = GemStone.icns; sourceTree = SOURCE_ROOT; };
-		E5CEFEE21544DA1000DD64D1 /* Version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Version.h; sourceTree = "<group>"; };
-		E5CEFEE31544DA1000DD64D1 /* Version.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Version.m; sourceTree = "<group>"; };
 		E5DDDEB415420816006F168D /* NSFileManager+DirectoryLocations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileManager+DirectoryLocations.h"; sourceTree = "<group>"; };
 		E5DDDEB515420816006F168D /* NSFileManager+DirectoryLocations.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+DirectoryLocations.m"; sourceTree = "<group>"; };
-		E5DDDEB715421320006F168D /* Versions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Versions.h; sourceTree = "<group>"; };
-		E5DDDEB815421320006F168D /* Versions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Versions.m; sourceTree = "<group>"; };
 		E5DDDEBA1542158A006F168D /* Versions.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = Versions.xib; sourceTree = "<group>"; };
 		E5DDDEBF15421FFE006F168D /* VersionsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VersionsController.h; sourceTree = "<group>"; };
 		E5DDDEC015421FFE006F168D /* VersionsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VersionsController.m; sourceTree = "<group>"; };
+		E5E33C2415547ADF002B1E9F /* Version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Version.h; sourceTree = "<group>"; };
+		E5E33C2515547ADF002B1E9F /* Version.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Version.m; sourceTree = "<group>"; };
+		E5E33C2615547ADF002B1E9F /* Versions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Versions.h; sourceTree = "<group>"; };
+		E5E33C2715547ADF002B1E9F /* Versions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Versions.m; sourceTree = "<group>"; };
+		E5FD633D1550CD4500D54088 /* Login.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Login.h; sourceTree = "<group>"; };
+		E5FD633E1550CD4500D54088 /* Login.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Login.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -206,24 +207,25 @@
 				E593F5911540C1CA00CA44CE /* MainMenu.xib */,
 				E554E96F1541C4C800A08D05 /* AppController.h */,
 				E554E9701541C4C800A08D05 /* AppController.m */,
-				E50D8588154B119A00E5FDB6 /* HelperController.h */,
-				E50D8589154B119A00E5FDB6 /* HelperController.m */,
 				E554E98F1541D8E400A08D05 /* Helper.h */,
 				E554E9901541D8E400A08D05 /* Helper.m */,
+				E50D8588154B119A00E5FDB6 /* HelperController.h */,
+				E50D8589154B119A00E5FDB6 /* HelperController.m */,
+				E5FD633D1550CD4500D54088 /* Login.h */,
+				E5FD633E1550CD4500D54088 /* Login.m */,
 				E555C916154F9F55006EE30F /* LoginController.h */,
 				E555C917154F9F55006EE30F /* LoginController.m */,
 				E5DDDEB415420816006F168D /* NSFileManager+DirectoryLocations.h */,
 				E5DDDEB515420816006F168D /* NSFileManager+DirectoryLocations.m */,
 				E509B09A154B8BE700994476 /* TaskProgressController.h */,
 				E509B09B154B8BE700994476 /* TaskProgressController.m */,
-				E5CEFEE21544DA1000DD64D1 /* Version.h */,
-				E5CEFEE31544DA1000DD64D1 /* Version.m */,
-				E5DDDEB715421320006F168D /* Versions.h */,
-				E5DDDEB815421320006F168D /* Versions.m */,
 				E5DDDEBF15421FFE006F168D /* VersionsController.h */,
 				E5DDDEC015421FFE006F168D /* VersionsController.m */,
 				E5DDDEBA1542158A006F168D /* Versions.xib */,
-				E593F5941540C1CA00CA44CE /* Document.xcdatamodeld */,
+				E5E33C2415547ADF002B1E9F /* Version.h */,
+				E5E33C2515547ADF002B1E9F /* Version.m */,
+				E5E33C2615547ADF002B1E9F /* Versions.h */,
+				E5E33C2715547ADF002B1E9F /* Versions.m */,
 				E593F5811540C1CA00CA44CE /* GemStone-Info.plist */,
 				E593F5881540C1CA00CA44CE /* Credits.rtf */,
 				E593F5B31540C1E000CA44CE /* GemStone.icns */,
@@ -400,17 +402,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				E593F5861540C1CA00CA44CE /* main.m in Sources */,
-				E593F5961540C1CA00CA44CE /* Document.xcdatamodeld in Sources */,
 				E554E9711541C4C800A08D05 /* AppController.m in Sources */,
 				E554E9861541D23A00A08D05 /* Utilties.c in Sources */,
 				E554E9911541D8E400A08D05 /* Helper.m in Sources */,
 				E5DDDEB615420816006F168D /* NSFileManager+DirectoryLocations.m in Sources */,
-				E5DDDEB915421321006F168D /* Versions.m in Sources */,
 				E5DDDEC115421FFE006F168D /* VersionsController.m in Sources */,
-				E5CEFEE41544DA1000DD64D1 /* Version.m in Sources */,
 				E50D858A154B119A00E5FDB6 /* HelperController.m in Sources */,
 				E509B09C154B8BE700994476 /* TaskProgressController.m in Sources */,
 				E555C918154F9F56006EE30F /* LoginController.m in Sources */,
+				E5FD633F1550CD4500D54088 /* Login.m in Sources */,
+				E5E33C2815547ADF002B1E9F /* Version.m in Sources */,
+				E5E33C2915547ADF002B1E9F /* Versions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -654,19 +656,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCVersionGroup section */
-		E593F5941540C1CA00CA44CE /* Document.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				E593F5951540C1CA00CA44CE /* Document.xcdatamodel */,
-			);
-			currentVersion = E593F5951540C1CA00CA44CE /* Document.xcdatamodel */;
-			path = Document.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = E593F56C1540C1CA00CA44CE /* Project object */;
 }

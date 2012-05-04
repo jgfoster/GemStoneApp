@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "AppController.h"
+#import "Version.h"
 
 #define kVersionsTaskDone		@"versionsTaskDone"
 #define kVersionsTaskError		@"versionsTaskError"
@@ -28,13 +29,16 @@
 	NSFileHandle			*zipFile;
 }
 
-@property (readonly) NSDate			*updateDate;
-@property (readonly) NSMutableArray	*versions;
-@property (readonly) NSArray		*sortDescriptors;
+@property (readonly) NSDate		*updateDate;
+@property (readonly) NSArray	*versions;
+@property (readonly) NSArray	*sortDescriptors;
 
 + (NSString *)archiveFilePath;
 
-- (NSInteger)count;
+// collection accessors for versions
+- (NSInteger)countOfVersions;
+- (id)objectInVersionsAtIndex:(NSUInteger)index;
+
 - (NSString *)createZipFileForVersionAtRow:(NSInteger)rowIndex;
 - (void)downloadVersionAtRow:(NSInteger)rowIndex;
 - (id)getRow:(NSInteger)rowIndex column:(NSString *)columnIdentifier;

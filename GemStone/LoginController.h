@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "Login.h"
 
 @interface LoginController : NSObject {
 	IBOutlet NSTextField	*name;
@@ -33,7 +34,12 @@
 	IBOutlet NSTextField	*gsPwdEntry;
 	
 	IBOutlet NSTextField	*developerEntry;
+	
+	IBOutlet NSArrayController	*loginArray;
+	IBOutlet Login			*currentLogin;
 }
+
+@property (readwrite,retain) Login *currentLogin;
 
 - (IBAction)deleteEntry:(id)sender;
 - (IBAction)login:(id)sender;

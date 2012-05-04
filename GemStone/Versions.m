@@ -8,7 +8,6 @@
 
 #import "NSFileManager+DirectoryLocations.h"
 #import "Versions.h"
-#import "Version.h"
 
 @interface Versions ()
 - (void)downloadTaskFinished;
@@ -35,7 +34,7 @@
 	return [NSString stringWithString:path];
 }
 
-- (NSInteger)count;
+- (NSInteger)countOfVersions;
 {
 	return [versions count];
 }
@@ -174,12 +173,7 @@
 - (id)getRow:(NSInteger)rowIndex column:(NSString *)columnIdentifier;
 {
 	Version *version = [versions objectAtIndex:rowIndex];
-	SEL selector = NSSelectorFromString(columnIdentifier);
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-	id object = [version performSelector:selector];
-#pragma clang diagnostic pop
-	return object;
+	return [version valueForKey:columnIdentifier];
 }
 
 - (void)import:(NSURL *)url
@@ -292,6 +286,11 @@
 		}
 	}
 	return installedVersions;
+}
+
+- (id)objectInVersionsAtIndex:(NSUInteger)index;
+{
+	return [versions objectAtIndex:index];
 }
 
 - (NSString *)removeVersionAtRow:(NSInteger)rowIndex;

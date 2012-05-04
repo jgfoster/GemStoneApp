@@ -65,7 +65,7 @@
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
-	return [versions count];
+	return [versions countOfVersions];
 }
 
 //	NSOpenPanelDelegate method for file import
