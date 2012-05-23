@@ -2,35 +2,44 @@
 //  Login.m
 //  GemStone
 //
-//  Created by James Foster on 5/1/12.
+//  Created by James Foster on 5/4/12.
 //  Copyright (c) 2012 VMware Inc. All rights reserved.
 //
 
 #import "Login.h"
 
+
 @implementation Login
 
-@synthesize name;
-@synthesize version;
-@synthesize stoneHost;
-@synthesize stoneName;
-@synthesize isRpcGem;
-@synthesize gemHost;
-@synthesize gemNet;
-@synthesize gemTask;
-@synthesize isGuest;
-@synthesize osUser;
-@synthesize osPwd;
-@synthesize gsUser;
-@synthesize gsPwd;
-@synthesize developer;
+@dynamic name;
+@dynamic version;
+@dynamic stoneHost;
+@dynamic stoneName;
+@dynamic gemTypeCode;
+@dynamic gemHost;
+@dynamic gemNet;
+@dynamic gemTask;
+@dynamic osTypeCode;
+@dynamic osUser;
+@dynamic osPassword;
+@dynamic gsUser;
+@dynamic gsPassword;
+@dynamic developer;
+@dynamic indexInArray;
 
-- (id)init;
+- (BOOL)isRpcGem;
 {
-	if (self = [super init]) {
-		name = @"James";
-	}
-	return self;
+	return ![self.gemTypeCode boolValue];
+}
+
+- (BOOL)isOsGuest;
+{
+	return ![self.osTypeCode boolValue];
+}
+
+- (void)login;
+{
+	NSLog(@"login");
 }
 
 @end

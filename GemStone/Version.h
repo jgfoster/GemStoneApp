@@ -8,20 +8,27 @@
 
 #import <Foundation/Foundation.h>
 
-@interface Version : NSObject {
-	BOOL		isInstalled;
-	NSString	*version;
+#define kDownloadRequest @"downloadRequest"
+#define kRemoveRequest @"removeVersionRequest"
+#define kRemoveVersionDone @"removeVersionDone"
+#define kRemoveVersionError @"removeVersionError"
+
+@interface Version : NSManagedObject {
+	NSNumber	*isInstalledCode;
+	NSString	*name;
 	NSDate		*date;
+	
+	NSTask		*task;
 }
 
-@property (readwrite,assign) BOOL		isInstalled;
-@property (readwrite,retain) NSString	*version;
-@property (readwrite,retain) NSDate		*date;
+@property (nonatomic, retain) NSNumber	*isInstalledCode;
+@property (nonatomic, retain) NSString	*name;
+@property (nonatomic, retain) NSDate	*date;
+@property (nonatomic, retain) NSNumber	*indexInArray;  
 
-- (NSString *)dateString;
-- (NSNumber *)isInstalledNumber;
+- (BOOL)isInstalled;
 - (NSString *)productPath;
-- (BOOL)remove:(NSError **)error;
+- (void)remove;
 - (void)updateIsInstalled;
 - (NSString *)zippedFileName;
 
