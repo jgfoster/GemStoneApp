@@ -24,10 +24,15 @@
 @property (nonatomic, retain)	NSNumber *spc_mb;
 @property (nonatomic, retain)	NSString *version;
 
+- (BOOL)canInitialize;
+- (BOOL)canRestore;
+- (BOOL)canStart;
+- (BOOL)canStop;
 - (void)deleteAll;
 - (void)installBaseExtent;
 - (void)installGlassExtent;
-- (BOOL)isRunning;
+- (void)restore;
 - (void)start;
+- (void)stop;
 
 @end

@@ -3652,7 +3652,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 																<int key="NSvFlags">256</int>
 																<string key="NSFrameSize">{522, 147}</string>
 																<reference key="NSSuperview" ref="41420807"/>
-																<reference key="NSNextKeyView" ref="126222052"/>
+																<reference key="NSNextKeyView" ref="238483350"/>
 																<string key="NSReuseIdentifierKey">_NS:13</string>
 																<bool key="NSEnabled">YES</bool>
 																<object class="NSTableHeaderView" key="NSHeaderView" id="108865905">
@@ -3896,7 +3896,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 												</array>
 												<string key="NSFrame">{{17, 250}, {524, 165}}</string>
 												<reference key="NSSuperview" ref="1001144743"/>
-												<reference key="NSNextKeyView" ref="238483350"/>
+												<reference key="NSNextKeyView" ref="41420807"/>
 												<string key="NSReuseIdentifierKey">_NS:9</string>
 												<int key="NSsFlags">133682</int>
 												<reference key="NSVScroller" ref="126222052"/>
@@ -3980,7 +3980,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 					<reference key="NSNextKeyView" ref="1005510469"/>
 					<string key="NSReuseIdentifierKey">_NS:20</string>
 				</object>
-				<string key="NSScreenRect">{{0, 0}, {1680, 1028}}</string>
+				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<bool key="NSWindowIsRestorable">YES</bool>
 			</object>
@@ -4201,7 +4201,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 					<reference key="NSNextKeyView" ref="746342284"/>
 					<string key="NSReuseIdentifierKey">_NS:21</string>
 				</object>
-				<string key="NSScreenRect">{{0, 0}, {1680, 1028}}</string>
+				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
 				<bool key="NSWindowIsRestorable">YES</bool>
 			</object>
@@ -5941,26 +5941,6 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled: selection.isRunning</string>
-						<reference key="source" ref="867968554"/>
-						<reference key="destination" ref="254871029"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="867968554"/>
-							<reference key="NSDestination" ref="254871029"/>
-							<string key="NSLabel">enabled: selection.isRunning</string>
-							<string key="NSBinding">enabled</string>
-							<string key="NSKeyPath">selection.isRunning</string>
-							<object class="NSDictionary" key="NSOptions">
-								<string key="NS.key.0">NSValueTransformerName</string>
-								<string key="NS.object.0">NSNegateBoolean</string>
-							</object>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">9697</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
 						<string key="label">target: selection</string>
 						<reference key="source" ref="867968554"/>
 						<reference key="destination" ref="254871029"/>
@@ -5981,23 +5961,19 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled: selection.isRunning</string>
-						<reference key="source" ref="281486816"/>
+						<string key="label">enabled: selection.canInitialize</string>
+						<reference key="source" ref="867968554"/>
 						<reference key="destination" ref="254871029"/>
 						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="281486816"/>
+							<reference key="NSSource" ref="867968554"/>
 							<reference key="NSDestination" ref="254871029"/>
-							<string key="NSLabel">enabled: selection.isRunning</string>
+							<string key="NSLabel">enabled: selection.canInitialize</string>
 							<string key="NSBinding">enabled</string>
-							<string key="NSKeyPath">selection.isRunning</string>
-							<object class="NSDictionary" key="NSOptions">
-								<string key="NS.key.0">NSValueTransformerName</string>
-								<string key="NS.object.0">NSNegateBoolean</string>
-							</object>
+							<string key="NSKeyPath">selection.canInitialize</string>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">9701</int>
+					<int key="connectionID">9721</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -6021,39 +5997,35 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled: selection.isRunning</string>
+						<string key="label">enabled: selection.canInitialize</string>
+						<reference key="source" ref="281486816"/>
+						<reference key="destination" ref="254871029"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="281486816"/>
+							<reference key="NSDestination" ref="254871029"/>
+							<string key="NSLabel">enabled: selection.canInitialize</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.canInitialize</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">9723</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.canRestore</string>
 						<reference key="source" ref="965399672"/>
 						<reference key="destination" ref="254871029"/>
 						<object class="NSNibBindingConnector" key="connector">
 							<reference key="NSSource" ref="965399672"/>
 							<reference key="NSDestination" ref="254871029"/>
-							<string key="NSLabel">enabled: selection.isRunning</string>
+							<string key="NSLabel">enabled: selection.canRestore</string>
 							<string key="NSBinding">enabled</string>
-							<string key="NSKeyPath">selection.isRunning</string>
+							<string key="NSKeyPath">selection.canRestore</string>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">9693</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled: selection.isRunning</string>
-						<reference key="source" ref="655219179"/>
-						<reference key="destination" ref="254871029"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="655219179"/>
-							<reference key="NSDestination" ref="254871029"/>
-							<string key="NSLabel">enabled: selection.isRunning</string>
-							<string key="NSBinding">enabled</string>
-							<string key="NSKeyPath">selection.isRunning</string>
-							<dictionary key="NSOptions">
-								<integer value="0" key="NSNoSelectionPlaceholder"/>
-								<string key="NSValueTransformerName">NSNegateBoolean</string>
-							</dictionary>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">9689</int>
+					<int key="connectionID">9727</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -6077,23 +6049,35 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled: selection.isRunning</string>
+						<string key="label">enabled: selection.canStart</string>
+						<reference key="source" ref="655219179"/>
+						<reference key="destination" ref="254871029"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="655219179"/>
+							<reference key="NSDestination" ref="254871029"/>
+							<string key="NSLabel">enabled: selection.canStart</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.canStart</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">9714</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.canStop</string>
 						<reference key="source" ref="65089660"/>
 						<reference key="destination" ref="254871029"/>
 						<object class="NSNibBindingConnector" key="connector">
 							<reference key="NSSource" ref="65089660"/>
 							<reference key="NSDestination" ref="254871029"/>
-							<string key="NSLabel">enabled: selection.isRunning</string>
+							<string key="NSLabel">enabled: selection.canStop</string>
 							<string key="NSBinding">enabled</string>
-							<string key="NSKeyPath">selection.isRunning</string>
-							<object class="NSDictionary" key="NSOptions">
-								<string key="NS.key.0">NSNoSelectionPlaceholder</string>
-								<integer value="0" key="NS.object.0"/>
-							</object>
+							<string key="NSKeyPath">selection.canStop</string>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">9690</int>
+					<int key="connectionID">9725</int>
 				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -13537,7 +13521,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">9712</int>
+			<int key="maxID">9727</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
