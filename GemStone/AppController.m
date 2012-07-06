@@ -14,6 +14,7 @@
 #import "Login.h"
 #import "Version.h"
 #import "DownloadVersion.h"
+#import "StartStone.h"
 
 #define kTaskCancelRequest @"cancelTaskRequest"
 
@@ -46,8 +47,8 @@
 	
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self 
-	 selector:@selector(downloadProgress:) 
-	 name:kDownloadProgress
+	 selector:@selector(taskProgress:) 
+	 name:kTaskProgress
 	 object:nil];
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self
@@ -58,6 +59,16 @@
 	 addObserver:self
 	 selector:@selector(removeRequest:)
 	 name:kRemoveRequest
+	 object:nil];
+	[[NSNotificationCenter defaultCenter]
+	 addObserver:self
+	 selector:@selector(databaseStartRequest:)
+	 name:kDatabaseStartRequest
+	 object:nil];
+	[[NSNotificationCenter defaultCenter]
+	 addObserver:self
+	 selector:@selector(databaseStopRequest:)
+	 name:kDatabaseStopRequest
 	 object:nil];
 	
 	[taskProgressText setFont:[NSFont fontWithName:@"Monaco" size:9]];
@@ -117,6 +128,49 @@
 	[alert runModal];
 }
 
+- (void)databaseStartDone:(NSNotification *)notification;
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
+	task = nil;	
+
+	[self taskFinishedAfterDelay:0.5];
+}
+
+- (void)databaseStartError:(NSNotification *)notification;
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
+	task = nil;	
+	[self criticalAlert:[[notification userInfo] objectForKey:@"string"]];
+	[self taskFinishedAfterDelay:0.5];
+}
+
+- (void)databaseStartRequest:(NSNotification *)notification;
+{
+	if (task) {
+		[NSException raise:NSInternalInconsistencyException
+					format:@"Task should not be in progress!"];	
+	}
+	StartStone *myTask = task = [StartStone new];
+	[myTask setDatabase:[notification object]];
+	[[NSNotificationCenter defaultCenter]
+	 addObserver:self 
+	 selector:@selector(databaseStartDone:) 
+	 name:kTaskDone 
+	 object:task];
+	[[NSNotificationCenter defaultCenter]
+	 addObserver:self 
+	 selector:@selector(databaseStartError:) 
+	 name:kTaskError 
+	 object:task];
+	[self startTaskProgressSheetAndAllowCancel:YES];
+	[task start];
+}
+
+- (void)databaseStopRequest:(NSNotification *)notification;
+{
+	
+}
+
 - (void)downloadDone:(NSNotification *)notification;
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
@@ -132,11 +186,6 @@
 	[self taskFinishedAfterDelay:0.5];
 }
 
-- (void)downloadProgress:(NSNotification *)notification;
-{
-	[taskProgressText insertText:[notification object]];
-}
-
 - (void)downloadRequest:(NSNotification *)notification;
 {
 	if (task) {
@@ -148,12 +197,12 @@
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self 
 	 selector:@selector(downloadDone:) 
-	 name:kDownloadDone 
+	 name:kTaskDone 
 	 object:task];
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self 
 	 selector:@selector(downloadError:) 
-	 name:kDownloadError 
+	 name:kTaskError 
 	 object:task];
 	[self startTaskProgressSheetAndAllowCancel:YES];
 	[task start];
@@ -350,6 +399,11 @@
 	[self performSelector:@selector(taskFinished) withObject:nil afterDelay:seconds];
 }
 
+- (void)taskProgress:(NSNotification *)notification;
+{
+	[taskProgressText insertText:[notification object]];
+}
+
 - (void)unzipDone:(NSNotification *)notification;
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
@@ -418,7 +472,7 @@
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self 
 	 selector:@selector(updateVersionsDone:) 
-	 name:kDownloadDone 
+	 name:kTaskDone 
 	 object:task];
 	[self startTaskProgressSheetAndAllowCancel:YES];
 	[task start];

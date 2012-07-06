@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
+#define kDatabaseStartRequest @"databaseStartRequest"
+#define kDatabaseStopRequest @"databaseStopRequest"
 
 @interface Database : NSManagedObject {
 	NSNumber *identifier;  
@@ -16,6 +18,7 @@
 	NSString *name;
 	NSNumber *spc_mb;
 	NSString *version;
+	NSDate	 *lastStartDate;
 }
 
 @property (readonly)			NSNumber *identifier;  
@@ -23,14 +26,19 @@
 @property (nonatomic, retain)	NSString *name;
 @property (nonatomic, retain)	NSNumber *spc_mb;
 @property (nonatomic, retain)	NSString *version;
+@property (readonly)			NSDate	 *lastStartDate;
 
+- (BOOL)canEditVersion;
 - (BOOL)canInitialize;
 - (BOOL)canRestore;
 - (BOOL)canStart;
 - (BOOL)canStop;
+- (NSString *)directory;
 - (void)deleteAll;
+- (NSString *)gemstone;
 - (void)installBaseExtent;
 - (void)installGlassExtent;
+- (NSString *)nameOrDefault;
 - (void)restore;
 - (void)start;
 - (void)stop;

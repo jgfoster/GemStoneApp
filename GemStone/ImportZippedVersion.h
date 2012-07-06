@@ -6,19 +6,16 @@
 //  Copyright (c) 2012 VMware Inc. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import "Task.h"
 
 #define kImportDone @"importDone"
 #define kImportError @"importError"
 #define kImportProgress @"importProgress"
 
-@interface ImportZippedVersion : NSObject {
-	NSTask		*task;
+@interface ImportZippedVersion : Task {
 	NSString	*zipFilePath;
 }
 
 @property (nonatomic, readwrite, retain) NSString *zipFilePath;
-
-- (void)start;
 
 @end

@@ -14,23 +14,29 @@
 @implementation Database
 
 @dynamic indexInArray;
+@dynamic lastStartDate;
 @dynamic name;
 @dynamic spc_mb;
 @dynamic version;
 
-- (BOOL)canInitialize;
+- (BOOL)canEditVersion;
 {
-	return version != nil;
+	return nil == lastStartDate;
+}
+
+- (BOOL)canInitialize;		// bound to Initialize buttons on MainMenu
+{
+	return [self isVersionDefined];
 }
 
 - (BOOL)canRestore;
 {
-	return NO;
+	return [self isVersionDefined] && NO;
 }
 
 - (BOOL)canStart;
 {
-	return NO;
+	return [self isVersionDefined];
 }
 
 - (BOOL)canStop;
@@ -38,38 +44,117 @@
 	return NO;
 }
 
-- (NSString *)dataDirectory;
+- (BOOL)createConfigFile;
 {
-	NSString *appSupDir = [[NSFileManager defaultManager] applicationSupportDirectory];
-	NSString *path = [NSString stringWithFormat: @"%@/db%@", appSupDir, [self identifier]];
-	
-	BOOL isDirectory;
-	if ([[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDirectory]) {
-		if (isDirectory) return path;
-		NSLog(@"%@ is not a directory!", path);
-		return nil;
-	}
+	NSString *directory = [self directory];
+	NSString *path = [NSString stringWithFormat:@"%@/conf/system.conf", directory];
+	NSMutableString *string = [NSMutableString new];
+	[string appendFormat: @"DBF_EXTENT_NAMES = \"%@/data/extent0.dbf\";\n", directory];
+	[string appendString: @"STN_TRAN_FULL_LOGGING = TRUE;\n"];
+	[string appendFormat: @"STN_TRAN_LOG_DIRECTORIES = \"/%@/data/\", \n", directory];
+	[string appendFormat: @"	\"%@/data/\";\n", [self directory]];
+	[string appendString: @"STN_TRAN_LOG_SIZES = 100, 100;\n"];
+	[string appendString: @"KEYFILE = \"$GEMSTONE/seaside/etc/gemstone.key\";\n"];
+	[string appendFormat: @"SHR_PAGE_CACHE_SIZE_KB = %lu;\n", [self spc_kb]];
+	return [[NSFileManager defaultManager] 
+			createFileAtPath:path 
+			contents:[string dataUsingEncoding:NSASCIIStringEncoding] 
+			attributes:nil];
+}
+
+- (BOOL)createDirectories;
+{
+	return [self createLocksDirectory]
+		&& [self createDirectory:@"conf"]
+		&& [self createDirectory:@"data"]
+		&& [self createDirectory:@"logs"]
+		&& [self createDirectory:@"stat"]
+	;
+}
+
+- (BOOL)createDirectory:(NSString *)aString;
+{
+	NSString *path = [NSString stringWithFormat:@"%@/%@", [self directory], aString];
 	NSError *error = nil;
-	BOOL success = [[NSFileManager defaultManager]
-					createDirectoryAtPath:path
-					withIntermediateDirectories:YES
-					attributes:nil
-					error:&error];
-	if (!success) 
-	{
-		NSLog(@"Unable to create %@ because %@!", path, [error description]);
-		return nil;
-	}	return path;
+	if ([[NSFileManager defaultManager]
+		 createDirectoryAtPath:path
+		 withIntermediateDirectories:YES
+		 attributes:nil
+		 error:&error]) return YES;
+	NSLog(@"Unable to create %@ because %@!", path, [error description]);
+	return NO;
+}
+
+- (BOOL)createLocksDirectory;
+{
+	NSError *error;
+	// this needs to point to something
+	NSString *localLink = [NSString stringWithFormat:@"%@/locks", [self directory]];
+	// previous installations might have created this directory
+	NSString *traditional = @"/opt/gemstone/locks";
+	// if traditional path is not present, we will use application support directory
+	NSString *alternate = [NSString stringWithFormat:@"%@/locks", 
+						   [[NSFileManager defaultManager] applicationSupportDirectory]];
+	
+	// try linking to traditional location
+	BOOL isDirectory;
+	BOOL exists = [[NSFileManager defaultManager] 
+				   fileExistsAtPath:traditional 
+				   isDirectory:&isDirectory];
+	if (exists && isDirectory) {
+		if ([[NSFileManager defaultManager]
+			 createSymbolicLinkAtPath:localLink 
+			 withDestinationPath:traditional 
+			 error:&error]) {
+			return YES;
+		}
+		NSLog(@"unable to link %@ to %@ because %@", localLink, traditional, [error description]);
+		return NO;
+	};
+	
+	// try linking alternate location
+	exists = [[NSFileManager defaultManager] 
+			  fileExistsAtPath:alternate 
+			  isDirectory:&isDirectory];
+	if (exists && !isDirectory) {
+		NSLog(@"%@ is not a directory!", alternate);
+		return NO;
+	}
+	if (!exists) {
+		if (![[NSFileManager defaultManager]
+			 createDirectoryAtPath:alternate
+			 withIntermediateDirectories:YES
+			 attributes:nil
+			 error:&error]) {
+			NSLog(@"unable to create %@ because %@", alternate, [error description]);
+			return NO;
+		}
+	}
+	if ([[NSFileManager defaultManager]
+		 createSymbolicLinkAtPath:localLink
+		 withDestinationPath:alternate
+		 error:&error]) {
+		return YES;
+	}
+	NSLog(@"unable to link %@ to %@ because %@", localLink, alternate, [error description]);
+	return NO;
 }
 
 - (void)deleteAll;
 {
-	NSString *path = [self dataDirectory];
+	NSString *path = [self directory];
 	NSError *error = nil;
 	if ([[NSFileManager defaultManager] removeItemAtPath:path error:&error]) {
 		return;
 	}
 	NSLog(@"unable to delete %@ because %@", path, [error description]);
+}
+
+- (NSString *)directory;
+{
+	return [NSString stringWithFormat: @"%@/db%@", 
+			[[NSFileManager defaultManager] applicationSupportDirectory], 
+			[self identifier]];
 }
 
 - (NSString *)gemstone;
@@ -83,22 +168,41 @@
 {
 	if (![identifier intValue]) {
 		identifier = [[[NSApp delegate] setup] newDatabaseIdentifier];
+		[self createDirectories];
 	}
 	return identifier;
 }
 
 - (void)installBaseExtent;
 {
-	NSString *source = [NSString stringWithFormat:@"%@/bin/extent0.dbf", [self gemstone]];
-	NSString *target = [NSString stringWithFormat:@"%@/extent0.dbf", [self dataDirectory]];
+	[self installExtent:@"extent0.dbf"];
+}
+
+- (void)installExtent: (NSString *) aString;
+{
 	NSError *error = nil;
+	NSString *target = [NSString stringWithFormat:@"%@/data/extent0.dbf", [self directory]];
 	if ([[NSFileManager defaultManager] fileExistsAtPath:target]) {
+		if (lastStartDate) {
+			NSAlert *alert = [[NSAlert alloc] init];
+			[alert setAlertStyle:NSCriticalAlertStyle];
+			[alert setMessageText:@"Replace existing repository?"];
+			[alert setInformativeText:@"All data in the existing repository will be lost!"];
+			[alert addButtonWithTitle:@"Cancel"];
+			[alert addButtonWithTitle:@"Replace"];
+			NSInteger answer = [alert runModal];
+			if (NSAlertSecondButtonReturn != answer) {
+				return;
+			}
+		}
 		if (![[NSFileManager defaultManager] removeItemAtPath:target error:&error]) {
 			NSLog(@"unable to delete %@ because %@", target, [error description]);
 			return;
 		}
 	}
+	NSString *source = [NSString stringWithFormat:@"%@/bin/%@", [self gemstone], aString];
 	if ([[NSFileManager defaultManager] copyItemAtPath:source toPath:target error:&error]) {
+		lastStartDate = nil;
 		return;
 	}
 	NSLog(@"copy from %@ to %@ failed because %@!", source, target, [error description]);
@@ -106,18 +210,43 @@
 
 - (void)installGlassExtent;
 {
-	NSLog(@"installGlassExtent");
+	[self installExtent:@"extent0.seaside.dbf"];
+}
+
+- (BOOL)isVersionDefined;
+{
+	return 0 < [version length];
 }
 
 - (NSString *)name;
 {
+	[self identifier];
 	if (![name length]) return nil;
+	return name;
+}
+
+- (NSString *)nameOrDefault;
+{
+	if (![name length]) return @"gs64stone";
 	return name;
 }
 
 - (void)restore;
 {
 	NSLog(@"restore");
+}
+
+- (void)setVersion:(NSString *)aString;
+{
+	if (version == aString) return;
+	version = aString;
+	[self installBaseExtent];
+}
+
+- (unsigned long)spc_kb;
+{
+	if (![spc_mb intValue]) return 131072;
+	return [[self spc_mb] unsignedLongValue] * 1024;
 }
 
 - (NSNumber *)spc_mb;
@@ -128,7 +257,10 @@
 
 - (void)start;
 {
-	NSLog(@"start");
+	if (![self createConfigFile]) return;
+	[[NSNotificationCenter defaultCenter] 
+	 postNotificationName:kDatabaseStartRequest 
+	 object:self];
 }
 
 - (void)stop;

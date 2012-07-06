@@ -18,16 +18,10 @@
 - (NSArray *)arguments;
 { 
 	NSString *zippedFileName = [version zippedFileName];
-	NSMutableString *ftp = [NSMutableString new];
-	[ftp appendString:@"ftp://ftp.gemstone.com/pub/GemStone64/"];
-	[ftp appendString:version.name];
-	[ftp appendString:@"/"];
-	[ftp appendString:zippedFileName];
-	return [NSArray arrayWithObjects:
-			ftp, 
-			@"--user",
-			@"anonymous:password",
-			nil];
+	NSMutableString *http = [NSMutableString new];
+	[http appendString:@"http://seaside.gemstone.com/downloads/i386.Darwin/"];
+	[http appendString:zippedFileName];
+	return [NSArray arrayWithObjects: @"--raw", http, nil];
 }
 
 - (NSString *)createZipFile;
@@ -90,14 +84,14 @@
 								  dictionaryWithObject:message
 								  forKey:@"string"];
 		NSNotification *outNotification = [NSNotification
-										   notificationWithName:kDownloadError 
+										   notificationWithName:kTaskError 
 										   object:self
 										   userInfo:userInfo];
 		[[NSNotificationCenter defaultCenter] postNotification:outNotification];
 	}
 }
 
-- (NSString *)path;
+- (NSString *)launchPath;
 { 
 	return @"/usr/bin/curl";
 }

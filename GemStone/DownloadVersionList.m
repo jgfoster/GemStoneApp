@@ -16,9 +16,7 @@
 - (NSArray *)arguments;
 {
 	return [NSArray arrayWithObjects:
-			@"ftp://ftp.gemstone.com/pub/GemStone64/", 
-			@"--user",
-			@"anonymous:password",
+			@"http://seaside.gemstone.com/downloads/i386.Darwin/",
 			nil];
 }
 
@@ -36,47 +34,46 @@
 	taskOutput = nil;
 	if (!task) return;		// task cancelled!
 	task = nil;
-	NSMutableArray *lines = [NSMutableArray arrayWithArray:[string componentsSeparatedByString:@"\n"]];
-	[lines removeObject:@""];
 	
-	versions = [NSMutableArray arrayWithCapacity:[lines count]];
-	NSRange range = {0, 5};
-	NSDate *today = [NSDate date];
+	NSUInteger loc = [string rangeOfString:@">"].location;
+	if (NSNotFound == loc) {
+		NSLog(@"invalid data returned from version list");
+		[self notifyDone];
+		return;
+	}
+	string = [NSString stringWithFormat:@"%@%@",
+			  @"<?xml version='1.0' encoding='UTF-8' ?",
+			  [string substringFromIndex:loc]];
+	string = [string stringByReplacingOccurrencesOfString:@"]\">" withString:@"]\" />"];
+	string = [string stringByReplacingOccurrencesOfString:@"<hr>" withString:@"<hr />"];
+	string = [string stringByReplacingOccurrencesOfString:@"&nbsp" withString:@""];
+	NSError *error = nil;
+	NSXMLDocument *doc = [[NSXMLDocument new] initWithXMLString:string options:0 error:&error];
+	if (error) {
+		NSLog(@"error parsing version list HTML: %@", [error description]);
+		[self notifyDone];
+		return;
+	}
+	NSArray *nodes = [doc nodesForXPath:@"/html/body/table/tr" error:&error];
+	NSRange nodeRange = {3, [nodes count] - 4};
+	nodes = [nodes subarrayWithRange:nodeRange];
 	
-	NSCalendar *calendar = [NSCalendar currentCalendar];
-    NSDateComponents *components = [calendar components:NSYearCalendarUnit fromDate:today];
-    NSInteger thisYear = [components year];
-	NSString *yearString = [NSString stringWithFormat:@"%d", thisYear];
-	
-	NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-	[formatter setDateFormat:@"MMM dd, yyyy"];
-	
-	for (id string in lines) {
-		NSMutableArray *fields = [NSMutableArray arrayWithArray:[string componentsSeparatedByString:@" "]];
-		[fields removeObject:@""];
-		[fields removeObjectsInRange:range];
-		if ([[fields objectAtIndex:2] rangeOfString:@":"].location != NSNotFound) {
-			[fields replaceObjectAtIndex:2 withObject:yearString];
-		}
-		NSString *dateString = [NSString stringWithFormat:@"%@ %@, %@", 
-								[fields objectAtIndex:0], 
-								[fields objectAtIndex:1], 
-								[fields objectAtIndex:2]];
-		NSDate *date = [formatter dateFromString:dateString];
-		if ([today compare:date] == NSOrderedAscending) {
-			dateString = [NSString stringWithFormat:@"%@ %@, %d", 
-						  [fields objectAtIndex:0], 
-						  [fields objectAtIndex:1], 
-						  thisYear - 1];
-			date = [formatter dateFromString:dateString];
-		}
-		NSString *name = [fields objectAtIndex:3];
-		NSDictionary *version = [NSMutableDictionary dictionaryWithCapacity:2];
+	NSDateFormatter *inFormatter = [NSDateFormatter new];
+	[inFormatter setDateFormat:@"dd-MMM-yyyy hh:mm"];
+	NSDateFormatter *outFormatter = [NSDateFormatter new];
+	[outFormatter setDateFormat:@"yyyy-mm-dd"];
+	versions = [NSMutableArray arrayWithCapacity:[nodes count]];
+	for (id node in nodes) {
+		NSArray *fields = [node nodesForXPath:@"td" error:&error];
+		NSString *name = [[fields objectAtIndex:1] stringValue];
+		NSDate   *date = [inFormatter dateFromString:[[fields objectAtIndex:2] stringValue]];
+		NSRange  range = {13, [name length] - 29};
+		name = [name substringWithRange:range];
+		NSDictionary *version = [NSMutableDictionary dictionaryWithCapacity:3];
 		[version setValue:name forKey:@"name"];
 		[version setValue:date forKey:@"date"];
 		[versions addObject:version];
 	}
-
 	[self notifyDone];
 }
 	
@@ -88,7 +85,7 @@
 	return self;
 }
 
-- (NSString *)path;
+- (NSString *)launchPath;
 {
 	return @"/usr/bin/curl";
 }
