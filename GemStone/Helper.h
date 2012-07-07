@@ -11,4 +11,5 @@
 @interface Helper : NSObject
 - (NSString *)install;
 - (BOOL)isCurrent;
+- (NSString *)remove;
 @end

@@ -9,7 +9,6 @@
 #import "ImportZippedVersion.h"
 
 #import "AppController.h"
-#import "NSFileManager+DirectoryLocations.h"
 
 @implementation ImportZippedVersion
 
@@ -24,58 +23,18 @@
 	return [NSArray arrayWithObjects:
 			zipFilePath, 
 			@"-d",
-			[[NSFileManager defaultManager] applicationSupportDirectory],
+			[[NSApp delegate] basePath],
 			nil];
-}
-
-- (NSString *)currentDirectoryPath;
-{
-	return [[NSFileManager defaultManager] applicationSupportDirectory];
 }
 
 - (void)done;
 {
-	
-}
-
-- (void)errorOutput:(NSNotification *)inNotification;
-{
-	[[NSNotificationCenter defaultCenter] 
-	 removeObserver:self 
-	 name:NSFileHandleReadCompletionNotification 
-	 object:nil];	//	this removes both stdout and stderr
-	NSData *data = [[inNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
-    NSString *string = [[NSString alloc] 
-						initWithData:data 
-						encoding:NSUTF8StringEncoding];
-	if ([string length]) {
-		[self importTaskErrored:string];
-	} else {
-		[self importTaskFinished];
-	}
-}
-
-- (void)importTaskErrored:(NSString *)message;
-{
-	[task terminate];
-	NSDictionary *userInfo = [NSDictionary
-							  dictionaryWithObject:message
-							  forKey:@"string"];
-	NSNotification *outNotification = [NSNotification
-									   notificationWithName:kImportError 
-									   object:self
-									   userInfo:userInfo];
-	[[NSNotificationCenter defaultCenter] postNotification:outNotification];
-}
-
-- (void)importTaskFinished;
-{
 	NSRange range;
-	range = [zipFilePath rangeOfString:[[NSFileManager defaultManager] applicationSupportDirectory]];
+	range = [zipFilePath rangeOfString:[[NSApp delegate] basePath]];
 	if (0 == range.location) {
 		[[NSFileManager defaultManager] removeItemAtPath:zipFilePath error:nil];
 	}
-	[[NSNotificationCenter defaultCenter] postNotificationName:kImportDone object:self];
+	[self notifyDone];
 }
 
 - (NSString *)launchPath;
@@ -83,9 +42,9 @@
 	return @"/usr/bin/unzip";
 }
 
-- (void)standardOutput:(NSNotification *)inNotification;
+- (void)dataString:(NSString *)aString;
 {
-	[self progressNotification:inNotification];
+	[self progress:aString];
 }
 
 @end

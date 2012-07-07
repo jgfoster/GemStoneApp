@@ -10,7 +10,7 @@
 #import "Database.h"
 
 @interface StartStone : Task {
-	Database *database;
+	Database		*database;
 }
 
 - (void)setDatabase:(Database *)database;

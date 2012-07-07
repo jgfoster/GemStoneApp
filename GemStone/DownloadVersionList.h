@@ -6,10 +6,9 @@
 //  Copyright (c) 2012 VMware Inc. All rights reserved.
 //
 
-#import "Task.h"
+#import "Download.h"
 
-@interface DownloadVersionList : Task {
-	NSMutableString *taskOutput;
+@interface DownloadVersionList : Download {
 	NSMutableArray	*versions;
 }
 

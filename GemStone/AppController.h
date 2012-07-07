@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "Helper.h"
 #import "Setup.h"
+#import "Task.h"
 
 @interface AppController : NSObject <NSOpenSavePanelDelegate> {
 	IBOutlet NSTextField			*helperToolMessage;
@@ -16,6 +17,7 @@
 	IBOutlet NSTextField			*lastUpdateDateField;
 	IBOutlet NSArrayController		*databaseListController;
 	IBOutlet NSArrayController		*loginListController;
+	IBOutlet NSButton				*removeButton;
 	IBOutlet NSArrayController		*versionListController;
 	IBOutlet NSArrayController		*versionPopupController;
 
@@ -24,17 +26,20 @@
 	IBOutlet NSProgressIndicator	*taskProgressIndicator;
 	IBOutlet NSButton				*taskCancelButton;
 
-	Helper	*helper;
-	id		task;		// to protect it from being garbage collected!
-	Setup	*setup;
+	Helper		*helper;
+	Task 		*task;		// to protect it from being garbage collected!
+	Setup		*setup;
+	NSString	*basePath;
 }
 
 - (IBAction)cancelTask:(id)sender;
 - (IBAction)installHelperTool:(id)sender;
 - (IBAction)removeDatabase:(id)sender;
+- (IBAction)removeHelperTool:(id)sender;
 - (IBAction)updateVersionList:(id)sender;
 - (IBAction)unzipRequest:(id)sender;
 
 @property (readonly) Setup *setup;
+@property (readonly) NSString *basePath;
 
 @end

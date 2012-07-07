@@ -7,7 +7,6 @@
 //
 
 #import "AppController.h"
-#import "NSFileManager+DirectoryLocations.h"
 #import "Database.h"
 #import "DownloadVersionList.h"
 #import "ImportZippedVersion.h"
@@ -15,8 +14,6 @@
 #import "Version.h"
 #import "DownloadVersion.h"
 #import "StartStone.h"
-
-#define kTaskCancelRequest @"cancelTaskRequest"
 
 @interface AppController ()
 - (void)criticalAlert:(NSString *)string;
@@ -30,7 +27,7 @@
 @implementation AppController
 
 @synthesize setup;
-
+@synthesize basePath;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
 {
@@ -38,6 +35,7 @@
 	BOOL isCurrent = [helper isCurrent];
 	[helperToolMessage setHidden:!isCurrent];
 	[authenticateButton setEnabled:!isCurrent];
+	[removeButton setEnabled:isCurrent];
 	
 	[self loadSetup];
 	[self loadRequest:@"Database" toController:databaseListController];
@@ -72,6 +70,7 @@
 	 object:nil];
 	
 	[taskProgressText setFont:[NSFont fontWithName:@"Monaco" size:9]];
+	[self setupBasePath];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification;
@@ -113,7 +112,7 @@
 - (IBAction)cancelTask:(id)sender
 {
 	if (!task) return;
-	[task performSelector:@selector(cancelTask)];
+	[task cancelTask];
 	task = nil;
 	[self taskFinishedAfterDelay:0];
 }
@@ -136,21 +135,14 @@
 	[self taskFinishedAfterDelay:0.5];
 }
 
-- (void)databaseStartError:(NSNotification *)notification;
-{
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
-	task = nil;	
-	[self criticalAlert:[[notification userInfo] objectForKey:@"string"]];
-	[self taskFinishedAfterDelay:0.5];
-}
-
 - (void)databaseStartRequest:(NSNotification *)notification;
 {
 	if (task) {
 		[NSException raise:NSInternalInconsistencyException
 					format:@"Task should not be in progress!"];	
 	}
-	StartStone *myTask = task = [StartStone new];
+	StartStone *myTask = [StartStone new];
+	task = myTask;
 	[myTask setDatabase:[notification object]];
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self 
@@ -159,7 +151,7 @@
 	 object:task];
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self 
-	 selector:@selector(databaseStartError:) 
+	 selector:@selector(taskError:) 
 	 name:kTaskError 
 	 object:task];
 	[self startTaskProgressSheetAndAllowCancel:YES];
@@ -178,21 +170,14 @@
 	[self unzipPath:[[notification object] zipFilePath]];
 }
 
-- (void)downloadError:(NSNotification *)notification;
-{
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
-	task = nil;	
-	[self criticalAlert:[[notification userInfo] objectForKey:@"string"]];
-	[self taskFinishedAfterDelay:0.5];
-}
-
 - (void)downloadRequest:(NSNotification *)notification;
 {
 	if (task) {
 		[NSException raise:NSInternalInconsistencyException
 					format:@"Task should not be in progress!"];	
 	}
-	DownloadVersion *myTask = task = [DownloadVersion new];
+	DownloadVersion *myTask = [DownloadVersion new];
+	task = myTask;
 	[myTask setVersion:[notification object]];
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self 
@@ -201,11 +186,19 @@
 	 object:task];
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self 
-	 selector:@selector(downloadError:) 
+	 selector:@selector(taskError:) 
 	 name:kTaskError 
 	 object:task];
 	[self startTaskProgressSheetAndAllowCancel:YES];
 	[task start];
+}
+
+- (id)init;
+{
+	if (self = [super init]) {
+		[self setupBasePath];
+	}
+	return self;
 }
 
 - (IBAction)installHelperTool:(id)sender
@@ -221,6 +214,7 @@
 	} else {
 		[authenticateButton setEnabled:NO];
 		[helperToolMessage setHidden:NO];
+		[removeButton setEnabled:YES];
 	}
 }
 
@@ -278,11 +272,9 @@
     [moc setPersistentStoreCoordinator: coordinator];
 	
     NSError *error = nil;
-	NSString *appSupDir = [[NSFileManager defaultManager] applicationSupportDirectory];
-	NSMutableString *path = [NSMutableString stringWithString:appSupDir];
-	[path appendString:@"/data.binary"];
-
-    NSURL *url = [NSURL fileURLWithPath:path isDirectory:NO];
+    NSURL *url = [NSURL 
+				  fileURLWithPath:[basePath stringByAppendingString:@"/data.binary"] 
+				  isDirectory:NO];
 	
     NSPersistentStore *newStore = [coordinator addPersistentStoreWithType:NSBinaryStoreType
 															configuration:nil
@@ -324,6 +316,18 @@
 	Database *database = [list objectAtIndex:0];
 	[database deleteAll];
 	[databaseListController remove:sender];
+}
+
+- (IBAction)removeHelperTool:(id)sender;
+{
+	NSString *error = [helper remove];
+	if (error) {
+		NSLog(@"remove failed: %@", error);
+	} else {
+		[authenticateButton setEnabled:YES];
+		[helperToolMessage setHidden:YES];
+		[removeButton setEnabled:NO];
+	}
 }
 
 - (void)removeRequest:(NSNotification *)notification;
@@ -375,6 +379,22 @@
 	[lastUpdateDateField setObjectValue:setup.versionsDownloadDate];
 }
 
+- (void)setupBasePath;
+{
+	basePath = [@"~/Library/GemStone" stringByExpandingTildeInPath];
+	
+	NSFileManager *fileManager = [NSFileManager defaultManager];
+	if ([fileManager fileExistsAtPath: basePath]) return;
+	NSError *error;
+	if ([fileManager
+		 createDirectoryAtPath:basePath
+		 withIntermediateDirectories:NO
+		 attributes:nil
+		 error:&error]) return;
+	[self criticalAlert:[error description]];
+	exit(1);
+}
+
 - (void)startTaskProgressSheetAndAllowCancel:(BOOL)allowCancel;
 {
     [NSApp beginSheet:taskProgressPanel
@@ -382,8 +402,17 @@
         modalDelegate:self
        didEndSelector:nil
           contextInfo:nil];
+	[taskProgressIndicator setIndeterminate:YES];
 	[taskProgressIndicator startAnimation:self];
 	[taskCancelButton setEnabled:allowCancel];
+}
+
+- (void)taskError:(NSNotification *)notification;
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
+	task = nil;	
+	[self criticalAlert:[[notification userInfo] objectForKey:@"string"]];
+	[self taskFinishedAfterDelay:0.5];
 }
 
 - (void)taskFinished;
@@ -401,7 +430,28 @@
 
 - (void)taskProgress:(NSNotification *)notification;
 {
-	[taskProgressText insertText:[notification object]];
+	NSArray *array = [[notification object] componentsSeparatedByString:@"\r"];
+	[taskProgressText insertText:[array objectAtIndex:0]];
+	for (int i = 1; i < [array count]; ++i) {
+		NSString *string = [taskProgressText string];
+		NSString *nextLine = [array objectAtIndex:i];
+		int lastLF = -1;
+		for (int j = 0; j < [string length]; ++j) {
+			if (10 == [string characterAtIndex:j]) {
+				lastLF = j;
+			}
+		}
+		if (0 < lastLF) {
+			NSRange range = {lastLF + 1, [string length] - 1};
+			[taskProgressText setSelectedRange:range];
+			double value = [nextLine doubleValue];
+			if (value) {
+				[taskProgressIndicator setIndeterminate:NO];
+				[taskProgressIndicator setDoubleValue:value];
+			}
+		}
+		[taskProgressText insertText:nextLine];
+	}
 }
 
 - (void)unzipDone:(NSNotification *)notification;
@@ -412,37 +462,25 @@
 	[self taskFinishedAfterDelay:0.5];
 }
 
-- (void)unzipError:(NSNotification *)notification;
-{
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
-	task = nil;
-	[self criticalAlert:[[notification userInfo] objectForKey:@"string"]];
-	[self taskFinishedAfterDelay:0];
-}
-
-- (void)unzipProgress:(NSNotification *)notification;
-{
-	[taskProgressText insertText:[[notification userInfo] objectForKey:@"string"]];
-}
-
 - (void)unzipPath:(NSString *)path;
 {
-	ImportZippedVersion *myTask = task = [ImportZippedVersion new];
+	ImportZippedVersion *myTask = [ImportZippedVersion new];
+	task = myTask;
 	myTask.zipFilePath = path;
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self 
 	 selector:@selector(unzipDone:) 
-	 name:kImportDone 
+	 name:kTaskDone 
 	 object:task];
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self 
-	 selector:@selector(unzipError:) 
-	 name:kImportError
+	 selector:@selector(taskError:) 
+	 name:kTaskError
 	 object:task];
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self 
-	 selector:@selector(unzipProgress:) 
-	 name:kImportProgress
+	 selector:@selector(taskProgress:) 
+	 name:kTaskProgress
 	 object:task];
 	[task start];
 }
@@ -474,6 +512,11 @@
 	 selector:@selector(updateVersionsDone:) 
 	 name:kTaskDone 
 	 object:task];
+	[[NSNotificationCenter defaultCenter]
+	 addObserver:self 
+	 selector:@selector(taskError:) 
+	 name:kTaskError
+	 object:task];
 	[self startTaskProgressSheetAndAllowCancel:YES];
 	[task start];
 }
@@ -490,7 +533,8 @@
 	NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Version"];
 	
 	NSArray *oldVersions = [versionListController arrangedObjects];
-	for (NSDictionary *dict in [task versions]) {
+	id myTask = task;
+	for (NSDictionary *dict in [myTask versions]) {
 		Version *oldVersion = nil;
 		for (Version *each in oldVersions) {
 			if (!oldVersion && [[each name] compare:[dict objectForKey:@"name"]] == NSOrderedSame) {

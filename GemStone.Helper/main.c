@@ -127,12 +127,26 @@ int respondToRequests() {
                 messageOut.data[2] = kVersionPart3;
                 break;
                 
+			//	answer our PID as a demo of things we can do and to allow debugging
             case Helper_PID: {
                 int pid = getpid();
                 messageOut.dataSize = sizeof(pid);
                 memcpy(messageOut.data, &pid, messageOut.dataSize);
                 break;
             }
+			case Helper_Remove: {
+				int error = 0, result;
+				result = unlink("/Library/LaunchDaemons/com.VMware.GemStone.Helper.plist");
+				if (0 == result) {
+					result = unlink("/Library/PrivilegedHelperTools/com.VMware.GemStone.Helper");
+				}
+				if (result) {
+					error = errno;
+				}
+				messageOut.dataSize = sizeof(error);
+				memcpy(messageOut.data, &error, messageOut.dataSize);
+				break;
+			}
             default:
                 syslog(LOG_NOTICE, "Unknown command: %hhd\n", messageIn.command);
                 char* message = "Unknown command!";

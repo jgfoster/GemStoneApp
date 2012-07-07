@@ -6,7 +6,6 @@
 //  Copyright (c) 2012 VMware Inc. All rights reserved.
 //
 
-#import "NSFileManager+DirectoryLocations.h"
 #import "Version.h"
 #import "AppController.h"
 
@@ -19,14 +18,6 @@
 @dynamic name;
 @dynamic date;
 @dynamic indexInArray;
-
-- (id)init;
-{
-	if (self = [super init]) {
-		
-	}
-	return self;
-}
 
 - (BOOL)isActuallyInstalled;
 {
@@ -44,12 +35,7 @@
 
 - (NSString *)productPath;
 {
-	NSString *appSupDir = [[NSFileManager defaultManager] applicationSupportDirectory];
-	NSMutableString *path = [NSMutableString stringWithString:appSupDir];
-	[path appendString:@"/GemStone64Bit"];
-	[path appendString:self.name];		//	use key accessor since value might not be faulted yet
-	[path appendString:@"-i386.Darwin"];
-	return path;
+	return [NSString stringWithFormat:@"%@/GemStone64Bit%@-i386.Darwin", [[NSApp delegate] basePath], self.name];
 }
 
 - (void)remove;

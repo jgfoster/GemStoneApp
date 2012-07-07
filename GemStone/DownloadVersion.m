@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 VMware Inc. All rights reserved.
 //
 
+#import "AppController.h"
 #import "DownloadVersion.h"
 #import "Version.h"
-#import "NSFileManager+DirectoryLocations.h"
 
 @implementation DownloadVersion
 
@@ -19,20 +19,21 @@
 { 
 	NSString *zippedFileName = [version zippedFileName];
 	NSMutableString *http = [NSMutableString new];
-	[http appendString:@"http://seaside.gemstone.com/downloads/i386.Darwin/"];
+	[http appendString:@"http://seaside.gemstone.comm/downloads/i386.Darwin/"];
 	[http appendString:zippedFileName];
 	return [NSArray arrayWithObjects: @"--raw", http, nil];
+}
+
+- (void)cancelTask;
+{
+	[[NSFileManager defaultManager] removeItemAtPath:zipFilePath error:nil];
+	[super cancelTask];
 }
 
 - (NSString *)createZipFile;
 {
 	NSString *zippedFileName = [version zippedFileName];
-	zipFilePath = [NSMutableString new];
-	NSMutableString *path = [NSMutableString new];
-	[path appendString:[[NSFileManager defaultManager] applicationSupportDirectory]];
-	[path appendString:@"/"];
-	[path appendString:zippedFileName];
-	zipFilePath = [NSString stringWithString:path];
+	zipFilePath = [NSMutableString stringWithFormat:@"%@/%@", [[NSApp delegate] basePath], zippedFileName];
 	BOOL exists, isDirectory = NO, success;
 	exists = [[NSFileManager defaultManager] fileExistsAtPath:zipFilePath isDirectory:&isDirectory];
 	if (exists) {
@@ -91,12 +92,7 @@
 	}
 }
 
-- (NSString *)launchPath;
-{ 
-	return @"/usr/bin/curl";
-}
-
-- (void) start;
+- (void)start;
 {
 	[self verifyNoTask];
 	NSString *errorString = [self createZipFile];

@@ -8,10 +8,6 @@
 
 #import "Task.h"
 
-#define kImportDone @"importDone"
-#define kImportError @"importError"
-#define kImportProgress @"importProgress"
-
 @interface ImportZippedVersion : Task {
 	NSString	*zipFilePath;
 }

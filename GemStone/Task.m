@@ -12,19 +12,52 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 #import "Task.h"
 
 #import "AppController.h"
-#import "NSFileManager+DirectoryLocations.h"
 
 @implementation Task
 
 - (NSArray *)arguments		{ mustOverride(); return nil; }
-- (void)data:(NSData *)data	{ mustOverride(); }
 - (void)done				{ mustOverride(); }
 - (NSString *)launchPath	{ mustOverride(); return nil; }
 
 - (void)cancelTask;
 {
+	[[NSNotificationCenter defaultCenter] 
+	 removeObserver:self 
+	 name:NSFileHandleReadCompletionNotification 
+	 object:nil];
 	[task terminate];
 	task = nil;
+}
+
+- (NSString *)currentDirectoryPath;
+{
+	return [[NSApp delegate] basePath];
+}
+
+- (void)data:(NSData *)data { 
+	NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+	[self dataString:string];
+}
+
+- (void)dataString:(NSString *)aString { 
+	[standardOutput appendString:aString];
+	[self progress:aString];
+}
+
+- (void)doneWithError:(int)statusCode;
+{
+	if (![errorOutput length]) {
+		errorOutput = [NSString stringWithFormat:@"Task returned status code %i", statusCode];
+	}
+	NSDictionary *userInfo = [NSDictionary
+							  dictionaryWithObject:errorOutput
+							  forKey:@"string"];
+	NSNotification *outNotification = [NSNotification
+									   notificationWithName:kTaskError
+									   object:self
+									   userInfo:userInfo];
+	[[NSNotificationCenter defaultCenter] postNotification:outNotification];
+	[self notifyDone];
 }
 
 - (NSMutableDictionary *)environment;
@@ -36,14 +69,39 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	return taskEnvironment;
 }
 
-- (NSString *)currentDirectoryPath;
+- (void)error:(NSString *)aString;
 {
-	return [[NSFileManager defaultManager] applicationSupportDirectory];
 }
 
 - (void)errorOutput:(NSNotification *)inNotification;
 {
-	[self progressNotification:inNotification];
+	if (!task) return;
+	NSData *data = [[inNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
+	if ([data length]) {
+		NSString *string = [[NSString alloc] 
+							initWithData:data 
+							encoding:NSUTF8StringEncoding];
+		[errorOutput appendString:string];
+		[self error: string];
+		[[inNotification object] readInBackgroundAndNotify];
+	} else {
+		[self mightBeDone];
+	}
+}
+
+- (void)mightBeDone;
+{
+	if (++doneCount < 2) return;
+	[[NSNotificationCenter defaultCenter] 
+	 removeObserver:self 
+	 name:NSFileHandleReadCompletionNotification 
+	 object:nil];
+	int status = [task terminationStatus];
+	if (status) {
+		[self doneWithError:status];
+	} else {
+		[self done];
+	}
 }
 
 - (void)notifyDone;
@@ -51,30 +109,20 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kTaskDone object:self];
 }
 
-- (void)progressNotification:(NSNotification *)inNotification;
+- (void)progress:(NSString *)aString;
 {
-	NSData *data = [[inNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
-	if ([data length]) {
-		NSString *string = [[NSString alloc] 
-							initWithData:data 
-							encoding:NSUTF8StringEncoding];
-		[[NSNotificationCenter defaultCenter] postNotificationName:kTaskProgress object:string];
-		[[inNotification object] readInBackgroundAndNotify];
-	} else {
-		[[NSNotificationCenter defaultCenter] 
-		 removeObserver:self 
-		 name:NSFileHandleReadCompletionNotification 
-		 object:nil];
-		[self done];
-	}
+	[[NSNotificationCenter defaultCenter] postNotificationName:kTaskProgress object:aString];
 }
 
 - (void)standardOutput:(NSNotification *)inNotification;
 {
+	if (!task) return;
 	NSData *data = [[inNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
 	if ([data length]) {
 		[self data:data];
 		[[inNotification object] readInBackgroundAndNotify];
+	} else {
+		[self mightBeDone];
 	}
 }
 
@@ -104,6 +152,9 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	 name:NSFileHandleReadCompletionNotification
 	 object:taskOut];
 	[taskOut readInBackgroundAndNotify];
+	doneCount = 0;
+	errorOutput = [NSMutableString new];
+	standardOutput = [NSMutableString new];
 	[task launch];	
 }
 

@@ -9,7 +9,6 @@
 #import "Database.h"
 #import "AppController.h"
 #import "Setup.h"
-#import "NSFileManager+DirectoryLocations.h"
 
 @implementation Database
 
@@ -58,18 +57,19 @@
 	[string appendFormat: @"SHR_PAGE_CACHE_SIZE_KB = %lu;\n", [self spc_kb]];
 	return [[NSFileManager defaultManager] 
 			createFileAtPath:path 
-			contents:[string dataUsingEncoding:NSASCIIStringEncoding] 
+			contents:[string dataUsingEncoding:NSUTF8StringEncoding] 
 			attributes:nil];
 }
 
 - (BOOL)createDirectories;
 {
-	return [self createLocksDirectory]
+	return YES 
 		&& [self createDirectory:@"conf"]
 		&& [self createDirectory:@"data"]
 		&& [self createDirectory:@"logs"]
 		&& [self createDirectory:@"stat"]
-	;
+		&& [self createLocksDirectory]
+		;
 }
 
 - (BOOL)createDirectory:(NSString *)aString;
@@ -93,8 +93,7 @@
 	// previous installations might have created this directory
 	NSString *traditional = @"/opt/gemstone/locks";
 	// if traditional path is not present, we will use application support directory
-	NSString *alternate = [NSString stringWithFormat:@"%@/locks", 
-						   [[NSFileManager defaultManager] applicationSupportDirectory]];
+	NSString *alternate = [NSString stringWithFormat:@"%@/locks", [[NSApp delegate] basePath]];
 	
 	// try linking to traditional location
 	BOOL isDirectory;
@@ -152,15 +151,12 @@
 
 - (NSString *)directory;
 {
-	return [NSString stringWithFormat: @"%@/db%@", 
-			[[NSFileManager defaultManager] applicationSupportDirectory], 
-			[self identifier]];
+	return [NSString stringWithFormat: @"%@/db%@", [[NSApp delegate] basePath], [self identifier]];
 }
 
 - (NSString *)gemstone;
 {
-	NSString *appSupDir = [[NSFileManager defaultManager] applicationSupportDirectory];
-	NSString *path = [NSString stringWithFormat: @"%@/GemStone64Bit%@-i386.Darwin", appSupDir, [self version]];
+	NSString *path = [NSString stringWithFormat: @"%@/GemStone64Bit%@-i386.Darwin", [[NSApp delegate] basePath], [self version]];
 	return path;
 }
 
@@ -202,7 +198,18 @@
 	}
 	NSString *source = [NSString stringWithFormat:@"%@/bin/%@", [self gemstone], aString];
 	if ([[NSFileManager defaultManager] copyItemAtPath:source toPath:target error:&error]) {
-		lastStartDate = nil;
+		NSDictionary *attributes = [NSDictionary 
+									dictionaryWithObject:[NSNumber numberWithInt:0600] 
+									forKey:NSFilePosixPermissions];
+		BOOL success = [[NSFileManager defaultManager]
+		 setAttributes:attributes
+		 ofItemAtPath:target
+		 error:&error];
+		if (success) {
+			lastStartDate = nil;
+			return;
+		}
+		NSLog(@"Unable to change permissions of %@ because %@", target, [error description]);
 		return;
 	}
 	NSLog(@"copy from %@ to %@ failed because %@!", source, target, [error description]);

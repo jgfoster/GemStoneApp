@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>GemStone.Helper</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.1</string>
+	<string>1.0.6</string>
 	<key>SMAuthorizedClients</key>
 	<array>
 		<string>identifier com.VMware.GemStone and certificate leaf[subject.CN] = &quot;GemStone&quot;</string>

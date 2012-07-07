@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 VMware Inc. All rights reserved.
 //
 
-#import "Task.h"
+#import "Download.h"
 #import "Version.h"
 
-@interface DownloadVersion : Task {
+@interface DownloadVersion : Download {
 	Version			*version;
 	NSString		*zipFilePath;
 	NSFileHandle	*zipFile;

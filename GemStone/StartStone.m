@@ -12,12 +12,8 @@
 
 - (NSArray *)arguments;
 { 
-	NSString *directory = [database directory];
-	NSString *stoneLog  = [NSString stringWithFormat:@"%@/logs/%@.log", directory, [database nameOrDefault]];
 	return [NSArray arrayWithObjects: 
 			[database nameOrDefault],
-			@"-l",
-			stoneLog,
 			nil];
 }
 
@@ -26,18 +22,13 @@
 	return [database directory];
 }
 
-- (void)data:(NSData *)data;
-{
-    NSString *string = [[NSString alloc] 
-						initWithData:data 
-						encoding:NSUTF8StringEncoding];
-	NSLog(@"startstone data = %@", string);
-}
-
 - (void)done;
 {
-	NSLog(@"startstone is done!");
-	[self notifyDone];
+	if ([errorOutput length]) {
+		[super error:errorOutput];
+	} else {
+		[self notifyDone];
+	}
 }
 
 - (NSMutableDictionary *)environment;
@@ -57,10 +48,14 @@
 	return environment;
 }
 
+- (void)error:(NSString *)aString;
+{
+	[errorOutput appendString:aString];
+}
+
 - (NSString *)launchPath;
 { 
-	NSString *path = [NSString stringWithFormat:@"%@/bin/startstone", [database gemstone]];
-	return path; 
+	return [NSString stringWithFormat:@"%@/bin/startstone", [database gemstone]];
 }
 
 - (void)setDatabase:(Database *)aDatabase;

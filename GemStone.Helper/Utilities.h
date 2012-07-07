@@ -13,12 +13,13 @@
 #define kHelperIdentifier "com.VMware.GemStone.Helper"
 #define kVersionPart1 1
 #define kVersionPart2 0
-#define kVersionPart3 1
+#define kVersionPart3 6
 
 enum HelperCommand {
-    Helper_Error    = 0,
-    Helper_Version  = 1,
-    Helper_PID      = 2,
+    Helper_Error    = 0,	// data is a (null-terminated) C string
+    Helper_Version  = 1,	// data is three bytes (see above)
+    Helper_PID      = 2,	// data is a four-byte int with getpid()
+	Helper_Remove	= 3,	// data is a four-byte int with errno (0 if no problems)
 };
 
 // This needs to change if the following structure changes

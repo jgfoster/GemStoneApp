@@ -13,13 +13,17 @@
 #define kTaskProgress @"taskProgress"
 
 @interface Task : NSObject {
-	NSTask *task;
+	NSTask			*task;
+	int				doneCount;
+	NSMutableString *errorOutput;
+	NSMutableString *standardOutput;
 }
 
 - (void)cancelTask;
 - (NSString *)currentDirectoryPath;
 - (NSMutableDictionary *)environment;
-- (void)progressNotification:(NSNotification *)inNotification;
+- (void)error:(NSString *)message;
+- (void)progress:(NSString *)aString;
 - (void)notifyDone;
 - (void)start;
 - (void)verifyNoTask;

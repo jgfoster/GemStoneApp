@@ -20,18 +20,14 @@
 			nil];
 }
 
-- (void)data:(NSData *)data;
-{
-    NSString *string = [[NSString alloc] 
-						initWithData:data 
-						encoding:NSUTF8StringEncoding];
-	[taskOutput appendString:string];
+- (void)dataString:(NSString *)aString { 
+	
 }
 
 - (void)done;
 {
-	NSString *string = taskOutput;
-	taskOutput = nil;
+	NSString *string = standardOutput;
+	standardOutput = nil;
 	if (!task) return;		// task cancelled!
 	task = nil;
 	
@@ -75,19 +71,6 @@
 		[versions addObject:version];
 	}
 	[self notifyDone];
-}
-	
-- (id)init;
-{
-	if (self = [super init]) {
-		taskOutput = [NSMutableString new];
-	}
-	return self;
-}
-
-- (NSString *)launchPath;
-{
-	return @"/usr/bin/curl";
 }
 
 @end
