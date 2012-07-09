@@ -7,6 +7,7 @@
 //
 
 #import "DownloadVersionList.h"
+#import "Utilities.h"
 #import "Version.h"
 
 @implementation DownloadVersionList
@@ -20,22 +21,13 @@
 			nil];
 }
 
-- (void)dataString:(NSString *)aString { 
-	
-}
-
 - (void)done;
 {
 	NSString *string = standardOutput;
 	standardOutput = nil;
-	if (!task) return;		// task cancelled!
-	task = nil;
-	
 	NSUInteger loc = [string rangeOfString:@">"].location;
 	if (NSNotFound == loc) {
-		NSLog(@"invalid data returned from version list");
-		[self notifyDone];
-		return;
+		AppError(@"invalid data returned from version list");
 	}
 	string = [NSString stringWithFormat:@"%@%@",
 			  @"<?xml version='1.0' encoding='UTF-8' ?",
@@ -46,9 +38,7 @@
 	NSError *error = nil;
 	NSXMLDocument *doc = [[NSXMLDocument new] initWithXMLString:string options:0 error:&error];
 	if (error) {
-		NSLog(@"error parsing version list HTML: %@", [error description]);
-		[self notifyDone];
-		return;
+		AppError(@"error parsing version list HTML: %@", [error description]);
 	}
 	NSArray *nodes = [doc nodesForXPath:@"/html/body/table/tr" error:&error];
 	NSRange nodeRange = {3, [nodes count] - 4};
@@ -70,7 +60,7 @@
 		[version setValue:date forKey:@"date"];
 		[versions addObject:version];
 	}
-	[self notifyDone];
+	[super done];
 }
 
 @end

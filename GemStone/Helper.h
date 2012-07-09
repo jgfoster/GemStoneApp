@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 @interface Helper : NSObject
-- (NSString *)install;
+- (void)install;
 - (BOOL)isCurrent;
-- (NSString *)remove;
+- (void)remove;
 @end

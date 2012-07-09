@@ -1,25 +1,27 @@
 //
-//  StartStone.m
+//  StopStone.m
 //  GemStone
 //
-//  Created by James Foster on 7/3/12.
+//  Created by James Foster on 7/9/12.
 //  Copyright (c) 2012 VMware Inc. All rights reserved.
 //
 
-#import "StartStone.h"
+#import "StopStone.h"
 
-@implementation StartStone
+@implementation StopStone
 
 - (NSArray *)arguments;
 { 
 	return [NSArray arrayWithObjects: 
 			[database nameOrDefault],
+			@"DataCurator",
+			@"swordfish",
 			nil];
 }
 
 - (NSString *)launchPath;
 { 
-	return [NSString stringWithFormat:@"%@/bin/startstone", [database gemstone]];
+	return [NSString stringWithFormat:@"%@/bin/stopstone", [database gemstone]];
 }
 
 @end

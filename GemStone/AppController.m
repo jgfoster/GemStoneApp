@@ -6,28 +6,22 @@
 //  Copyright (c) 2012 VMware Inc. All rights reserved.
 //
 
+#import <ExceptionHandling/NSExceptionHandler.h>
+
 #import "AppController.h"
 #import "Database.h"
+#import "DownloadVersion.h"
 #import "DownloadVersionList.h"
 #import "ImportZippedVersion.h"
 #import "Login.h"
-#import "Version.h"
-#import "DownloadVersion.h"
 #import "StartStone.h"
-
-@interface AppController ()
-- (void)criticalAlert:(NSString *)string;
-- (void)loadRequest:(NSString *)requestName toController:(NSArrayController *)arrayController;
-- (void)refreshInstalledVersionsList;
-- (void)startTaskProgressSheetAndAllowCancel:(BOOL)allowCancel;
-- (void)taskFinishedAfterDelay:(NSTimeInterval)seconds;
-- (void)unzipPath:(NSString *)path;
-@end
+#import "StopStone.h"
+#import "Utilities.h"
+#import "Version.h"
 
 @implementation AppController
 
 @synthesize setup;
-@synthesize basePath;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
 {
@@ -43,6 +37,11 @@
 	[self loadRequest:@"Version" toController:versionListController];
 	[self refreshInstalledVersionsList];
 	
+	[[NSNotificationCenter defaultCenter]
+	 addObserver:self 
+	 selector:@selector(taskError:) 
+	 name:kTaskError 
+	 object:nil];
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self 
 	 selector:@selector(taskProgress:) 
@@ -70,7 +69,6 @@
 	 object:nil];
 	
 	[taskProgressText setFont:[NSFont fontWithName:@"Monaco" size:9]];
-	[self setupBasePath];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification;
@@ -103,7 +101,7 @@
 	}
 	NSError *error = nil;
 	if (![moc save:&error]) {
-		NSLog(@"Data save failed\n%@",
+		AppError(@"Data save failed\n%@",
 			  ([error localizedDescription] != nil) ?
 			  [error localizedDescription] : @"Unknown Error");
 	}
@@ -113,16 +111,15 @@
 {
 	if (!task) return;
 	[task cancelTask];
-	task = nil;
 	[self taskFinishedAfterDelay:0];
 }
 
-- (void)criticalAlert:(NSString *)string;
+- (void)criticalAlert:(NSString *)textString details:(NSString *)detailsString;
 {
 	NSAlert *alert = [[NSAlert alloc] init];
 	[alert setAlertStyle:NSCriticalAlertStyle];
-	[alert setMessageText:@"Task Failed"];
-	[alert setInformativeText:string];
+	[alert setMessageText:textString];
+	[alert setInformativeText:detailsString];
 	[alert addButtonWithTitle:@"Dismiss"];
 	[alert runModal];
 }
@@ -130,17 +127,12 @@
 - (void)databaseStartDone:(NSNotification *)notification;
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
-	task = nil;	
-
 	[self taskFinishedAfterDelay:0.5];
 }
 
 - (void)databaseStartRequest:(NSNotification *)notification;
 {
-	if (task) {
-		[NSException raise:NSInternalInconsistencyException
-					format:@"Task should not be in progress!"];	
-	}
+	[self verifyNoTask];
 	StartStone *myTask = [StartStone new];
 	task = myTask;
 	[myTask setDatabase:[notification object]];
@@ -149,33 +141,42 @@
 	 selector:@selector(databaseStartDone:) 
 	 name:kTaskDone 
 	 object:task];
-	[[NSNotificationCenter defaultCenter]
-	 addObserver:self 
-	 selector:@selector(taskError:) 
-	 name:kTaskError 
-	 object:task];
 	[self startTaskProgressSheetAndAllowCancel:YES];
 	[task start];
 }
 
+- (void)databaseStopDone:(NSNotification *)notification;
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
+	[self taskFinishedAfterDelay:0.5];
+}
+
 - (void)databaseStopRequest:(NSNotification *)notification;
 {
-	
+	[self verifyNoTask];
+	StopStone *myTask = [StopStone new];
+	task = myTask;
+	[myTask setDatabase:[notification object]];
+	[[NSNotificationCenter defaultCenter]
+	 addObserver:self 
+	 selector:@selector(databaseStopDone:) 
+	 name:kTaskDone 
+	 object:task];
+	[self startTaskProgressSheetAndAllowCancel:YES];
+	[task start];
 }
 
 - (void)downloadDone:(NSNotification *)notification;
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
 	task = nil;	
+	[taskCancelButton setEnabled:NO];
 	[self unzipPath:[[notification object] zipFilePath]];
 }
 
 - (void)downloadRequest:(NSNotification *)notification;
 {
-	if (task) {
-		[NSException raise:NSInternalInconsistencyException
-					format:@"Task should not be in progress!"];	
-	}
+	[self verifyNoTask];
 	DownloadVersion *myTask = [DownloadVersion new];
 	task = myTask;
 	[myTask setVersion:[notification object]];
@@ -184,38 +185,33 @@
 	 selector:@selector(downloadDone:) 
 	 name:kTaskDone 
 	 object:task];
-	[[NSNotificationCenter defaultCenter]
-	 addObserver:self 
-	 selector:@selector(taskError:) 
-	 name:kTaskError 
-	 object:task];
 	[self startTaskProgressSheetAndAllowCancel:YES];
 	[task start];
+}
+
+- (BOOL)exceptionHandler:(NSExceptionHandler *)sender shouldLogException:(NSException *)exception mask:(unsigned int)aMask;
+{
+	NSString *string = [NSString stringWithFormat:@"%@\n\nSee Console for details.", [exception reason]];
+	[self criticalAlert:@"Internal Application Error!" details:string];
+	[self taskFinishedAfterDelay:0];
+	return YES;
 }
 
 - (id)init;
 {
 	if (self = [super init]) {
-		[self setupBasePath];
+		[[Utilities new] setupGlobals];
+		[self setupExceptionHandler];
 	}
 	return self;
 }
 
 - (IBAction)installHelperTool:(id)sender
 {
-	NSString *errorString = [helper install];
-	if (errorString) {
-		NSAlert *alert = [[NSAlert alloc] init];
-		[alert setAlertStyle:NSCriticalAlertStyle];
-		[alert setMessageText:@"Installation failed:"];
-		[alert setInformativeText:errorString];
-		[alert addButtonWithTitle:@"Dismiss"];
-		[alert runModal];
-	} else {
-		[authenticateButton setEnabled:NO];
-		[helperToolMessage setHidden:NO];
-		[removeButton setEnabled:YES];
-	}
+	[helper install];
+	[authenticateButton setEnabled:NO];
+	[helperToolMessage setHidden:NO];
+	[removeButton setEnabled:YES];
 }
 
 - (void)loadRequest:(NSString *)requestName toController:(NSArrayController *)controller;
@@ -226,7 +222,7 @@
 	NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:requestName];
 	NSArray *list = [moc executeFetchRequest:request error:&error];
 	if (!list) {
-        NSLog(@"Data load failed\n%@",
+        AppError(@"Data load failed\n%@",
 			  ([error localizedDescription] != nil) ?
 			  [error localizedDescription] : @"Unknown Error");
 		list = [NSArray new];
@@ -282,7 +278,7 @@
 																  options:nil
 																	error:&error];
     if (newStore == nil) {
-        NSLog(@"Store Configuration Failure\n%@",
+        AppError(@"Store Configuration Failure\n%@",
 			  ([error localizedDescription] != nil) ?
 			  [error localizedDescription] : @"Unknown Error");
     }
@@ -294,7 +290,7 @@
 {
 	NSString *path = [url path];
 	BOOL isDirectory;
-	[[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDirectory];
+	[fileManager fileExistsAtPath:path isDirectory:&isDirectory];
 	if (isDirectory) {
 		return ![[NSWorkspace sharedWorkspace] isFilePackageAtPath:path];
 	}
@@ -320,14 +316,10 @@
 
 - (IBAction)removeHelperTool:(id)sender;
 {
-	NSString *error = [helper remove];
-	if (error) {
-		NSLog(@"remove failed: %@", error);
-	} else {
-		[authenticateButton setEnabled:YES];
-		[helperToolMessage setHidden:YES];
-		[removeButton setEnabled:NO];
-	}
+	[helper remove];
+	[authenticateButton setEnabled:YES];
+	[helperToolMessage setHidden:YES];
+	[removeButton setEnabled:NO];
 }
 
 - (void)removeRequest:(NSNotification *)notification;
@@ -340,11 +332,6 @@
 	 selector:@selector(removeVersionDone:) 
 	 name:kRemoveVersionDone 
 	 object:version];
-	[[NSNotificationCenter defaultCenter]
-	 addObserver:self 
-	 selector:@selector(removeVersionError:) 
-	 name:kRemoveVersionError 
-	 object:version];
 	[version performSelector:@selector(remove) withObject:nil afterDelay:0.1];
 }
 
@@ -352,19 +339,8 @@
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:[notification object]];
 	[self refreshInstalledVersionsList];	
-	[taskProgressText insertText:@"...Done!"];
-	[self taskFinishedAfterDelay:1];
-}
-
-- (void)removeVersionError:(NSNotification *)notification;
-{
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:[notification object]];
-	[self criticalAlert:[[notification object] localizedDescription]];
-	[self taskFinishedAfterDelay:0];
-}
-
-- (void)removeVersionStart:(NSNotification *)notification;
-{
+	[taskProgressText insertText:@" . . . Done!"];
+	[self taskFinishedAfterDelay:0.5];
 }
 
 - (void)refreshInstalledVersionsList;
@@ -379,20 +355,11 @@
 	[lastUpdateDateField setObjectValue:setup.versionsDownloadDate];
 }
 
-- (void)setupBasePath;
+- (void)setupExceptionHandler;
 {
-	basePath = [@"~/Library/GemStone" stringByExpandingTildeInPath];
-	
-	NSFileManager *fileManager = [NSFileManager defaultManager];
-	if ([fileManager fileExistsAtPath: basePath]) return;
-	NSError *error;
-	if ([fileManager
-		 createDirectoryAtPath:basePath
-		 withIntermediateDirectories:NO
-		 attributes:nil
-		 error:&error]) return;
-	[self criticalAlert:[error description]];
-	exit(1);
+	NSExceptionHandler *handler = [NSExceptionHandler defaultExceptionHandler];
+	[handler setExceptionHandlingMask:[handler exceptionHandlingMask] | NSLogOtherExceptionMask];
+	[handler setDelegate:self];
 }
 
 - (void)startTaskProgressSheetAndAllowCancel:(BOOL)allowCancel;
@@ -410,13 +377,13 @@
 - (void)taskError:(NSNotification *)notification;
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
-	task = nil;	
-	[self criticalAlert:[[notification userInfo] objectForKey:@"string"]];
+	[self criticalAlert:@"Task Failed" details:[[notification userInfo] objectForKey:@"string"]];
 	[self taskFinishedAfterDelay:0.5];
 }
 
 - (void)taskFinished;
 {
+	task = nil;
 	[taskProgressIndicator stopAnimation:self];
 	[taskProgressText setString:[NSMutableString new]];
 	[NSApp endSheet:taskProgressPanel];
@@ -457,7 +424,6 @@
 - (void)unzipDone:(NSNotification *)notification;
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
-	task = nil;
 	[self refreshInstalledVersionsList];	
 	[self taskFinishedAfterDelay:0.5];
 }
@@ -472,50 +438,30 @@
 	 selector:@selector(unzipDone:) 
 	 name:kTaskDone 
 	 object:task];
-	[[NSNotificationCenter defaultCenter]
-	 addObserver:self 
-	 selector:@selector(taskError:) 
-	 name:kTaskError
-	 object:task];
-	[[NSNotificationCenter defaultCenter]
-	 addObserver:self 
-	 selector:@selector(taskProgress:) 
-	 name:kTaskProgress
-	 object:task];
 	[task start];
 }
 
 - (IBAction)unzipRequest:(id)sender;
 {
-	if (task) {
-		[NSException raise:NSInternalInconsistencyException
-					format:@"Task should not be in progress!"];	
-	}
-	
+	[self verifyNoTask];
 	//	get path to zip file
 	NSOpenPanel *op = [NSOpenPanel openPanel];
 	[op setDelegate:self];
-    if ([op runModal] != NSOKButton) return;
+	int result = [op runModal];
+	[op setDelegate:nil];
+    if (result != NSOKButton) return;
 	[self startTaskProgressSheetAndAllowCancel:NO];
 	[self unzipPath:[[[op URLs] objectAtIndex:0] path]];
 }
 
 - (IBAction)updateVersionList:(id)sender;
 {
-	if (task) {
-		[NSException raise:NSInternalInconsistencyException
-					format:@"Task should not be in progress!"];	
-	}
+	[self verifyNoTask];
 	task = [DownloadVersionList new];
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self 
 	 selector:@selector(updateVersionsDone:) 
 	 name:kTaskDone 
-	 object:task];
-	[[NSNotificationCenter defaultCenter]
-	 addObserver:self 
-	 selector:@selector(taskError:) 
-	 name:kTaskError
 	 object:task];
 	[self startTaskProgressSheetAndAllowCancel:YES];
 	[task start];
@@ -523,11 +469,7 @@
 
 - (void)updateVersionsDone:(NSNotification *)notification;
 {
-	[[NSNotificationCenter defaultCenter]
-	 removeObserver:self 
-	 name:nil 
-	 object:task];
-	
+	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
 	NSManagedObjectContext *moc = [self managedObjectContext];
 	NSManagedObjectModel *managedObjectModel = [[moc persistentStoreCoordinator] managedObjectModel];
 	NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Version"];
@@ -555,9 +497,14 @@
 		}
 	}
 	[self refreshInstalledVersionsList];
-	task = nil;
 	setup.versionsDownloadDate = [NSDate date];
 	[self taskFinishedAfterDelay:0.5];
+}
+
+- (void)verifyNoTask;
+{
+	if (!task) return;
+	AppError(@"Task should not be in progress!");
 }
 
 @end

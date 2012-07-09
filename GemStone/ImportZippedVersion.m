@@ -7,8 +7,7 @@
 //
 
 #import "ImportZippedVersion.h"
-
-#import "AppController.h"
+#import "Utilities.h"
 
 @implementation ImportZippedVersion
 
@@ -23,18 +22,18 @@
 	return [NSArray arrayWithObjects:
 			zipFilePath, 
 			@"-d",
-			[[NSApp delegate] basePath],
+			basePath,
 			nil];
 }
 
 - (void)done;
 {
 	NSRange range;
-	range = [zipFilePath rangeOfString:[[NSApp delegate] basePath]];
+	range = [zipFilePath rangeOfString:basePath];
 	if (0 == range.location) {
-		[[NSFileManager defaultManager] removeItemAtPath:zipFilePath error:nil];
+		[fileManager removeItemAtPath:zipFilePath error:nil];
 	}
-	[self notifyDone];
+	[super done];
 }
 
 - (NSString *)launchPath;

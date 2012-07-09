@@ -1,13 +1,13 @@
 //
-//  StartStone.h
+//  StopStone.h
 //  GemStone
 //
-//  Created by James Foster on 7/3/12.
+//  Created by James Foster on 7/9/12.
 //  Copyright (c) 2012 VMware Inc. All rights reserved.
 //
 
 #import "DatabaseTask.h"
 
-@interface StartStone : DatabaseTask
+@interface StopStone : DatabaseTask
 
 @end

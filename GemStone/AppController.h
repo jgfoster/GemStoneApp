@@ -29,7 +29,6 @@
 	Helper		*helper;
 	Task 		*task;		// to protect it from being garbage collected!
 	Setup		*setup;
-	NSString	*basePath;
 }
 
 - (IBAction)cancelTask:(id)sender;
@@ -40,6 +39,5 @@
 - (IBAction)unzipRequest:(id)sender;
 
 @property (readonly) Setup *setup;
-@property (readonly) NSString *basePath;
 
 @end

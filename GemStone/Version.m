@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 VMware Inc. All rights reserved.
 //
 
+#import "Utilities.h"
 #import "Version.h"
-#import "AppController.h"
 
 @interface Version ()
 @end
@@ -22,7 +22,7 @@
 - (BOOL)isActuallyInstalled;
 {
 	BOOL isDirectory;
-	BOOL exists = [[NSFileManager defaultManager] 
+	BOOL exists = [fileManager
 				   fileExistsAtPath:[self productPath] 
 				   isDirectory:&isDirectory];
 	return exists && isDirectory;
@@ -35,14 +35,12 @@
 
 - (NSString *)productPath;
 {
-	return [NSString stringWithFormat:@"%@/GemStone64Bit%@-i386.Darwin", [[NSApp delegate] basePath], self.name];
+	return [NSString stringWithFormat:@"%@/GemStone64Bit%@-i386.Darwin", basePath, self.name];
 }
 
 - (void)remove;
 {
 	NSError *error = nil;
-
-	NSFileManager *fileManager = [NSFileManager defaultManager];
 	NSString *productPath = [self productPath];
 	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:productPath];
 	NSString *file;
@@ -55,17 +53,15 @@
 		BOOL exists = [fileManager fileExistsAtPath:path isDirectory:&isDirectory];
 		if (exists && isDirectory) {
 			if (![fileManager setAttributes:attributes ofItemAtPath:path error:&error]) {
-				[[NSNotificationCenter defaultCenter] postNotificationName:kRemoveVersionError object:error];
-				return;
+				AppError(@"Unable to set directory permissions for %@ because %@", path, [error description]);
 			}
 		}
 	}
-	if ([[NSFileManager defaultManager] removeItemAtPath:[self productPath] error:&error]) {
+	if ([fileManager removeItemAtPath:[self productPath] error:&error]) {
 		[[NSNotificationCenter defaultCenter] postNotificationName:kRemoveVersionDone object:self];
 	} else {
-		[[NSNotificationCenter defaultCenter] postNotificationName:kRemoveVersionError object:error];
+		AppError(@"Unable to remove %@ because %@", [self productPath], [error description]);
 	}
-
 }
 
 - (void)setIsInstalledCode:(NSNumber *)aNumber;

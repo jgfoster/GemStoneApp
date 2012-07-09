@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 VMware Inc. All rights reserved.
 //
 
-#import "AppController.h"
 #import "DownloadVersion.h"
+#import "Utilities.h"
 #import "Version.h"
 
 @implementation DownloadVersion
@@ -19,34 +19,37 @@
 { 
 	NSString *zippedFileName = [version zippedFileName];
 	NSMutableString *http = [NSMutableString new];
-	[http appendString:@"http://seaside.gemstone.comm/downloads/i386.Darwin/"];
+	[http appendString:@"http://seaside.gemstone.com/downloads/i386.Darwin/"];
 	[http appendString:zippedFileName];
 	return [NSArray arrayWithObjects: @"--raw", http, nil];
 }
 
 - (void)cancelTask;
 {
-	[[NSFileManager defaultManager] removeItemAtPath:zipFilePath error:nil];
+	[zipFile closeFile];
+	zipFile = nil;
+	[fileManager removeItemAtPath:zipFilePath error:nil];
+	zipFilePath = nil;
 	[super cancelTask];
 }
 
 - (NSString *)createZipFile;
 {
 	NSString *zippedFileName = [version zippedFileName];
-	zipFilePath = [NSMutableString stringWithFormat:@"%@/%@", [[NSApp delegate] basePath], zippedFileName];
+	zipFilePath = [NSMutableString stringWithFormat:@"%@/%@", basePath, zippedFileName];
 	BOOL exists, isDirectory = NO, success;
-	exists = [[NSFileManager defaultManager] fileExistsAtPath:zipFilePath isDirectory:&isDirectory];
+	exists = [fileManager fileExistsAtPath:zipFilePath isDirectory:&isDirectory];
 	if (exists) {
 		if (isDirectory) {
 			return [@"Please delete directory at:" stringByAppendingString:zipFilePath];
 		}
 		NSError *error;
-		success = [[NSFileManager defaultManager] removeItemAtPath:zipFilePath error:&error];
+		success = [fileManager removeItemAtPath:zipFilePath error:&error];
 		if (!success) {
 			return [@"Unable to delete existing file: " stringByAppendingString:[error localizedDescription]];
 		}
 	}
-	success = [[NSFileManager defaultManager] 
+	success = [fileManager
 			   createFileAtPath:zipFilePath 
 			   contents:[NSData new] 
 			   attributes:nil];
@@ -69,27 +72,24 @@
 { 
 	[zipFile closeFile];
 	zipFile = nil;
-	if (!task) return;		// task cancelled!
-	task = nil;
-	int fileSize = [[[NSFileManager defaultManager] 
+	int fileSize = [[fileManager
 					 attributesOfItemAtPath:zipFilePath 
 					 error:nil] fileSize];
-	if (fileSize) {
-		[self notifyDone];
+	if (!fileSize) {
+		[fileManager removeItemAtPath:zipFilePath error:nil];
 		zipFilePath = nil;
-	} else {
-		[[NSFileManager defaultManager] removeItemAtPath:zipFilePath error:nil];
-		zipFilePath = nil;
-		NSString *message = @"'RETR 550' means that this version of GemStone/S 64 Bit is not available for the Macintosh.";
-		NSDictionary *userInfo = [NSDictionary
-								  dictionaryWithObject:message
-								  forKey:@"string"];
-		NSNotification *outNotification = [NSNotification
-										   notificationWithName:kTaskError 
-										   object:self
-										   userInfo:userInfo];
-		[[NSNotificationCenter defaultCenter] postNotification:outNotification];
+		AppError(@"Empty zip file without an error!?");
 	}
+	[super done];
+}
+
+- (void)doneWithError:(int)statusCode;
+{
+	[zipFile closeFile];
+	zipFile = nil;
+	[fileManager removeItemAtPath:zipFilePath error:nil];
+	zipFilePath = nil;
+	[super doneWithError:statusCode];
 }
 
 - (void)start;
@@ -97,8 +97,7 @@
 	[self verifyNoTask];
 	NSString *errorString = [self createZipFile];
 	if (errorString) {
-		NSLog(@"%@", errorString);
-		return;
+		AppError(@"%@", errorString);
 	}
 	[super start];
 }

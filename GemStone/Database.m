@@ -6,9 +6,10 @@
 //  Copyright (c) 2012 VMware Inc. All rights reserved.
 //
 
-#import "Database.h"
 #import "AppController.h"
+#import "Database.h"
 #import "Setup.h"
+#import "Utilities.h"
 
 @implementation Database
 
@@ -40,7 +41,7 @@
 
 - (BOOL)canStop;
 {
-	return NO;
+	return YES;
 }
 
 - (BOOL)createConfigFile;
@@ -55,37 +56,34 @@
 	[string appendString: @"STN_TRAN_LOG_SIZES = 100, 100;\n"];
 	[string appendString: @"KEYFILE = \"$GEMSTONE/seaside/etc/gemstone.key\";\n"];
 	[string appendFormat: @"SHR_PAGE_CACHE_SIZE_KB = %lu;\n", [self spc_kb]];
-	return [[NSFileManager defaultManager] 
+	return [fileManager 
 			createFileAtPath:path 
 			contents:[string dataUsingEncoding:NSUTF8StringEncoding] 
 			attributes:nil];
 }
 
-- (BOOL)createDirectories;
+- (void)createDirectories;
 {
-	return YES 
-		&& [self createDirectory:@"conf"]
-		&& [self createDirectory:@"data"]
-		&& [self createDirectory:@"logs"]
-		&& [self createDirectory:@"stat"]
-		&& [self createLocksDirectory]
-		;
+	[self createDirectory:@"conf"];
+	[self createDirectory:@"data"];
+	[self createDirectory:@"logs"];
+	[self createDirectory:@"stat"];
+	[self createLocksDirectory];
 }
 
-- (BOOL)createDirectory:(NSString *)aString;
+- (void)createDirectory:(NSString *)aString;
 {
 	NSString *path = [NSString stringWithFormat:@"%@/%@", [self directory], aString];
 	NSError *error = nil;
-	if ([[NSFileManager defaultManager]
+	if ([fileManager
 		 createDirectoryAtPath:path
 		 withIntermediateDirectories:YES
 		 attributes:nil
-		 error:&error]) return YES;
-	NSLog(@"Unable to create %@ because %@!", path, [error description]);
-	return NO;
+		 error:&error]) return;
+	AppError(@"Unable to create %@ because %@!", path, [error description]);
 }
 
-- (BOOL)createLocksDirectory;
+- (void)createLocksDirectory;
 {
 	NSError *error;
 	// this needs to point to something
@@ -93,70 +91,79 @@
 	// previous installations might have created this directory
 	NSString *traditional = @"/opt/gemstone/locks";
 	// if traditional path is not present, we will use application support directory
-	NSString *alternate = [NSString stringWithFormat:@"%@/locks", [[NSApp delegate] basePath]];
+	NSString *alternate = [NSString stringWithFormat:@"%@/locks", basePath];
 	
 	// try linking to traditional location
 	BOOL isDirectory;
-	BOOL exists = [[NSFileManager defaultManager] 
+	BOOL exists = [fileManager
 				   fileExistsAtPath:traditional 
 				   isDirectory:&isDirectory];
 	if (exists && isDirectory) {
-		if ([[NSFileManager defaultManager]
+		if ([fileManager
 			 createSymbolicLinkAtPath:localLink 
 			 withDestinationPath:traditional 
-			 error:&error]) {
-			return YES;
-		}
-		NSLog(@"unable to link %@ to %@ because %@", localLink, traditional, [error description]);
-		return NO;
+			 error:&error]) return;
+		AppError(@"unable to link %@ to %@ because %@", localLink, traditional, [error description]);
 	};
 	
 	// try linking alternate location
-	exists = [[NSFileManager defaultManager] 
+	exists = [fileManager
 			  fileExistsAtPath:alternate 
 			  isDirectory:&isDirectory];
 	if (exists && !isDirectory) {
-		NSLog(@"%@ is not a directory!", alternate);
-		return NO;
+		AppError(@"%@ is not a directory!", alternate);
 	}
 	if (!exists) {
-		if (![[NSFileManager defaultManager]
+		if (![fileManager
 			 createDirectoryAtPath:alternate
 			 withIntermediateDirectories:YES
 			 attributes:nil
 			 error:&error]) {
-			NSLog(@"unable to create %@ because %@", alternate, [error description]);
-			return NO;
+			AppError(@"unable to create %@ because %@", alternate, [error description]);
 		}
 	}
-	if ([[NSFileManager defaultManager]
+	if ([fileManager
 		 createSymbolicLinkAtPath:localLink
 		 withDestinationPath:alternate
-		 error:&error]) {
-		return YES;
-	}
-	NSLog(@"unable to link %@ to %@ because %@", localLink, alternate, [error description]);
-	return NO;
+		 error:&error]) return;
+	AppError(@"unable to link %@ to %@ because %@", localLink, alternate, [error description]);
 }
 
 - (void)deleteAll;
 {
 	NSString *path = [self directory];
 	NSError *error = nil;
-	if ([[NSFileManager defaultManager] removeItemAtPath:path error:&error]) {
-		return;
+	if ([fileManager removeItemAtPath:path error:&error]) return;
+	AppError(@"unable to delete %@ because %@", path, [error description]);
+}
+
+- (void)deleteTransactionLogs;
+{
+	NSError *error = nil;
+	NSString *dataPath = [NSString stringWithFormat:@"%@/data", [self directory]];
+	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:dataPath];
+	NSString *file;
+	while (file = [dirEnum nextObject]) {
+		NSRange first = [file rangeOfString:@"tranlog"];
+		NSRange last  = [file rangeOfString:@".dbf"];
+		if (first.location == 0 && first.length == 7 && last.location == [file length] - 4) {
+			NSString *path = [[dataPath stringByAppendingString:@"/"]stringByAppendingString:file];
+			if (![fileManager removeItemAtPath:path error:&error]) {
+				AppError(@"Unable to remove %@ because %@", path, [error description]);
+			}
+		}
+		
 	}
-	NSLog(@"unable to delete %@ because %@", path, [error description]);
 }
 
 - (NSString *)directory;
 {
-	return [NSString stringWithFormat: @"%@/db%@", [[NSApp delegate] basePath], [self identifier]];
+	return [NSString stringWithFormat: @"%@/db%@", basePath, [self identifier]];
 }
 
 - (NSString *)gemstone;
 {
-	NSString *path = [NSString stringWithFormat: @"%@/GemStone64Bit%@-i386.Darwin", [[NSApp delegate] basePath], [self version]];
+	NSString *path = [NSString stringWithFormat: @"%@/GemStone64Bit%@-i386.Darwin", basePath, [self version]];
 	return path;
 }
 
@@ -178,7 +185,7 @@
 {
 	NSError *error = nil;
 	NSString *target = [NSString stringWithFormat:@"%@/data/extent0.dbf", [self directory]];
-	if ([[NSFileManager defaultManager] fileExistsAtPath:target]) {
+	if ([fileManager fileExistsAtPath:target]) {
 		if (lastStartDate) {
 			NSAlert *alert = [[NSAlert alloc] init];
 			[alert setAlertStyle:NSCriticalAlertStyle];
@@ -191,17 +198,17 @@
 				return;
 			}
 		}
-		if (![[NSFileManager defaultManager] removeItemAtPath:target error:&error]) {
-			NSLog(@"unable to delete %@ because %@", target, [error description]);
-			return;
+		if (![fileManager removeItemAtPath:target error:&error]) {
+			AppError(@"unable to delete %@ because %@", target, [error description]);
 		}
 	}
+	[self deleteTransactionLogs];
 	NSString *source = [NSString stringWithFormat:@"%@/bin/%@", [self gemstone], aString];
-	if ([[NSFileManager defaultManager] copyItemAtPath:source toPath:target error:&error]) {
+	if ([fileManager copyItemAtPath:source toPath:target error:&error]) {
 		NSDictionary *attributes = [NSDictionary 
 									dictionaryWithObject:[NSNumber numberWithInt:0600] 
 									forKey:NSFilePosixPermissions];
-		BOOL success = [[NSFileManager defaultManager]
+		BOOL success = [fileManager
 		 setAttributes:attributes
 		 ofItemAtPath:target
 		 error:&error];
@@ -209,10 +216,9 @@
 			lastStartDate = nil;
 			return;
 		}
-		NSLog(@"Unable to change permissions of %@ because %@", target, [error description]);
-		return;
+		AppError(@"Unable to change permissions of %@ because %@", target, [error description]);
 	}
-	NSLog(@"copy from %@ to %@ failed because %@!", source, target, [error description]);
+	AppError(@"copy from %@ to %@ failed because %@!", source, target, [error description]);
 }
 
 - (void)installGlassExtent;
@@ -265,14 +271,12 @@
 - (void)start;
 {
 	if (![self createConfigFile]) return;
-	[[NSNotificationCenter defaultCenter] 
-	 postNotificationName:kDatabaseStartRequest 
-	 object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:kDatabaseStartRequest object:self];
 }
 
 - (void)stop;
 {
-	NSLog(@"stop");
+	[[NSNotificationCenter defaultCenter] postNotificationName:kDatabaseStopRequest object:self];
 }
 
 - (NSString *)version;

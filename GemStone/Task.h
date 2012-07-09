@@ -22,9 +22,10 @@
 - (void)cancelTask;
 - (NSString *)currentDirectoryPath;
 - (NSMutableDictionary *)environment;
-- (void)error:(NSString *)message;
+- (void)done;
+- (void)doneWithError:(int)statusCode;
+- (void)errorOutputString:(NSString *)message;
 - (void)progress:(NSString *)aString;
-- (void)notifyDone;
 - (void)start;
 - (void)verifyNoTask;
 

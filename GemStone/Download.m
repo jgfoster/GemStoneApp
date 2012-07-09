@@ -7,12 +7,14 @@
 //
 
 #import "Download.h"
+#import "Utilities.h"
 
 @implementation Download
 
-- (void)error:(NSString *)aString;
+- (void)errorOutputString:(NSString *)aString;
 {
 	[self progress:aString];
+	// no need to send super since we don't need to save output
 }
 
 - (NSString *)launchPath;

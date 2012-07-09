@@ -10,13 +10,11 @@
 format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 
 #import "Task.h"
-
-#import "AppController.h"
+#import "Utilities.h"
 
 @implementation Task
 
 - (NSArray *)arguments		{ mustOverride(); return nil; }
-- (void)done				{ mustOverride(); }
 - (NSString *)launchPath	{ mustOverride(); return nil; }
 
 - (void)cancelTask;
@@ -25,13 +23,14 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	 removeObserver:self 
 	 name:NSFileHandleReadCompletionNotification 
 	 object:nil];
-	[task terminate];
+	NSTask *myTask = task;
 	task = nil;
+	[myTask terminate];
 }
 
 - (NSString *)currentDirectoryPath;
 {
-	return [[NSApp delegate] basePath];
+	return basePath;
 }
 
 - (void)data:(NSData *)data { 
@@ -41,7 +40,11 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 
 - (void)dataString:(NSString *)aString { 
 	[standardOutput appendString:aString];
-	[self progress:aString];
+}
+
+- (void)done;
+{
+	[[NSNotificationCenter defaultCenter] postNotificationName:kTaskDone object:self];
 }
 
 - (void)doneWithError:(int)statusCode;
@@ -57,7 +60,6 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 									   object:self
 									   userInfo:userInfo];
 	[[NSNotificationCenter defaultCenter] postNotification:outNotification];
-	[self notifyDone];
 }
 
 - (NSMutableDictionary *)environment;
@@ -69,10 +71,6 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	return taskEnvironment;
 }
 
-- (void)error:(NSString *)aString;
-{
-}
-
 - (void)errorOutput:(NSNotification *)inNotification;
 {
 	if (!task) return;
@@ -81,32 +79,33 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 		NSString *string = [[NSString alloc] 
 							initWithData:data 
 							encoding:NSUTF8StringEncoding];
-		[errorOutput appendString:string];
-		[self error: string];
+		[self errorOutputString: string];
 		[[inNotification object] readInBackgroundAndNotify];
 	} else {
 		[self mightBeDone];
 	}
 }
 
+- (void)errorOutputString:(NSString *)aString;
+{
+	[errorOutput appendString:aString];
+}
+
 - (void)mightBeDone;
 {
-	if (++doneCount < 2) return;
+	if (++doneCount < 2) return;	//	look for stderr and stdout notifications
 	[[NSNotificationCenter defaultCenter] 
 	 removeObserver:self 
 	 name:NSFileHandleReadCompletionNotification 
 	 object:nil];
+	if (!task) return;				//	terminated by user, so no need to report error
 	int status = [task terminationStatus];
+	task = nil;
 	if (status) {
 		[self doneWithError:status];
 	} else {
 		[self done];
 	}
-}
-
-- (void)notifyDone;
-{
-	[[NSNotificationCenter defaultCenter] postNotificationName:kTaskDone object:self];
 }
 
 - (void)progress:(NSString *)aString;

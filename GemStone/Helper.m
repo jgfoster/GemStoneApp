@@ -12,6 +12,8 @@
 #import <ServiceManagement/ServiceManagement.h>
 #import <Security/Authorization.h>
 
+#import "Utilities.h"
+
 #define MAX_PATH_SIZE 128
 
 @implementation Helper
@@ -33,35 +35,30 @@
 	/* Obtain the right to install privileged helper tools (kSMRightBlessPrivilegedHelper). */
 	OSStatus status = AuthorizationCreate(&authRights, kAuthorizationEmptyEnvironment, flags, &authRef);
 	if (status != errAuthorizationSuccess) {
-		NSLog(@"Failed to create AuthorizationRef, return code %i", status);
-	} else {
-		/* This does all the work of verifying the helper tool against the application
-		 * and vice-versa. Once verification has passed, the embedded launchd.plist
-		 * is extracted and placed in /Library/LaunchDaemons and then loaded. The
-		 * executable is placed in /Library/PrivilegedHelperTools.
-		 */
-		result = SMJobBless(kSMDomainSystemLaunchd, (__bridge CFStringRef)label, authRef, &cfError);
-		*error = (__bridge NSError*) cfError;
+		AppError(@"Failed to create AuthorizationRef, return code %i", status);
 	}
 	
+	/* This does all the work of verifying the helper tool against the application
+	 * and vice-versa. Once verification has passed, the embedded launchd.plist
+	 * is extracted and placed in /Library/LaunchDaemons and then loaded. The
+	 * executable is placed in /Library/PrivilegedHelperTools.
+	 */
+	result = SMJobBless(kSMDomainSystemLaunchd, (__bridge CFStringRef)label, authRef, &cfError);
+	*error = (__bridge NSError*) cfError;
 	return result;
 }
 
-- (NSString *)install;
+- (void)install;
 {
 	NSError *error = nil;
 	if (![self blessHelperWithLabel:@kHelperIdentifier error:&error]) {
-		NSLog(@"Helper tool installation failed: %@", [error localizedDescription]);
-		return [error localizedDescription];
-	} else {
-		NSLog(@"Helper tool installed!");
-		return nil;
-    }
+		AppError(@"Helper tool installation failed: %@", [error localizedDescription]);
+	}
 }
 
 - (BOOL)isCurrent;
 {
-    if (![[NSFileManager defaultManager] fileExistsAtPath:@kSocketPath]) {
+    if (![fileManager fileExistsAtPath:@kSocketPath]) {
 		return NO;	
 	}
 	struct HelperMessage messageOut, messageIn;
@@ -111,30 +108,29 @@ int sendMessage(const struct HelperMessage * messageOut, struct HelperMessage * 
     return 0;
 }
 
-- (NSString *)remove;
+- (void)remove;
 {
 	struct HelperMessage messageOut, messageIn;
     initMessage(messageOut, Helper_Remove)
     if (sendMessage(&messageOut, &messageIn)) {
-		return @"sendMessage failed!";
+		AppError(@"sendMessage failed!");
 	}
 	if (messageIn.command == Helper_Error) {
-		return [NSString stringWithCString:(const char *)messageIn.data encoding:NSUTF8StringEncoding];
+		AppError([NSString stringWithCString:(const char *)messageIn.data encoding:NSUTF8StringEncoding]);
 	}
 	if (messageIn.command != Helper_Remove) {
-		return @"unknown error";
+		AppError(@"unknown error");
 	}
 	int error;
 	if (messageIn.dataSize != sizeof(error)) {
-		return @"wrong size!";
+		AppError(@"wrong size!");
 	}
 	memcpy(&error, messageIn.data, messageIn.dataSize);
-	if (0 == error) {
-		return nil;
+	if (error) {
+		// see usr/include/sys/errno.h for errors, such as 
+		// ENOENT		2		/* No such file or directory */
+		AppError(@"errno = %i", error);
 	}
-	// see usr/include/sys/errno.h for errors, such as 
-	// ENOENT		2		/* No such file or directory */
-	return [NSString stringWithFormat:@"errno = %i", error];
 }
 
 @end
