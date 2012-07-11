@@ -15,31 +15,36 @@
 @interface Database : NSManagedObject {
 	NSNumber *identifier;  
 	NSNumber *indexInArray;  
+	NSNumber *isRunningCode;
+	NSDate	 *lastStartDate;
 	NSString *name;
+	NSString *netLDI;
 	NSNumber *spc_mb;
 	NSString *version;
-	NSDate	 *lastStartDate;
 }
 
 @property (readonly)			NSNumber *identifier;  
 @property (nonatomic, retain)	NSNumber *indexInArray;  
+@property (nonatomic, retain)	NSNumber *isRunningCode;
+@property (readonly)			NSDate	 *lastStartDate;
 @property (nonatomic, retain)	NSString *name;
+@property (nonatomic, retain)	NSString *netLDI;
 @property (nonatomic, retain)	NSNumber *spc_mb;
 @property (nonatomic, retain)	NSString *version;
-@property (readonly)			NSDate	 *lastStartDate;
 
-- (BOOL)canEditVersion;
 - (BOOL)canInitialize;
-- (BOOL)canRestore;
 - (BOOL)canStart;
-- (BOOL)canStop;
 - (NSString *)directory;
 - (void)deleteAll;
 - (NSString *)gemstone;
 - (void)installBaseExtent;
 - (void)installGlassExtent;
-- (NSString *)nameOrDefault;
+- (BOOL)isRunning;
+- (NSString *)isRunningString;
+- (NSArray *)logFiles;
+- (void)open;
 - (void)restore;
+- (void)setIsRunning:(BOOL)aBool;
 - (void)start;
 - (void)stop;
 

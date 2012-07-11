@@ -8,43 +8,65 @@
 
 #import "AppController.h"
 #import "Database.h"
+#import "GSList.h"
+#import "LogFile.h"
 #import "Setup.h"
 #import "Utilities.h"
+#import "WaitStone.h"
 
 @implementation Database
 
+// following are part of the DataModel handled by Core Data
 @dynamic indexInArray;
+@dynamic isRunningCode;
 @dynamic lastStartDate;
 @dynamic name;
+@dynamic netLDI;
 @dynamic spc_mb;
 @dynamic version;
 
-- (BOOL)canEditVersion;
+
+- (void)archiveExistingLogs;
 {
-	return nil == lastStartDate;
+	NSError  *error = nil;
+	NSString *path = [NSString stringWithFormat:@"%@/log", [self directory]];
+	NSArray  *baseList = [[self name] componentsSeparatedByString:@"_"];
+	NSUInteger baseListCount = [baseList count];
+	
+	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:path];
+	NSString *file;
+	while (file = [dirEnum nextObject]) {
+		NSArray *thisList = [file componentsSeparatedByString:@"_"];
+		int j = -1;
+		for (int i = 0; i == j + 1 && i < [thisList count] && i < baseListCount; ++i) {
+			if (NSOrderedSame == [[baseList objectAtIndex:i] compare:[thisList objectAtIndex:i]]) {
+				j = i;
+			}
+		}
+		if (j + 1 == baseListCount) {
+			NSString *target = [NSString stringWithFormat:@"%@/archive/%@", path, file];
+			[fileManager removeItemAtPath:target error:nil];
+			if (![fileManager 
+				  moveItemAtPath:[NSString stringWithFormat:@"%@/%@", path, file]
+				  toPath:target
+				  error:&error]) {
+				AppError(@"Unable to move %@/%@ because %@", path, file, [error description]);
+			}
+		}
+	}
 }
 
 - (BOOL)canInitialize;		// bound to Initialize buttons on MainMenu
 {
-	return [self isVersionDefined];
-}
-
-- (BOOL)canRestore;
-{
-	return [self isVersionDefined] && NO;
+	return [self canStart];
 }
 
 - (BOOL)canStart;
 {
-	return [self isVersionDefined];
+	return [self isVersionDefined] && ![self isRunning];
 }
 
-- (BOOL)canStop;
-{
-	return YES;
-}
-
-- (BOOL)createConfigFile;
+- (void)createConfigFile;
 {
 	NSString *directory = [self directory];
 	NSString *path = [NSString stringWithFormat:@"%@/conf/system.conf", directory];
@@ -56,17 +78,21 @@
 	[string appendString: @"STN_TRAN_LOG_SIZES = 100, 100;\n"];
 	[string appendString: @"KEYFILE = \"$GEMSTONE/seaside/etc/gemstone.key\";\n"];
 	[string appendFormat: @"SHR_PAGE_CACHE_SIZE_KB = %lu;\n", [self spc_kb]];
-	return [fileManager 
+	if (![fileManager 
 			createFileAtPath:path 
 			contents:[string dataUsingEncoding:NSUTF8StringEncoding] 
-			attributes:nil];
+			attributes:nil]) {
+		AppError(@"Unable to create config file at %@", path);
+	};
 }
 
 - (void)createDirectories;
 {
 	[self createDirectory:@"conf"];
 	[self createDirectory:@"data"];
-	[self createDirectory:@"logs"];
+	[self createDirectory:@"data/archive"];
+	[self createDirectory:@"log"];
+	[self createDirectory:@"log/archive"];
 	[self createDirectory:@"stat"];
 	[self createLocksDirectory];
 }
@@ -152,7 +178,6 @@
 				AppError(@"Unable to remove %@ because %@", path, [error description]);
 			}
 		}
-		
 	}
 }
 
@@ -202,23 +227,23 @@
 			AppError(@"unable to delete %@ because %@", target, [error description]);
 		}
 	}
+	[[NSApp delegate] startTaskProgressSheetAndAllowCancel:NO];
+	[[NSNotificationCenter defaultCenter] postNotificationName:kTaskProgress object:@"Copying extent . . ."];
 	[self deleteTransactionLogs];
 	NSString *source = [NSString stringWithFormat:@"%@/bin/%@", [self gemstone], aString];
-	if ([fileManager copyItemAtPath:source toPath:target error:&error]) {
-		NSDictionary *attributes = [NSDictionary 
-									dictionaryWithObject:[NSNumber numberWithInt:0600] 
-									forKey:NSFilePosixPermissions];
-		BOOL success = [fileManager
-		 setAttributes:attributes
-		 ofItemAtPath:target
-		 error:&error];
-		if (success) {
-			lastStartDate = nil;
-			return;
-		}
+	BOOL success = [fileManager copyItemAtPath:source toPath:target error:&error];
+	if (!success) {
+		AppError(@"copy from %@ to %@ failed because %@!", source, target, [error description]);
+	}
+	NSDictionary *attributes = [NSDictionary 
+								dictionaryWithObject:[NSNumber numberWithInt:0600] 
+								forKey:NSFilePosixPermissions];
+	success = [fileManager setAttributes:attributes ofItemAtPath:target error:&error];
+	if (!success) {
 		AppError(@"Unable to change permissions of %@ because %@", target, [error description]);
 	}
-	AppError(@"copy from %@ to %@ failed because %@!", source, target, [error description]);
+	lastStartDate = nil;
+	[[NSApp delegate] taskFinished];
 }
 
 - (void)installGlassExtent;
@@ -226,27 +251,77 @@
 	[self installExtent:@"extent0.seaside.dbf"];
 }
 
+- (BOOL)isRunning;
+{
+	return [isRunningCode boolValue];
+}
+
+- (NSString *)isRunningString;
+{
+	return [self isRunning] ? @"yes" : @"no";
+}
+
 - (BOOL)isVersionDefined;
 {
 	return 0 < [version length];
 }
 
-- (NSString *)name;
+- (NSArray *)logFiles;
 {
-	[self identifier];
-	if (![name length]) return nil;
-	return name;
+	NSMutableArray *list = [NSMutableArray array];
+	NSString *path = [NSString stringWithFormat:@"%@/log", [self directory]];
+	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:path];
+	NSString *file;
+	while (file = [dirEnum nextObject]) {
+		if (1 < [[file pathComponents] count]) {
+			[dirEnum skipDescendents];
+			continue;
+		}
+		if (NSOrderedSame == [@".log" compare:[file substringFromIndex:[file length]-4]]) {
+			NSError *error = nil;
+			NSString *fullPath = [NSString stringWithFormat:@"%@/%@", path, file];
+			NSDictionary *dict = [fileManager attributesOfItemAtPath:fullPath error:&error];
+			if (error) {
+				AppError(@"Unable to obtain attributes of %@ because %@", fullPath, [error description]);
+			}
+			NSMutableDictionary *attributes = [NSMutableDictionary dictionaryWithDictionary:dict];
+			[attributes setValue:file forKey:@"name"];
+			[attributes setValue:fullPath forKey:@"path"];
+			[attributes setValue:name forKey:@"stone"];
+			[list addObject:[LogFile logFileFromDictionary:attributes]];
+		}
+	}
+	return list;
 }
 
-- (NSString *)nameOrDefault;
+- (NSString *)name;
 {
-	if (![name length]) return @"gs64stone";
-	return name;
+	if ([name length]) return name;
+	return [NSString stringWithFormat:@"gs64stone%@", [self identifier]];
+}
+
+- (NSString *)netLDI;
+{
+	if ([netLDI length]) return netLDI;
+	return [NSString stringWithFormat:@"netldi%@", [self identifier]];
+}
+
+- (void)open;
+{
+	[[NSWorkspace sharedWorkspace] openFile:[self directory]];
 }
 
 - (void)restore;
 {
 	NSLog(@"restore");
+}
+
+- (void)setIsRunning:(BOOL)aBool;
+{
+	isRunningCode = [NSNumber numberWithBool:aBool];
+	if (aBool) {
+		lastStartDate = [NSDate date];
+	}
 }
 
 - (void)setVersion:(NSString *)aString;
@@ -270,7 +345,8 @@
 
 - (void)start;
 {
-	if (![self createConfigFile]) return;
+	[self createConfigFile];
+	[self archiveExistingLogs];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kDatabaseStartRequest object:self];
 }
 

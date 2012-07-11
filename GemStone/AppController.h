@@ -16,6 +16,7 @@
 	IBOutlet NSButton				*authenticateButton;
 	IBOutlet NSTextField			*lastUpdateDateField;
 	IBOutlet NSArrayController		*databaseListController;
+	IBOutlet NSArrayController		*logFileListController;
 	IBOutlet NSArrayController		*loginListController;
 	IBOutlet NSButton				*removeButton;
 	IBOutlet NSArrayController		*versionListController;
@@ -33,8 +34,12 @@
 
 - (IBAction)cancelTask:(id)sender;
 - (IBAction)installHelperTool:(id)sender;
+- (void)openDirectory;
+- (void)openLogFile;
 - (IBAction)removeDatabase:(id)sender;
 - (IBAction)removeHelperTool:(id)sender;
+- (void)startTaskProgressSheetAndAllowCancel:(BOOL)allowCancel;
+- (void)taskFinished;
 - (IBAction)updateVersionList:(id)sender;
 - (IBAction)unzipRequest:(id)sender;
 

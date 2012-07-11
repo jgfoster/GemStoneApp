@@ -26,6 +26,7 @@
 - (void)doneWithError:(int)statusCode;
 - (void)errorOutputString:(NSString *)message;
 - (void)progress:(NSString *)aString;
+- (void)run;
 - (void)start;
 - (void)verifyNoTask;
 

@@ -13,10 +13,16 @@
 - (NSArray *)arguments;
 { 
 	return [NSArray arrayWithObjects: 
-			[database nameOrDefault],
+			[database name],
 			@"DataCurator",
 			@"swordfish",
 			nil];
+}
+
+- (void)done;
+{
+	[database setIsRunning:NO];
+	[super done];
 }
 
 - (NSString *)launchPath;

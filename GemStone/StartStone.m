@@ -13,8 +13,14 @@
 - (NSArray *)arguments;
 { 
 	return [NSArray arrayWithObjects: 
-			[database nameOrDefault],
+			[database name],
 			nil];
+}
+
+- (void)done;
+{
+	[database setIsRunning:YES];
+	[super done];
 }
 
 - (NSString *)launchPath;

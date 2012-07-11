@@ -13,6 +13,6 @@
 	Database		*database;
 }
 
-- (void)setDatabase:(Database *)database;
+@property (nonatomic, retain) Database *database;
 
 @end

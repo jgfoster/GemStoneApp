@@ -113,6 +113,20 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	[[NSNotificationCenter defaultCenter] postNotificationName:kTaskProgress object:aString];
 }
 
+- (void)run;
+{
+	[self start];
+	[task waitUntilExit];
+	// give a bit of time for output notifications
+	for (int i = 1; doneCount < 2 && i <= 100; ++i) {
+		[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.001 * i]];
+	}
+	// force things to finish without all the output
+	while (doneCount < 2) {
+		[self mightBeDone];
+	}
+}
+
 - (void)standardOutput:(NSNotification *)inNotification;
 {
 	if (!task) return;

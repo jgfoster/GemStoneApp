@@ -11,6 +11,8 @@
 
 @implementation DatabaseTask
 
+@synthesize database;
+
 - (NSString *)currentDirectoryPath;
 {
 	return [database directory];
@@ -24,8 +26,10 @@
 {
 	NSString *directory = [database directory];
 	NSString *config    = [NSString stringWithFormat:@"%@/conf/system.conf", directory];
-	NSString *stoneLog  = [NSString stringWithFormat:@"\"%@/logs/%@.log\"", directory, [database nameOrDefault]];
-	NSString *nrsString = [NSString stringWithFormat:@"#dir:%@#log:%@/logs/%%N_%%P.log", directory, directory];
+	NSString *stoneLog  = [NSString stringWithFormat:@"\"%@/log/%@.log\"", directory, [database name]];
+	NSString *nrsString = [NSString stringWithFormat:@"#netldi:%@#dir:%@#log:%@/log/%%N_%%P.log", 
+						   [database netLDI], directory, directory];
+	nrsString = [nrsString stringByReplacingOccurrencesOfString:@" " withString:@"^ "];
 	NSMutableDictionary *environment = [super environment];
 	[environment setValue:[database gemstone] forKey:@"GEMSTONE"];
 	[environment setValue:config    forKey:@"GEMSTONE_EXE_CONF"];
@@ -40,11 +44,6 @@
 - (void)errorOutputString:(NSString *)aString { 
 	[self progress:aString];
 	[super errorOutputString:aString];
-}
-
-- (void)setDatabase:(Database *)aDatabase;
-{
-	database = aDatabase;
 }
 
 @end

@@ -13,8 +13,11 @@
 #import "DownloadVersion.h"
 #import "DownloadVersionList.h"
 #import "ImportZippedVersion.h"
+#import "LogFile.h"
 #import "Login.h"
+#import "StartNetLDI.h"
 #import "StartStone.h"
+#import "StopNetLDI.h"
 #import "StopStone.h"
 #import "Utilities.h"
 #import "Version.h"
@@ -67,8 +70,27 @@
 	 selector:@selector(databaseStopRequest:)
 	 name:kDatabaseStopRequest
 	 object:nil];
-	
+	[databaseListController addObserver:self
+							 forKeyPath:@"selection"
+								options:(NSKeyValueObservingOptionNew)
+								context:NULL];
+
 	[taskProgressText setFont:[NSFont fontWithName:@"Monaco" size:9]];
+}
+
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender;
+{
+	for (id database in [databaseListController arrangedObjects]) {
+		if ([database isRunning]) {
+			NSAlert *alert = [[NSAlert alloc] init];
+			[alert setMessageText:@"Database(s) are running!"];
+			[alert setInformativeText:@"Please stop all databases before quitting application!"];
+			[alert addButtonWithTitle:@"Dismiss"];
+			[alert runModal];
+			return NSTerminateCancel;
+		}
+	}
+	return NSTerminateNow;
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification;
@@ -124,10 +146,28 @@
 	[alert runModal];
 }
 
-- (void)databaseStartDone:(NSNotification *)notification;
+- (void)databaseStartNetLdiDone:(NSNotification *)notification;
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
+	[self updateDatabaseList];
 	[self taskFinishedAfterDelay:0.5];
+	[self performSelector:@selector(updateDatabaseList) withObject:nil afterDelay:1.0];
+}
+
+- (void)databaseStartStoneDone:(NSNotification *)notification;
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
+	StartStone *startStoneTask = (StartStone *) task;
+	Database *database = [startStoneTask database];
+	StartNetLDI *startNetLdiTask = [StartNetLDI new];
+	task = startNetLdiTask;
+	[startNetLdiTask setDatabase:database];
+	[[NSNotificationCenter defaultCenter]
+	 addObserver:self 
+	 selector:@selector(databaseStartNetLdiDone:) 
+	 name:kTaskDone 
+	 object:task];
+	[task start];
 }
 
 - (void)databaseStartRequest:(NSNotification *)notification;
@@ -138,17 +178,34 @@
 	[myTask setDatabase:[notification object]];
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self 
-	 selector:@selector(databaseStartDone:) 
+	 selector:@selector(databaseStartStoneDone:) 
 	 name:kTaskDone 
 	 object:task];
 	[self startTaskProgressSheetAndAllowCancel:YES];
 	[task start];
 }
 
+- (void)databaseStopNetLdiDone:(NSNotification *)notification;
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
+	[self updateDatabaseList];
+	[self taskFinishedAfterDelay:0.5];
+}
+
 - (void)databaseStopDone:(NSNotification *)notification;
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
-	[self taskFinishedAfterDelay:0.5];
+	StopStone *stopStoneTask = (StopStone *) task;
+	Database *database = [stopStoneTask database];
+	StopNetLDI *stopNetLdiTask = [StopNetLDI new];
+	task = stopNetLdiTask;
+	[stopNetLdiTask setDatabase:database];
+	[[NSNotificationCenter defaultCenter]
+	 addObserver:self 
+	 selector:@selector(databaseStopNetLdiDone:) 
+	 name:kTaskDone 
+	 object:task];
+	[task start];
 }
 
 - (void)databaseStopRequest:(NSNotification *)notification;
@@ -164,6 +221,7 @@
 	 object:task];
 	[self startTaskProgressSheetAndAllowCancel:YES];
 	[task start];
+	[taskProgressText insertText:@"Initiating database shutdown . . .\n\n"];
 }
 
 - (void)downloadDone:(NSNotification *)notification;
@@ -285,6 +343,30 @@
 	return moc;
 }
 
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context;
+{
+	if (object == databaseListController) {
+		NSArray *list = [databaseListController selectedObjects];
+		Database *database = nil;
+		if (0 < [list count]) {
+			database = [list objectAtIndex:0];
+		}
+		[self selectedDatabase:database];
+		return;
+	}
+	NSLog(@"keyPath = %@; object = %@; change = %@; context = %@", keyPath, object, change, context);
+}
+
+- (void)openDirectory;
+{
+	[[[databaseListController selectedObjects] objectAtIndex:0] open];
+}
+
+- (void)openLogFile;
+{
+	[[[logFileListController selectedObjects] objectAtIndex:0] open];
+}
+
 //	NSOpenPanelDelegate method for file import
 - (BOOL)panel:(id)sender shouldEnableURL:(NSURL *)url;
 {
@@ -355,6 +437,12 @@
 	[lastUpdateDateField setObjectValue:setup.versionsDownloadDate];
 }
 
+- (void)selectedDatabase:(Database *)aDatabase;
+{
+	[logFileListController removeObjects:[logFileListController arrangedObjects]];
+	[logFileListController addObjects:[aDatabase logFiles]];
+}
+
 - (void)setupExceptionHandler;
 {
 	NSExceptionHandler *handler = [NSExceptionHandler defaultExceptionHandler];
@@ -419,6 +507,7 @@
 		}
 		[taskProgressText insertText:nextLine];
 	}
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
 }
 
 - (void)unzipDone:(NSNotification *)notification;
@@ -452,6 +541,15 @@
     if (result != NSOKButton) return;
 	[self startTaskProgressSheetAndAllowCancel:NO];
 	[self unzipPath:[[[op URLs] objectAtIndex:0] path]];
+}
+
+- (void)updateDatabaseList;
+{
+	NSUInteger index = [databaseListController selectionIndex];
+	[databaseListController setAvoidsEmptySelection:NO];
+	[databaseListController setSelectedObjects:[NSArray new]];
+	[databaseListController setSelectionIndex:index];
+	[databaseListController setAvoidsEmptySelection:YES];
 }
 
 - (IBAction)updateVersionList:(id)sender;
@@ -496,8 +594,8 @@
 			[versionListController insertObject:version atArrangedObjectIndex:0];
 		}
 	}
-	[self refreshInstalledVersionsList];
 	setup.versionsDownloadDate = [NSDate date];
+	[self refreshInstalledVersionsList];
 	[self taskFinishedAfterDelay:0.5];
 }
 
