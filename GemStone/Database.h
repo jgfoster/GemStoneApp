@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
+#define kDababaseInfoChanged @"databaseInfoChanged"
 #define kDatabaseStartRequest @"databaseStartRequest"
 #define kDatabaseStopRequest @"databaseStopRequest"
 
@@ -32,10 +33,16 @@
 @property (nonatomic, retain)	NSNumber *spc_mb;
 @property (nonatomic, retain)	NSString *version;
 
+- (void)archiveCurrentLogFiles;
+- (void)archiveCurrentTransactionLogs;
 - (BOOL)canInitialize;
 - (BOOL)canStart;
 - (NSString *)directory;
 - (void)deleteAll;
+- (void)deleteOldLogFiles;
+- (void)deleteOldTranLogs;
+- (NSString *)descriptionOfOldLogFiles;
+- (NSString *)descriptionOfOldTranLogs;
 - (NSString *)gemstone;
 - (void)installBaseExtent;
 - (void)installGlassExtent;

@@ -15,6 +15,7 @@
 - (void)setupGlobals;
 {
 	fileManager = [NSFileManager defaultManager];
+	notificationCenter = [NSNotificationCenter defaultCenter];
 	[self setupBasePath];
 }
 

@@ -58,7 +58,7 @@
 		}
 	}
 	if ([fileManager removeItemAtPath:[self productPath] error:&error]) {
-		[[NSNotificationCenter defaultCenter] postNotificationName:kRemoveVersionDone object:self];
+		[notificationCenter postNotificationName:kRemoveVersionDone object:self];
 	} else {
 		AppError(@"Unable to remove %@ because %@", [self productPath], [error description]);
 	}
@@ -72,9 +72,9 @@
 		return;
 	}
 	if ([aNumber boolValue]) {
-		[[NSNotificationCenter defaultCenter] postNotificationName:kDownloadRequest object:self];
+		[notificationCenter postNotificationName:kDownloadRequest object:self];
 	} else {
-		[[NSNotificationCenter defaultCenter] postNotificationName:kRemoveRequest object:self];
+		[notificationCenter postNotificationName:kRemoveRequest object:self];
 	}
 }
 

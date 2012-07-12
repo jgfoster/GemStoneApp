@@ -12,11 +12,13 @@
 									format:[NSString stringWithFormat:__VA_ARGS__]]
 
 #ifdef __Utilities__
-			NSFileManager	*fileManager = nil;
-			NSString		*basePath = nil;
+			NSFileManager			*fileManager = nil;
+			NSString				*basePath = nil;
+			NSNotificationCenter	*notificationCenter = nil;
 #else
-	extern	NSFileManager	*fileManager;
-	extern	NSString		*basePath;
+	extern	NSFileManager			*fileManager;
+	extern	NSString				*basePath;
+	extern  NSNotificationCenter	*notificationCenter;
 #endif
 
 @interface Utilities : NSObject

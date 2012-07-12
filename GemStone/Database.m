@@ -12,6 +12,7 @@
 #import "LogFile.h"
 #import "Setup.h"
 #import "Utilities.h"
+#import "Version.h"
 #import "WaitStone.h"
 
 @implementation Database
@@ -26,7 +27,7 @@
 @dynamic version;
 
 
-- (void)archiveExistingLogs;
+- (void)archiveCurrentLogFiles;
 {
 	NSError  *error = nil;
 	NSString *path = [NSString stringWithFormat:@"%@/log", [self directory]];
@@ -51,6 +52,26 @@
 				  toPath:target
 				  error:&error]) {
 				AppError(@"Unable to move %@/%@ because %@", path, file, [error description]);
+			}
+		}
+	}
+}
+
+- (void)archiveCurrentTransactionLogs;
+{
+	NSError *error = nil;
+	NSString *dataPath = [NSString stringWithFormat:@"%@/data", [self directory]];
+	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:dataPath];
+	NSString *file;
+	while (file = [dirEnum nextObject]) {
+		NSRange first = [file rangeOfString:@"tranlog"];
+		NSRange last  = [file rangeOfString:@".dbf"];
+		if (first.location == 0 && first.length == 7 && last.location == [file length] - 4) {
+			NSString *source = [NSString stringWithFormat:@"%@/%@", dataPath, file];
+			NSString *target = [NSString stringWithFormat:@"%@/archive/%@", dataPath, file];
+			[fileManager removeItemAtPath:target error:nil];
+			if (![fileManager moveItemAtPath:source toPath:target error:&error]) {
+				AppError(@"Unable to move %@ because %@", source, [error description]);
 			}
 		}
 	}
@@ -163,22 +184,63 @@
 	AppError(@"unable to delete %@ because %@", path, [error description]);
 }
 
-- (void)deleteTransactionLogs;
+- (void)deleteFilesIn:(NSString *)aString;
 {
-	NSError *error = nil;
-	NSString *dataPath = [NSString stringWithFormat:@"%@/data", [self directory]];
-	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:dataPath];
+	NSString *path = [NSString stringWithFormat:@"%@/%@", [self directory], aString];
+	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:path];
 	NSString *file;
 	while (file = [dirEnum nextObject]) {
-		NSRange first = [file rangeOfString:@"tranlog"];
-		NSRange last  = [file rangeOfString:@".dbf"];
-		if (first.location == 0 && first.length == 7 && last.location == [file length] - 4) {
-			NSString *path = [[dataPath stringByAppendingString:@"/"]stringByAppendingString:file];
-			if (![fileManager removeItemAtPath:path error:&error]) {
-				AppError(@"Unable to remove %@ because %@", path, [error description]);
-			}
-		}
+		NSError  *error = nil;
+		NSString *fullPath = [NSString stringWithFormat:@"%@/%@", path, file];
+		if (![fileManager removeItemAtPath:fullPath error:&error]) {
+			AppError(@"unable to delete %@ because %@", fullPath, [error description]);
+		};
 	}
+	[notificationCenter postNotificationName:kDababaseInfoChanged object:nil];
+}
+
+- (void)deleteOldLogFiles;
+{
+	[self deleteFilesIn:@"log/archive"];
+}
+
+- (void)deleteOldTranLogs;
+{
+	[self deleteFilesIn:@"data/archive"];
+}
+
+- (NSString *)descriptionOfFilesIn:(NSString *)aString;
+{
+	NSString *path = [NSString stringWithFormat:@"%@/%@/archive", [self directory], aString];
+	NSUInteger count = 0;
+	NSUInteger size = 0;
+	
+	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:path];
+	NSString *file;
+	while (file = [dirEnum nextObject]) {
+		NSError  *error = nil;
+		NSString *fullPath = [NSString stringWithFormat:@"%@/%@", path, file];
+		NSDictionary *attributes = [fileManager attributesOfItemAtPath:fullPath error:&error];
+		if (error) {
+			AppError(@"Unable to obtain attributes of %@ because %@", fullPath, [error description]);
+		}
+		count = count + 1;
+		size = size + [[attributes valueForKey:NSFileSize] unsignedLongValue];
+	}
+	NSUInteger kbSize = size / 1024;
+	NSUInteger mbSize = kbSize / 1024;
+	return 9 < mbSize ?
+		[NSString stringWithFormat:@"%lu files, %lu MB", count, mbSize] :
+		[NSString stringWithFormat:@"%lu files, %lu KB", count, kbSize];
+}
+
+- (NSString *)descriptionOfOldLogFiles;
+{
+	return [self descriptionOfFilesIn:@"log"];
+}
+- (NSString *)descriptionOfOldTranLogs;
+{
+	return [self descriptionOfFilesIn:@"data"];
 }
 
 - (NSString *)directory;
@@ -197,6 +259,15 @@
 	if (![identifier intValue]) {
 		identifier = [[[NSApp delegate] setup] newDatabaseIdentifier];
 		[self createDirectories];
+		NSArray *versions = [[NSApp delegate] versionList];
+		Version *aVersion = [versions objectAtIndex:0];
+		version = aVersion.name;
+		for (Version *each in versions) {
+			if ([version compare:each.name]== NSOrderedAscending) {
+				version = each.name;
+			}
+		}
+		[self installBaseExtent];
 	}
 	return identifier;
 }
@@ -228,8 +299,8 @@
 		}
 	}
 	[[NSApp delegate] startTaskProgressSheetAndAllowCancel:NO];
-	[[NSNotificationCenter defaultCenter] postNotificationName:kTaskProgress object:@"Copying extent . . ."];
-	[self deleteTransactionLogs];
+	[notificationCenter postNotificationName:kTaskProgress object:@"Copying extent . . ."];
+	[self archiveCurrentTransactionLogs];
 	NSString *source = [NSString stringWithFormat:@"%@/bin/%@", [self gemstone], aString];
 	BOOL success = [fileManager copyItemAtPath:source toPath:target error:&error];
 	if (!success) {
@@ -287,7 +358,7 @@
 			NSMutableDictionary *attributes = [NSMutableDictionary dictionaryWithDictionary:dict];
 			[attributes setValue:file forKey:@"name"];
 			[attributes setValue:fullPath forKey:@"path"];
-			[attributes setValue:name forKey:@"stone"];
+			[attributes setValue:[self name] forKey:@"stone"];
 			[list addObject:[LogFile logFileFromDictionary:attributes]];
 		}
 	}
@@ -345,14 +416,15 @@
 
 - (void)start;
 {
+	//
 	[self createConfigFile];
-	[self archiveExistingLogs];
-	[[NSNotificationCenter defaultCenter] postNotificationName:kDatabaseStartRequest object:self];
+	[self archiveCurrentLogFiles];
+	[notificationCenter postNotificationName:kDatabaseStartRequest object:self];
 }
 
 - (void)stop;
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:kDatabaseStopRequest object:self];
+	[notificationCenter postNotificationName:kDatabaseStopRequest object:self];
 }
 
 - (NSString *)version;

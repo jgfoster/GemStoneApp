@@ -9,8 +9,25 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
+#import "Database.h"
 
-@interface Login : NSManagedObject
+@interface Login : NSManagedObject {
+	NSString * name;
+	NSString * version;
+	NSString * stoneHost;
+	NSString * stoneName;
+	NSNumber * gemTypeCode;	// 0 = RPC, 1 = linked
+	NSString * gemHost;
+	NSString * gemNet;
+	NSString * gemTask;
+	NSNumber * osTypeCode;	// 0 = guest, 1 = member
+	NSString * osUser;
+	NSString * osPassword;
+	NSString * gsUser;
+	NSString * gsPassword;
+	NSString * developer;
+	NSNumber * indexInArray;  
+}
 
 @property (nonatomic, retain) NSString * name;
 @property (nonatomic, retain) NSString * version;
@@ -28,6 +45,7 @@
 @property (nonatomic, retain) NSString * developer;
 @property (nonatomic, retain) NSNumber * indexInArray;  
 
+- (void)initializeForDatabase:(Database *)aDatabase;
 - (BOOL)isRpcGem;
 - (BOOL)isOsGuest;
 - (void)login;

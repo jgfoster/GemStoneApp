@@ -19,7 +19,7 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 
 - (void)cancelTask;
 {
-	[[NSNotificationCenter defaultCenter] 
+	[notificationCenter
 	 removeObserver:self 
 	 name:NSFileHandleReadCompletionNotification 
 	 object:nil];
@@ -44,7 +44,7 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 
 - (void)done;
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:kTaskDone object:self];
+	[notificationCenter postNotificationName:kTaskDone object:self];
 }
 
 - (void)doneWithError:(int)statusCode;
@@ -59,7 +59,7 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 									   notificationWithName:kTaskError
 									   object:self
 									   userInfo:userInfo];
-	[[NSNotificationCenter defaultCenter] postNotification:outNotification];
+	[notificationCenter postNotification:outNotification];
 }
 
 - (NSMutableDictionary *)environment;
@@ -94,7 +94,7 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 - (void)mightBeDone;
 {
 	if (++doneCount < 2) return;	//	look for stderr and stdout notifications
-	[[NSNotificationCenter defaultCenter] 
+	[notificationCenter
 	 removeObserver:self 
 	 name:NSFileHandleReadCompletionNotification 
 	 object:nil];
@@ -110,7 +110,7 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 
 - (void)progress:(NSString *)aString;
 {
-	[[NSNotificationCenter defaultCenter] postNotificationName:kTaskProgress object:aString];
+	[notificationCenter postNotificationName:kTaskProgress object:aString];
 }
 
 - (void)run;
@@ -152,14 +152,14 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	NSFileHandle *taskOut = [[task standardOutput] fileHandleForReading];
 	NSFileHandle *taskErr = [[task standardError]  fileHandleForReading];
 	
-	[[NSNotificationCenter defaultCenter] 
+	[notificationCenter
 	 addObserver:self 
 	 selector:@selector(errorOutput:)
 	 name:NSFileHandleReadCompletionNotification
 	 object:taskErr];
 	[taskErr readInBackgroundAndNotify];
 	
-	[[NSNotificationCenter defaultCenter] 
+	[notificationCenter
 	 addObserver:self 
 	 selector:@selector(standardOutput:) 
 	 name:NSFileHandleReadCompletionNotification

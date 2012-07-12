@@ -21,27 +21,32 @@
 	IBOutlet NSButton				*removeButton;
 	IBOutlet NSArrayController		*versionListController;
 	IBOutlet NSArrayController		*versionPopupController;
+	IBOutlet NSTextField			*oldLogFilesText;
+	IBOutlet NSButton				*deleteLogFilesButton;
+	IBOutlet NSTextField			*oldTranLogsText;
+	IBOutlet NSButton				*deleteTranLogsButton;
 
 	IBOutlet NSPanel				*taskProgressPanel;
 	IBOutlet NSTextView				*taskProgressText;
 	IBOutlet NSProgressIndicator	*taskProgressIndicator;
 	IBOutlet NSButton				*taskCancelButton;
 
-	Helper		*helper;
-	Task 		*task;		// to protect it from being garbage collected!
-	Setup		*setup;
+	Helper					*helper;
+	Task					*task;		// to protect it from being garbage collected!
+	Setup					*setup;
+	NSMutableDictionary		*statmonitors;
 }
 
 - (IBAction)cancelTask:(id)sender;
+- (IBAction)defaultLogin:(id)sender;
 - (IBAction)installHelperTool:(id)sender;
-- (void)openDirectory;
-- (void)openLogFile;
 - (IBAction)removeDatabase:(id)sender;
 - (IBAction)removeHelperTool:(id)sender;
 - (void)startTaskProgressSheetAndAllowCancel:(BOOL)allowCancel;
 - (void)taskFinished;
-- (IBAction)updateVersionList:(id)sender;
 - (IBAction)unzipRequest:(id)sender;
+- (IBAction)updateVersionList:(id)sender;
+- (NSArray *)versionList;
 
 @property (readonly) Setup *setup;
 

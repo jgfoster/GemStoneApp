@@ -17,6 +17,7 @@
 #import "Login.h"
 #import "StartNetLDI.h"
 #import "StartStone.h"
+#import "Statmonitor.h"
 #import "StopNetLDI.h"
 #import "StopStone.h"
 #import "Utilities.h"
@@ -40,36 +41,16 @@
 	[self loadRequest:@"Version" toController:versionListController];
 	[self refreshInstalledVersionsList];
 	
-	[[NSNotificationCenter defaultCenter]
-	 addObserver:self 
-	 selector:@selector(taskError:) 
-	 name:kTaskError 
-	 object:nil];
-	[[NSNotificationCenter defaultCenter]
-	 addObserver:self 
-	 selector:@selector(taskProgress:) 
-	 name:kTaskProgress
-	 object:nil];
-	[[NSNotificationCenter defaultCenter]
-	 addObserver:self
-	 selector:@selector(downloadRequest:)
-	 name:kDownloadRequest
-	 object:nil];
-	[[NSNotificationCenter defaultCenter]
-	 addObserver:self
-	 selector:@selector(removeRequest:)
-	 name:kRemoveRequest
-	 object:nil];
-	[[NSNotificationCenter defaultCenter]
-	 addObserver:self
-	 selector:@selector(databaseStartRequest:)
-	 name:kDatabaseStartRequest
-	 object:nil];
-	[[NSNotificationCenter defaultCenter]
-	 addObserver:self
-	 selector:@selector(databaseStopRequest:)
-	 name:kDatabaseStopRequest
-	 object:nil];
+#define NotifyMe(aString, aSymbol) \
+		[notificationCenter addObserver:self selector:@selector(aSymbol:) name:aString object:nil]
+	NotifyMe(kTaskError,				taskError);
+	NotifyMe(kTaskProgress,				taskProgress);
+	NotifyMe(kDownloadRequest,			downloadRequest);
+	NotifyMe(kRemoveRequest,			removeRequest);
+	NotifyMe(kDatabaseStartRequest,		databaseStartRequest);
+	NotifyMe(kDatabaseStopRequest,		databaseStopRequest);
+	NotifyMe(kDababaseInfoChanged,		updateDatabaseList);
+	
 	[databaseListController addObserver:self
 							 forKeyPath:@"selection"
 								options:(NSKeyValueObservingOptionNew)
@@ -148,21 +129,26 @@
 
 - (void)databaseStartNetLdiDone:(NSNotification *)notification;
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
-	[self updateDatabaseList];
+	[notificationCenter removeObserver:self name:nil object:task];
+	Database *database = [(DatabaseTask *) task database];
+	Statmonitor *monitor = [Statmonitor new];
+	[monitor setDatabase:database];
+	[monitor start];
+	NSString *key = [[database identifier] stringValue];
+	[statmonitors setValue:monitor forKey:key];
+	[self updateDatabaseList:nil];
 	[self taskFinishedAfterDelay:0.5];
-	[self performSelector:@selector(updateDatabaseList) withObject:nil afterDelay:1.0];
+	[self performSelector:@selector(updateDatabaseList:) withObject:nil afterDelay:1.0];
 }
 
 - (void)databaseStartStoneDone:(NSNotification *)notification;
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
-	StartStone *startStoneTask = (StartStone *) task;
-	Database *database = [startStoneTask database];
+	[notificationCenter removeObserver:self name:nil object:task];
+	Database *database = [(DatabaseTask *) task database];
 	StartNetLDI *startNetLdiTask = [StartNetLDI new];
 	task = startNetLdiTask;
 	[startNetLdiTask setDatabase:database];
-	[[NSNotificationCenter defaultCenter]
+	[notificationCenter
 	 addObserver:self 
 	 selector:@selector(databaseStartNetLdiDone:) 
 	 name:kTaskDone 
@@ -176,7 +162,7 @@
 	StartStone *myTask = [StartStone new];
 	task = myTask;
 	[myTask setDatabase:[notification object]];
-	[[NSNotificationCenter defaultCenter]
+	[notificationCenter
 	 addObserver:self 
 	 selector:@selector(databaseStartStoneDone:) 
 	 name:kTaskDone 
@@ -187,20 +173,23 @@
 
 - (void)databaseStopNetLdiDone:(NSNotification *)notification;
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
-	[self updateDatabaseList];
+	[notificationCenter removeObserver:self name:nil object:task];
+	Database *database = [(DatabaseTask *) task database];
+	[statmonitors setValue:nil forKey:[[database identifier] stringValue]];
+	[self updateDatabaseList:nil];
 	[self taskFinishedAfterDelay:0.5];
 }
 
-- (void)databaseStopDone:(NSNotification *)notification;
+- (void)databaseStopStoneDone:(NSNotification *)notification;
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
-	StopStone *stopStoneTask = (StopStone *) task;
-	Database *database = [stopStoneTask database];
+	[notificationCenter removeObserver:self name:nil object:task];
+	Database *database = [(DatabaseTask *) task database];
+	[database archiveCurrentLogFiles];
+	[database archiveCurrentTransactionLogs];
 	StopNetLDI *stopNetLdiTask = [StopNetLDI new];
 	task = stopNetLdiTask;
 	[stopNetLdiTask setDatabase:database];
-	[[NSNotificationCenter defaultCenter]
+	[notificationCenter
 	 addObserver:self 
 	 selector:@selector(databaseStopNetLdiDone:) 
 	 name:kTaskDone 
@@ -214,9 +203,9 @@
 	StopStone *myTask = [StopStone new];
 	task = myTask;
 	[myTask setDatabase:[notification object]];
-	[[NSNotificationCenter defaultCenter]
+	[notificationCenter
 	 addObserver:self 
-	 selector:@selector(databaseStopDone:) 
+	 selector:@selector(databaseStopStoneDone:) 
 	 name:kTaskDone 
 	 object:task];
 	[self startTaskProgressSheetAndAllowCancel:YES];
@@ -224,9 +213,22 @@
 	[taskProgressText insertText:@"Initiating database shutdown . . .\n\n"];
 }
 
+- (IBAction)defaultLogin:(id)sender;
+{
+	Database *database = [[databaseListController selectedObjects] objectAtIndex:0];
+	NSManagedObjectContext *moc = [self managedObjectContext];
+	NSManagedObjectModel *managedObjectModel = [[moc persistentStoreCoordinator] managedObjectModel];
+	NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Login"];
+	Login *login = [[Login alloc]
+					initWithEntity:entity
+					insertIntoManagedObjectContext:moc];
+	[login initializeForDatabase:database];
+	NSLog(@"login = %@", login);
+}
+
 - (void)downloadDone:(NSNotification *)notification;
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
+	[notificationCenter removeObserver:self name:nil object:task];
 	task = nil;	
 	[taskCancelButton setEnabled:NO];
 	[self unzipPath:[[notification object] zipFilePath]];
@@ -238,7 +240,7 @@
 	DownloadVersion *myTask = [DownloadVersion new];
 	task = myTask;
 	[myTask setVersion:[notification object]];
-	[[NSNotificationCenter defaultCenter]
+	[notificationCenter
 	 addObserver:self 
 	 selector:@selector(downloadDone:) 
 	 name:kTaskDone 
@@ -260,6 +262,7 @@
 	if (self = [super init]) {
 		[[Utilities new] setupGlobals];
 		[self setupExceptionHandler];
+		statmonitors = [NSMutableDictionary new];
 	}
 	return self;
 }
@@ -357,16 +360,6 @@
 	NSLog(@"keyPath = %@; object = %@; change = %@; context = %@", keyPath, object, change, context);
 }
 
-- (void)openDirectory;
-{
-	[[[databaseListController selectedObjects] objectAtIndex:0] open];
-}
-
-- (void)openLogFile;
-{
-	[[[logFileListController selectedObjects] objectAtIndex:0] open];
-}
-
 //	NSOpenPanelDelegate method for file import
 - (BOOL)panel:(id)sender shouldEnableURL:(NSURL *)url;
 {
@@ -409,7 +402,7 @@
 	Version *version = [notification object];
 	[self startTaskProgressSheetAndAllowCancel:NO];
 	[taskProgressText insertText:[@"Deleting version " stringByAppendingString:[version name]]];
-	[[NSNotificationCenter defaultCenter]
+	[notificationCenter
 	 addObserver:self 
 	 selector:@selector(removeVersionDone:) 
 	 name:kRemoveVersionDone 
@@ -419,7 +412,7 @@
 
 - (void)removeVersionDone:(NSNotification *)notification;
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:[notification object]];
+	[notificationCenter removeObserver:self name:nil object:[notification object]];
 	[self refreshInstalledVersionsList];	
 	[taskProgressText insertText:@" . . . Done!"];
 	[self taskFinishedAfterDelay:0.5];
@@ -440,7 +433,12 @@
 - (void)selectedDatabase:(Database *)aDatabase;
 {
 	[logFileListController removeObjects:[logFileListController arrangedObjects]];
+	[oldLogFilesText setStringValue:@""];
+	[oldTranLogsText setStringValue:@""];
+	if (aDatabase == nil) return;
 	[logFileListController addObjects:[aDatabase logFiles]];
+	[oldLogFilesText setStringValue:[aDatabase descriptionOfOldLogFiles]];
+	[oldTranLogsText setStringValue:[aDatabase descriptionOfOldTranLogs]];
 }
 
 - (void)setupExceptionHandler;
@@ -464,7 +462,7 @@
 
 - (void)taskError:(NSNotification *)notification;
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
+	[notificationCenter removeObserver:self name:nil object:task];
 	[self criticalAlert:@"Task Failed" details:[[notification userInfo] objectForKey:@"string"]];
 	[self taskFinishedAfterDelay:0.5];
 }
@@ -512,7 +510,7 @@
 
 - (void)unzipDone:(NSNotification *)notification;
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
+	[notificationCenter removeObserver:self name:nil object:task];
 	[self refreshInstalledVersionsList];	
 	[self taskFinishedAfterDelay:0.5];
 }
@@ -522,7 +520,7 @@
 	ImportZippedVersion *myTask = [ImportZippedVersion new];
 	task = myTask;
 	myTask.zipFilePath = path;
-	[[NSNotificationCenter defaultCenter]
+	[notificationCenter
 	 addObserver:self 
 	 selector:@selector(unzipDone:) 
 	 name:kTaskDone 
@@ -543,7 +541,7 @@
 	[self unzipPath:[[[op URLs] objectAtIndex:0] path]];
 }
 
-- (void)updateDatabaseList;
+- (void)updateDatabaseList:(id)sender;
 {
 	NSUInteger index = [databaseListController selectionIndex];
 	[databaseListController setAvoidsEmptySelection:NO];
@@ -556,7 +554,7 @@
 {
 	[self verifyNoTask];
 	task = [DownloadVersionList new];
-	[[NSNotificationCenter defaultCenter]
+	[notificationCenter
 	 addObserver:self 
 	 selector:@selector(updateVersionsDone:) 
 	 name:kTaskDone 
@@ -567,7 +565,7 @@
 
 - (void)updateVersionsDone:(NSNotification *)notification;
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:task];
+	[notificationCenter removeObserver:self name:nil object:task];
 	NSManagedObjectContext *moc = [self managedObjectContext];
 	NSManagedObjectModel *managedObjectModel = [[moc persistentStoreCoordinator] managedObjectModel];
 	NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Version"];
@@ -603,6 +601,11 @@
 {
 	if (!task) return;
 	AppError(@"Task should not be in progress!");
+}
+
+- (NSArray *)versionList;
+{
+	return [versionListController arrangedObjects];
 }
 
 @end
