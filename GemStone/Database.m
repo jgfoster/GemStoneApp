@@ -7,6 +7,7 @@
 //
 
 #import "AppController.h"
+#import "CopyDBF.h"
 #import "Database.h"
 #import "GSList.h"
 #import "LogFile.h"
@@ -75,16 +76,6 @@
 			}
 		}
 	}
-}
-
-- (BOOL)canInitialize;		// bound to Initialize buttons on MainMenu
-{
-	return [self canStart];
-}
-
-- (BOOL)canStart;
-{
-	return [self isVersionDefined] && ![self isRunning];
 }
 
 - (void)createConfigFile;
@@ -176,12 +167,29 @@
 	AppError(@"unable to link %@ to %@ because %@", localLink, alternate, [error description]);
 }
 
+- (NSArray *)dataFiles;
+{
+	NSString *path = [NSString stringWithFormat:@"%@/data", [self directory]];
+	NSError *error = nil;
+	NSArray *fullList = [fileManager contentsOfDirectoryAtPath:path error:&error];
+	if (!fullList) {
+		AppError(@"Unable to get contents of %@ because %@", path, [error description]);
+	}
+	NSMutableArray *list = [NSMutableArray arrayWithCapacity:[fullList count]];
+	for (NSString *each in fullList) {
+		if ([each compare:@"archive"] != NSOrderedSame) {
+			[list addObject:each];
+		}
+	}
+	return list;
+}
+
 - (void)deleteAll;
 {
 	NSString *path = [self directory];
 	NSError *error = nil;
 	if ([fileManager removeItemAtPath:path error:&error]) return;
-	AppError(@"unable to delete %@ because %@", path, [error description]);
+	AppError(@"Unable to delete %@ because %@", path, [error description]);
 }
 
 - (void)deleteFilesIn:(NSString *)aString;
@@ -259,17 +267,15 @@
 	if (![identifier intValue]) {
 		identifier = [[[NSApp delegate] setup] newDatabaseIdentifier];
 		[self createDirectories];
-		NSArray *versions = [[NSApp delegate] versionList];
-		Version *aVersion = [versions objectAtIndex:0];
-		version = aVersion.name;
-		for (Version *each in versions) {
-			if ([version compare:each.name]== NSOrderedAscending) {
-				version = each.name;
-			}
-		}
+		version = [[NSApp delegate] mostAdvancedVersion];
 		[self installBaseExtent];
 	}
 	return identifier;
+}
+
+- (NSString *)infoForDataFile:(NSString *)file;
+{
+	return [CopyDBF infoForFile:file in:self];
 }
 
 - (void)installBaseExtent;
@@ -315,6 +321,7 @@
 	}
 	lastStartDate = nil;
 	[[NSApp delegate] taskFinished];
+	[notificationCenter postNotificationName:kDababaseInfoChanged object:nil];
 }
 
 - (void)installGlassExtent;
@@ -330,11 +337,6 @@
 - (NSString *)isRunningString;
 {
 	return [self isRunning] ? @"yes" : @"no";
-}
-
-- (BOOL)isVersionDefined;
-{
-	return 0 < [version length];
 }
 
 - (NSArray *)logFiles;
@@ -400,6 +402,30 @@
 	if (version == aString) return;
 	version = aString;
 	[self installBaseExtent];
+}
+
+- (NSString *)sizeForDataFile:(NSString *)file;
+{
+	NSString *path = [NSString stringWithFormat:@"%@/data/%@", [self directory], file];
+	NSError *error = nil;
+	NSDictionary *attributes = [fileManager attributesOfItemAtPath:path error:&error];
+	if (error) {
+		AppError(@"Unable to obtain attributes of %@ because %@", path, [error description]);
+	}
+	NSUInteger size = [[attributes valueForKey:NSFileSize] unsignedLongValue];
+	NSString *units = @"bytes";
+	if (10 * 1024 * 1024 < size) {
+		size = size / 1024 / 1024;
+		units = @"MB";
+	} else if (10 * 1024 < size) {
+		size = size / 1024;
+		units = @"KB";
+	}
+	NSNumberFormatter *formatter = [NSNumberFormatter new];
+	[formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+	[formatter setGroupingSeparator: [[NSLocale currentLocale] objectForKey:NSLocaleGroupingSeparator]];
+	NSString *formatted = [formatter stringFromNumber:[NSNumber numberWithInteger:size]];
+	return [NSString stringWithFormat:@"%@ %@", formatted, units];
 }
 
 - (unsigned long)spc_kb;

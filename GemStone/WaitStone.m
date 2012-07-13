@@ -15,16 +15,14 @@
 
 + (BOOL)isStoneRunningForDatabase:(Database *)database;
 {
-	WaitStone *task = [self new];
-	[task setDatabase:database];
+	WaitStone *task = [self forDatabase:database];
 	[task run];
 	return [task isReady];
 }
 
 + (BOOL)isNetLdiRunningForDatabase:(Database *)database;
 {
-	WaitStone *task = [self new];
-	[task setDatabase:database];
+	WaitStone *task = [self forDatabase:database];
 	[task setName:[database netLDI]];
 	[task run];
 	return [task isReady];

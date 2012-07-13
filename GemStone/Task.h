@@ -21,9 +21,9 @@
 
 - (void)cancelTask;
 - (NSString *)currentDirectoryPath;
-- (NSMutableDictionary *)environment;
 - (void)done;
 - (void)doneWithError:(int)statusCode;
+- (NSMutableDictionary *)environment;
 - (void)errorOutputString:(NSString *)message;
 - (void)progress:(NSString *)aString;
 - (void)run;

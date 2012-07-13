@@ -27,11 +27,6 @@
 			nil];
 }
 
-- (void)done;
-{
-	[super done];
-}
-
 - (NSString *)launchPath;
 { 
 	return [NSString stringWithFormat:@"%@/bin/statmonitor", [database gemstone]];

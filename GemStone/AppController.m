@@ -12,6 +12,7 @@
 #import "Database.h"
 #import "DownloadVersion.h"
 #import "DownloadVersionList.h"
+#import "GSList.h"
 #import "ImportZippedVersion.h"
 #import "LogFile.h"
 #import "Login.h"
@@ -54,9 +55,11 @@
 	[databaseListController addObserver:self
 							 forKeyPath:@"selection"
 								options:(NSKeyValueObservingOptionNew)
-								context:NULL];
+								context:nil];
 
 	[taskProgressText setFont:[NSFont fontWithName:@"Monaco" size:9]];
+	
+	[self performSelector:@selector(updateDatabaseState) withObject:nil afterDelay:0.5];
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender;
@@ -117,6 +120,20 @@
 	[self taskFinishedAfterDelay:0];
 }
 
+- (IBAction)clickedDataFile:(id)sender;
+{
+	[dataFileInfo setString:@""];
+	Database *database = [self selectedDatabase];
+	if (!database) return;
+	NSTableView *dataFileList = sender;
+	NSArrayController *arrayController = (NSArrayController *)[dataFileList dataSource];
+	NSInteger rowIndex = [dataFileList selectedRow];
+	if (rowIndex < 0) return;
+	NSString *file = [[arrayController arrangedObjects] objectAtIndex:rowIndex];
+	[dataFileInfo setString:[database infoForDataFile:file]];
+	[dataFileSizeText setStringValue:[database sizeForDataFile:file]];
+}
+
 - (void)criticalAlert:(NSString *)textString details:(NSString *)detailsString;
 {
 	NSAlert *alert = [[NSAlert alloc] init];
@@ -131,8 +148,7 @@
 {
 	[notificationCenter removeObserver:self name:nil object:task];
 	Database *database = [(DatabaseTask *) task database];
-	Statmonitor *monitor = [Statmonitor new];
-	[monitor setDatabase:database];
+	Statmonitor *monitor = [Statmonitor forDatabase:database];
 	[monitor start];
 	NSString *key = [[database identifier] stringValue];
 	[statmonitors setValue:monitor forKey:key];
@@ -145,9 +161,8 @@
 {
 	[notificationCenter removeObserver:self name:nil object:task];
 	Database *database = [(DatabaseTask *) task database];
-	StartNetLDI *startNetLdiTask = [StartNetLDI new];
+	StartNetLDI *startNetLdiTask = [StartNetLDI forDatabase:database];
 	task = startNetLdiTask;
-	[startNetLdiTask setDatabase:database];
 	[notificationCenter
 	 addObserver:self 
 	 selector:@selector(databaseStartNetLdiDone:) 
@@ -159,9 +174,8 @@
 - (void)databaseStartRequest:(NSNotification *)notification;
 {
 	[self verifyNoTask];
-	StartStone *myTask = [StartStone new];
+	StartStone *myTask = [StartStone forDatabase:[notification object]];
 	task = myTask;
-	[myTask setDatabase:[notification object]];
 	[notificationCenter
 	 addObserver:self 
 	 selector:@selector(databaseStartStoneDone:) 
@@ -186,9 +200,8 @@
 	Database *database = [(DatabaseTask *) task database];
 	[database archiveCurrentLogFiles];
 	[database archiveCurrentTransactionLogs];
-	StopNetLDI *stopNetLdiTask = [StopNetLDI new];
+	StopNetLDI *stopNetLdiTask = [StopNetLDI forDatabase:database];
 	task = stopNetLdiTask;
-	[stopNetLdiTask setDatabase:database];
 	[notificationCenter
 	 addObserver:self 
 	 selector:@selector(databaseStopNetLdiDone:) 
@@ -200,9 +213,8 @@
 - (void)databaseStopRequest:(NSNotification *)notification;
 {
 	[self verifyNoTask];
-	StopStone *myTask = [StopStone new];
+	StopStone *myTask = [StopStone forDatabase:[notification object]];
 	task = myTask;
-	[myTask setDatabase:[notification object]];
 	[notificationCenter
 	 addObserver:self 
 	 selector:@selector(databaseStopStoneDone:) 
@@ -215,7 +227,7 @@
 
 - (IBAction)defaultLogin:(id)sender;
 {
-	Database *database = [[databaseListController selectedObjects] objectAtIndex:0];
+	Database *database = [self selectedDatabase];
 	NSManagedObjectContext *moc = [self managedObjectContext];
 	NSManagedObjectModel *managedObjectModel = [[moc persistentStoreCoordinator] managedObjectModel];
 	NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Login"];
@@ -346,15 +358,36 @@
 	return moc;
 }
 
+- (Database *)mostAdvancedDatabase;
+{
+	NSArray *databases = [databaseListController arrangedObjects];
+	if (0 == [databases count]) return nil;
+	Database *database = [databases objectAtIndex:0];
+	for (Database *each in databases) {
+		if ([[database version]compare:[each version]]== NSOrderedAscending) {
+			database = each;
+		}
+	}
+	return database;
+}
+
+- (NSString *)mostAdvancedVersion;
+{
+	NSArray *versions = [self versionList];
+	Version *aVersion = [versions objectAtIndex:0];
+	NSString *version = aVersion.name;
+	for (Version *each in versions) {
+		if ([version compare:each.name]== NSOrderedAscending) {
+			version = each.name;
+		}
+	}
+	return version;
+}
+
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context;
 {
 	if (object == databaseListController) {
-		NSArray *list = [databaseListController selectedObjects];
-		Database *database = nil;
-		if (0 < [list count]) {
-			database = [list objectAtIndex:0];
-		}
-		[self selectedDatabase:database];
+		[self selectedDatabase:[self selectedDatabase]];
 		return;
 	}
 	NSLog(@"keyPath = %@; object = %@; change = %@; context = %@", keyPath, object, change, context);
@@ -430,15 +463,28 @@
 	[lastUpdateDateField setObjectValue:setup.versionsDownloadDate];
 }
 
+- (Database *)selectedDatabase;
+{
+	NSArray *list = [databaseListController selectedObjects];
+	Database *database = nil;
+	if (0 < [list count]) {
+		database = [list objectAtIndex:0];
+	}
+	return database;
+}
+
 - (void)selectedDatabase:(Database *)aDatabase;
 {
 	[logFileListController removeObjects:[logFileListController arrangedObjects]];
+	[dataFileListController removeObjects:[dataFileListController arrangedObjects]];
 	[oldLogFilesText setStringValue:@""];
 	[oldTranLogsText setStringValue:@""];
+	[dataFileInfo setString:@""];
 	if (aDatabase == nil) return;
 	[logFileListController addObjects:[aDatabase logFiles]];
 	[oldLogFilesText setStringValue:[aDatabase descriptionOfOldLogFiles]];
 	[oldTranLogsText setStringValue:[aDatabase descriptionOfOldTranLogs]];
+	[dataFileListController addObjects:[aDatabase dataFiles]];
 }
 
 - (void)setupExceptionHandler;
@@ -548,6 +594,13 @@
 	[databaseListController setSelectedObjects:[NSArray new]];
 	[databaseListController setSelectionIndex:index];
 	[databaseListController setAvoidsEmptySelection:YES];
+}
+
+- (void)updateDatabaseState;
+{
+	Database *database = [self mostAdvancedDatabase];
+	if (!database) return;
+	NSArray *list = [GSList processListUsingDatabase:database];
 }
 
 - (IBAction)updateVersionList:(id)sender;

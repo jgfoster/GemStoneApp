@@ -10,4 +10,6 @@
 
 @interface GSList : DatabaseTask
 
++ (NSArray *)processListUsingDatabase:(Database *)aDatabase;
+
 @end

@@ -10,6 +10,12 @@
 
 @implementation GSList
 
++ (NSArray *)processListUsingDatabase:(Database *)aDatabase;
+{
+	GSList *instance = [self forDatabase:aDatabase];
+	return [instance processList];
+}
+
 - (NSArray *)arguments;
 { 
 	return [NSArray arrayWithObjects: 
@@ -22,13 +28,15 @@
 - (void)dataString:(NSString *)aString;
 {
 	[standardOutput appendString:aString];
-//	NSLog(@"%@", aString);
+//	NSLog(@"stdout: %@", aString);		
 }
 
 - (void)done;
 {
 	NSLog(@"%@", standardOutput);
 /*
+gslist[Info]: No GemStone servers.
+--- or ---
 Status   Version    Owner    Pid   Port   Started     Type       Name
 ------- --------- --------- ----- ----- ------------ ------      ----
   OK    3.1.0     jfoster    1029 44485 Jul 10 09:26 Netldi      44485
@@ -40,12 +48,21 @@ Status   Version    Owner    Pid   Port   Started     Type       Name
 
 - (void)doneWithError:(int)statusCode;
 {
-	NSLog(@"%@", errorOutput);
+	NSLog(@"errout: %@", errorOutput);
 }
 
 - (NSString *)launchPath;
 { 
 	return [NSString stringWithFormat:@"%@/bin/gslist", [database gemstone]];
+}
+
+- (NSArray *)processList;
+{
+	NSMutableArray *list = [NSMutableArray new];
+	NSLog(@"before");
+	[self run];
+	NSLog(@"after");
+	return list;
 }
 
 @end

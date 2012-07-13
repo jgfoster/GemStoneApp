@@ -35,8 +35,7 @@
 
 - (void)archiveCurrentLogFiles;
 - (void)archiveCurrentTransactionLogs;
-- (BOOL)canInitialize;
-- (BOOL)canStart;
+- (NSArray *)dataFiles;
 - (NSString *)directory;
 - (void)deleteAll;
 - (void)deleteOldLogFiles;
@@ -44,6 +43,7 @@
 - (NSString *)descriptionOfOldLogFiles;
 - (NSString *)descriptionOfOldTranLogs;
 - (NSString *)gemstone;
+- (NSString *)infoForDataFile:(NSString *)file;
 - (void)installBaseExtent;
 - (void)installGlassExtent;
 - (BOOL)isRunning;
@@ -52,6 +52,7 @@
 - (void)open;
 - (void)restore;
 - (void)setIsRunning:(BOOL)aBool;
+- (NSString *)sizeForDataFile:(NSString *)file;
 - (void)start;
 - (void)stop;
 

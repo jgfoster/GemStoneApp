@@ -15,4 +15,6 @@
 
 @property (nonatomic, retain) Database *database;
 
++ (id)forDatabase:(Database *)aDatabase;
+
 @end

@@ -13,6 +13,13 @@
 
 @synthesize database;
 
++ (id)forDatabase:(Database *)aDatabase;
+{
+	DatabaseTask *instance = [self new];
+	[instance setDatabase:aDatabase];
+	return instance;
+}
+
 - (NSString *)currentDirectoryPath;
 {
 	return [database directory];

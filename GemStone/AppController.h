@@ -25,6 +25,9 @@
 	IBOutlet NSButton				*deleteLogFilesButton;
 	IBOutlet NSTextField			*oldTranLogsText;
 	IBOutlet NSButton				*deleteTranLogsButton;
+	IBOutlet NSArrayController		*dataFileListController;
+	IBOutlet NSTextView				*dataFileInfo;
+	IBOutlet NSTextField			*dataFileSizeText;
 
 	IBOutlet NSPanel				*taskProgressPanel;
 	IBOutlet NSTextView				*taskProgressText;
@@ -38,8 +41,10 @@
 }
 
 - (IBAction)cancelTask:(id)sender;
+- (IBAction)clickedDataFile:(id)sender;
 - (IBAction)defaultLogin:(id)sender;
 - (IBAction)installHelperTool:(id)sender;
+- (NSString *)mostAdvancedVersion;
 - (IBAction)removeDatabase:(id)sender;
 - (IBAction)removeHelperTool:(id)sender;
 - (void)startTaskProgressSheetAndAllowCancel:(BOOL)allowCancel;
