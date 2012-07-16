@@ -24,6 +24,7 @@
 - (void)done;
 - (void)doneWithError:(int)statusCode;
 - (NSMutableDictionary *)environment;
+- (BOOL)isRunning;
 - (void)errorOutputString:(NSString *)message;
 - (void)progress:(NSString *)aString;
 - (void)run;

@@ -43,6 +43,8 @@
 - (NSString *)descriptionOfOldLogFiles;
 - (NSString *)descriptionOfOldTranLogs;
 - (NSString *)gemstone;
+- (void)gsList:(NSArray *)list;
+- (BOOL)hasIdentifier;
 - (NSString *)infoForDataFile:(NSString *)file;
 - (void)installBaseExtent;
 - (void)installGlassExtent;

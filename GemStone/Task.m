@@ -91,6 +91,11 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	[errorOutput appendString:aString];
 }
 
+- (BOOL)isRunning;
+{
+	return [task isRunning];
+}
+
 - (void)mightBeDone;
 {
 	if (++doneCount < 2) return;	//	look for stderr and stdout notifications
@@ -99,6 +104,9 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	 name:NSFileHandleReadCompletionNotification 
 	 object:nil];
 	if (!task) return;				//	terminated by user, so no need to report error
+	for (NSUInteger i = 0; i < 100 && [task isRunning]; ++i) {
+		[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.001 * i]];
+	}
 	int status = [task terminationStatus];
 	task = nil;
 	if (status) {

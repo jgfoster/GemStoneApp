@@ -24,6 +24,9 @@
 #import "Utilities.h"
 #import "Version.h"
 
+#define NotifyMe(aString, aSymbol) \
+[notificationCenter addObserver:self selector:@selector(aSymbol:) name:aString object:nil]
+
 @implementation AppController
 
 @synthesize setup;
@@ -35,15 +38,8 @@
 	[helperToolMessage setHidden:!isCurrent];
 	[authenticateButton setEnabled:!isCurrent];
 	[removeButton setEnabled:isCurrent];
-	
-	[self loadSetup];
-	[self loadRequest:@"Database" toController:databaseListController];
-	[self loadRequest:@"Login" toController:loginListController];
-	[self loadRequest:@"Version" toController:versionListController];
-	[self refreshInstalledVersionsList];
-	
-#define NotifyMe(aString, aSymbol) \
-		[notificationCenter addObserver:self selector:@selector(aSymbol:) name:aString object:nil]
+	[taskProgressText setFont:[NSFont fontWithName:@"Monaco" size:9]];
+		
 	NotifyMe(kTaskError,				taskError);
 	NotifyMe(kTaskProgress,				taskProgress);
 	NotifyMe(kDownloadRequest,			downloadRequest);
@@ -56,10 +52,12 @@
 							 forKeyPath:@"selection"
 								options:(NSKeyValueObservingOptionNew)
 								context:nil];
-
-	[taskProgressText setFont:[NSFont fontWithName:@"Monaco" size:9]];
-	
-	[self performSelector:@selector(updateDatabaseState) withObject:nil afterDelay:0.5];
+	[self performSelector:@selector(loadSetup)						withObject:nil afterDelay:0.01];
+	[self performSelector:@selector(loadRequestForDatabase)			withObject:nil afterDelay:0.02];
+	[self performSelector:@selector(loadRequestForLogin)			withObject:nil afterDelay:0.03];
+	[self performSelector:@selector(loadRequestForVersion)			withObject:nil afterDelay:0.04];
+	[self performSelector:@selector(refreshInstalledVersionsList)	withObject:nil afterDelay:0.05];
+	[self performSelector:@selector(updateDatabaseState)			withObject:nil afterDelay:0.06];
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender;
@@ -115,9 +113,17 @@
 
 - (IBAction)cancelTask:(id)sender
 {
-	if (!task) return;
-	[task cancelTask];
-	[self taskFinishedAfterDelay:0];
+	if (!task) {	// initializing a database does not use a task but shows the task pane
+		[self taskFinished];
+		return;
+	};
+	if ([task isRunning]) {
+		[taskProgressText insertText:@"\n\nSending task cancel request . . ."];
+		[task cancelTask];
+		[self taskFinishedAfterDelay];
+	} else {	//	Presumably this means that the title was changed to "Close"
+		[self taskFinished];
+	}
 }
 
 - (IBAction)clickedDataFile:(id)sender;
@@ -153,7 +159,7 @@
 	NSString *key = [[database identifier] stringValue];
 	[statmonitors setValue:monitor forKey:key];
 	[self updateDatabaseList:nil];
-	[self taskFinishedAfterDelay:0.5];
+	[self taskFinishedAfterDelay];
 	[self performSelector:@selector(updateDatabaseList:) withObject:nil afterDelay:1.0];
 }
 
@@ -191,7 +197,7 @@
 	Database *database = [(DatabaseTask *) task database];
 	[statmonitors setValue:nil forKey:[[database identifier] stringValue]];
 	[self updateDatabaseList:nil];
-	[self taskFinishedAfterDelay:0.5];
+	[self taskFinishedAfterDelay];
 }
 
 - (void)databaseStopStoneDone:(NSNotification *)notification;
@@ -265,7 +271,7 @@
 {
 	NSString *string = [NSString stringWithFormat:@"%@\n\nSee Console for details.", [exception reason]];
 	[self criticalAlert:@"Internal Application Error!" details:string];
-	[self taskFinishedAfterDelay:0];
+	[self taskFinishedAfterDelay];
 	return YES;
 }
 
@@ -287,6 +293,21 @@
 	[removeButton setEnabled:YES];
 }
 
+- (void)loadRequestForDatabase;
+{
+	[self loadRequest:@"Database" toController:databaseListController];
+}
+
+- (void)loadRequestForLogin;
+{
+	[self loadRequest:@"Login" toController:loginListController];
+}
+
+- (void)loadRequestForVersion;
+{
+	[self loadRequest:@"Version" toController:versionListController];
+}
+
 - (void)loadRequest:(NSString *)requestName toController:(NSArrayController *)controller;
 {
 	NSManagedObjectContext *moc = [self managedObjectContext];
@@ -298,7 +319,10 @@
         AppError(@"Data load failed\n%@",
 			  ([error localizedDescription] != nil) ?
 			  [error localizedDescription] : @"Unknown Error");
-		list = [NSArray new];
+		exit(1);		// not much point in running if we can't load our data
+	}
+	for (id each in list) {		// iterate over each object and cause the "fault" to be replaced with the object
+		[each valueForKey:@"indexInArray"];
 	}
 	NSSortDescriptor *descriptor = [NSSortDescriptor sortDescriptorWithKey:@"indexInArray" ascending:YES];
 	NSArray *descriptors = [NSArray arrayWithObjects:descriptor, nil];
@@ -322,7 +346,6 @@
 		setup = [[Setup alloc]
 				 initWithEntity:entity 
 				 insertIntoManagedObjectContext:moc];
-		setup.lastDatabaseIdentifier = [NSNumber numberWithInt:0];
 	}
 }
 
@@ -448,7 +471,7 @@
 	[notificationCenter removeObserver:self name:nil object:[notification object]];
 	[self refreshInstalledVersionsList];	
 	[taskProgressText insertText:@" . . . Done!"];
-	[self taskFinishedAfterDelay:0.5];
+	[self taskFinishedAfterDelay];
 }
 
 - (void)refreshInstalledVersionsList;
@@ -503,28 +526,49 @@
           contextInfo:nil];
 	[taskProgressIndicator setIndeterminate:YES];
 	[taskProgressIndicator startAnimation:self];
+	[taskCancelButton setTitle:@"Cancel"];
 	[taskCancelButton setEnabled:allowCancel];
+	[taskCloseWhenDoneButton setState:[setup.taskCloseWhenDoneCode integerValue]];
+}
+
+- (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem;
+{
+	if (tabViewItem == gsListTabViewItem) {
+		[self updateDatabaseState];
+		return;
+	}
+}
+
+- (IBAction)taskCloseWhenDone:(id)sender;
+{
+	NSButton *myButton = sender;
+	NSInteger state = [myButton state];
+	setup.taskCloseWhenDoneCode = [NSNumber numberWithInteger:state];
 }
 
 - (void)taskError:(NSNotification *)notification;
 {
 	[notificationCenter removeObserver:self name:nil object:task];
 	[self criticalAlert:@"Task Failed" details:[[notification userInfo] objectForKey:@"string"]];
-	[self taskFinishedAfterDelay:0.5];
+	[self taskFinishedAfterDelay];
 }
 
 - (void)taskFinished;
 {
 	task = nil;
-	[taskProgressIndicator stopAnimation:self];
 	[taskProgressText setString:[NSMutableString new]];
 	[NSApp endSheet:taskProgressPanel];
 	[taskProgressPanel orderOut:nil];
 }
 
-- (void)taskFinishedAfterDelay:(NSTimeInterval)seconds;
+- (void)taskFinishedAfterDelay;
 {
-	[self performSelector:@selector(taskFinished) withObject:nil afterDelay:seconds];
+	[taskProgressIndicator stopAnimation:self];
+	[taskCancelButton setTitle:@"Close"];
+	[taskCancelButton setEnabled:YES];
+	if ([setup.taskCloseWhenDoneCode boolValue]) {
+		[self performSelector:@selector(taskFinished) withObject:nil afterDelay:1];
+	}
 }
 
 - (void)taskProgress:(NSNotification *)notification;
@@ -558,7 +602,7 @@
 {
 	[notificationCenter removeObserver:self name:nil object:task];
 	[self refreshInstalledVersionsList];	
-	[self taskFinishedAfterDelay:0.5];
+	[self taskFinishedAfterDelay];
 }
 
 - (void)unzipPath:(NSString *)path;
@@ -600,7 +644,15 @@
 {
 	Database *database = [self mostAdvancedDatabase];
 	if (!database) return;
+	if (![database hasIdentifier]) {
+		AppError(@"database not yet loaded!");
+	}
 	NSArray *list = [GSList processListUsingDatabase:database];
+	for (database in [databaseListController arrangedObjects]) {
+		[database gsList:list];
+	}
+	[processListController removeObjects:[processListController arrangedObjects]];
+	[processListController addObjects:list];
 }
 
 - (IBAction)updateVersionList:(id)sender;
@@ -647,7 +699,7 @@
 	}
 	setup.versionsDownloadDate = [NSDate date];
 	[self refreshInstalledVersionsList];
-	[self taskFinishedAfterDelay:0.5];
+	[self taskFinishedAfterDelay];
 }
 
 - (void)verifyNoTask;

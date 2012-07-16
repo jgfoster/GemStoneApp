@@ -11,8 +11,19 @@
 
 @implementation Setup
 
-@dynamic versionsDownloadDate;
 @dynamic lastDatabaseIdentifier;
+@dynamic taskCloseWhenDoneCode;
+@dynamic versionsDownloadDate;
+
+- (id)initWithEntity:(NSEntityDescription *)entity insertIntoManagedObjectContext:(NSManagedObjectContext *)context;
+{
+	if (self = [super initWithEntity:entity insertIntoManagedObjectContext:context]) {
+		self.lastDatabaseIdentifier = [NSNumber numberWithInt:0];
+		self.taskCloseWhenDoneCode  = [NSNumber numberWithBool:YES];
+		self.versionsDownloadDate	= nil;
+	}
+	return self;
+}
 
 - (NSNumber *)newDatabaseIdentifier;
 {

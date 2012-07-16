@@ -12,8 +12,9 @@
 
 @interface Setup : NSManagedObject
 
-@property (nonatomic, retain) NSDate * versionsDownloadDate;
-@property (nonatomic, retain) NSNumber * lastDatabaseIdentifier;
+@property (nonatomic, retain) NSNumber	*lastDatabaseIdentifier;
+@property (nonatomic, retain) NSNumber	*taskCloseWhenDoneCode;
+@property (nonatomic, retain) NSDate	*versionsDownloadDate;
 
 - (NSNumber *)newDatabaseIdentifier;
 

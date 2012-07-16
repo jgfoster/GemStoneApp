@@ -41,7 +41,7 @@
 	osTypeCode = 0;
 	gsUser = @"DataCurator";
 	gsPassword = @"swordfish";
-	developer:NSUserName();
+	developer = NSUserName();
 }
 
 - (BOOL)isRpcGem;

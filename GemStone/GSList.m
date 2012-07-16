@@ -7,6 +7,7 @@
 //
 
 #import "GSList.h"
+#import "Utilities.h"
 
 @implementation GSList
 
@@ -21,34 +22,18 @@
 	return [NSArray arrayWithObjects: 
 			@"-c",
 			@"-v",
-			@"-l",
+			@"-x",
 			nil];
 }
 
 - (void)dataString:(NSString *)aString;
 {
 	[standardOutput appendString:aString];
-//	NSLog(@"stdout: %@", aString);		
-}
-
-- (void)done;
-{
-	NSLog(@"%@", standardOutput);
-/*
-gslist[Info]: No GemStone servers.
---- or ---
-Status   Version    Owner    Pid   Port   Started     Type       Name
-------- --------- --------- ----- ----- ------------ ------      ----
-  OK    3.1.0     jfoster    1029 44485 Jul 10 09:26 Netldi      44485
-  OK    3.1.0     jfoster    1129  5830 Jul 10 09:30 Netldi      5830
-  OK    3.1.0     jfoster     530 49932 Jul 10 08:57 Stone       gs64stone
-  OK    3.1.0     jfoster     531 49924 Jul 10 08:57 cache       gs64stone~3fdedd382a86f539
-*/
 }
 
 - (void)doneWithError:(int)statusCode;
 {
-	NSLog(@"errout: %@", errorOutput);
+	foundNoProcesses = YES;
 }
 
 - (NSString *)launchPath;
@@ -59,9 +44,30 @@ Status   Version    Owner    Pid   Port   Started     Type       Name
 - (NSArray *)processList;
 {
 	NSMutableArray *list = [NSMutableArray new];
-	NSLog(@"before");
+	NSMutableDictionary *process = nil;
+	foundNoProcesses = NO;
 	[self run];
-	NSLog(@"after");
+	if (foundNoProcesses) return list;
+	for (NSString *line in [standardOutput componentsSeparatedByString:@"\n"]) {
+		if ([line length]) {
+			if ([line characterAtIndex:0] != ' ') {
+				// next process
+				if (process) {
+					[list addObject:process];
+				}
+				process = [NSMutableDictionary new];
+				[process setValue:line forKey:@"name"];
+			} else {
+				NSRange range = [line rangeOfString:@"="];
+				NSString *key = [line substringToIndex:range.location];
+				NSString *value = [line substringFromIndex:range.location + 1];
+				key = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+				value = [value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+				[process setValue:value forKey:key];
+			}
+		}
+	}
+	[list addObject:process];
 	return list;
 }
 

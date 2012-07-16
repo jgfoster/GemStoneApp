@@ -27,6 +27,7 @@
     <entity name="Setup" representedClassName="Setup" syncable="YES">
         <attribute name="indexInArray" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="lastDatabaseIdentifier" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="taskCloseWhenDoneCode" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="versionsDownloadDate" optional="YES" attributeType="Date" syncable="YES"/>
     </entity>
     <entity name="Version" representedClassName="Version" syncable="YES">
@@ -38,7 +39,7 @@
     <elements>
         <element name="Database" positionX="160" positionY="192" width="128" height="135"/>
         <element name="Login" positionX="160" positionY="192" width="128" height="255"/>
-        <element name="Setup" positionX="160" positionY="192" width="128" height="90"/>
+        <element name="Setup" positionX="160" positionY="192" width="128" height="105"/>
         <element name="Version" positionX="160" positionY="192" width="128" height="105"/>
     </elements>
 </model>

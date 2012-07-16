@@ -8,7 +8,9 @@
 
 #import "DatabaseTask.h"
 
-@interface GSList : DatabaseTask
+@interface GSList : DatabaseTask {
+	BOOL	foundNoProcesses;
+}
 
 + (NSArray *)processListUsingDatabase:(Database *)aDatabase;
 

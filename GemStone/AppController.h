@@ -11,7 +11,7 @@
 #import "Setup.h"
 #import "Task.h"
 
-@interface AppController : NSObject <NSOpenSavePanelDelegate> {
+@interface AppController : NSObject <NSOpenSavePanelDelegate, NSTabViewDelegate> {
 	IBOutlet NSTextField			*helperToolMessage;
 	IBOutlet NSButton				*authenticateButton;
 	IBOutlet NSTextField			*lastUpdateDateField;
@@ -28,10 +28,13 @@
 	IBOutlet NSArrayController		*dataFileListController;
 	IBOutlet NSTextView				*dataFileInfo;
 	IBOutlet NSTextField			*dataFileSizeText;
+	IBOutlet NSArrayController		*processListController;
+	IBOutlet NSTabViewItem			*gsListTabViewItem;
 
 	IBOutlet NSPanel				*taskProgressPanel;
 	IBOutlet NSTextView				*taskProgressText;
 	IBOutlet NSProgressIndicator	*taskProgressIndicator;
+	IBOutlet NSButton				*taskCloseWhenDoneButton;
 	IBOutlet NSButton				*taskCancelButton;
 
 	Helper					*helper;
@@ -48,7 +51,8 @@
 - (IBAction)removeDatabase:(id)sender;
 - (IBAction)removeHelperTool:(id)sender;
 - (void)startTaskProgressSheetAndAllowCancel:(BOOL)allowCancel;
-- (void)taskFinished;
+- (IBAction)taskCloseWhenDone:(id)sender;
+- (void)taskFinishedAfterDelay;
 - (IBAction)unzipRequest:(id)sender;
 - (IBAction)updateVersionList:(id)sender;
 - (NSArray *)versionList;

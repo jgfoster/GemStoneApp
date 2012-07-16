@@ -262,6 +262,34 @@
 	return path;
 }
 
+- (void)gsList:(NSArray *)list;
+{
+	isRunningCode = [NSNumber numberWithBool:NO];
+	for (NSDictionary *process in list) {
+		NSString *string = [process valueForKey:@"version"];
+		if ([string compare:version] == NSOrderedSame) {
+			string = [process valueForKey:@"GEMSTONE"];
+			if ([string compare:[self gemstone]] == NSOrderedSame) {
+				string = [process valueForKey:@"logfile"];
+				NSString *directory = [self directory];
+				NSRange range = [string rangeOfString:directory];
+				if (range.location == 0) {
+					string = [process valueForKey:@"type"];
+					if ([string compare:@"Stone"] == NSOrderedSame) {
+						isRunningCode = [NSNumber numberWithBool:YES];
+						return;
+					}
+				}
+			}
+		}
+	}
+}
+
+- (BOOL)hasIdentifier;
+{
+	return 0 < [identifier intValue];
+}
+
 - (NSNumber *)identifier;
 {
 	if (![identifier intValue]) {
@@ -320,7 +348,7 @@
 		AppError(@"Unable to change permissions of %@ because %@", target, [error description]);
 	}
 	lastStartDate = nil;
-	[[NSApp delegate] taskFinished];
+	[[NSApp delegate] taskFinishedAfterDelay];
 	[notificationCenter postNotificationName:kDababaseInfoChanged object:nil];
 }
 
