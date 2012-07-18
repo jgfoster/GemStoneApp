@@ -16,6 +16,7 @@
 	IBOutlet NSButton				*authenticateButton;
 	IBOutlet NSTextField			*lastUpdateDateField;
 	IBOutlet NSArrayController		*databaseListController;
+	IBOutlet NSTableView			*databaseTableView;
 	IBOutlet NSArrayController		*logFileListController;
 	IBOutlet NSArrayController		*loginListController;
 	IBOutlet NSButton				*removeButton;
@@ -30,6 +31,8 @@
 	IBOutlet NSTextField			*dataFileSizeText;
 	IBOutlet NSArrayController		*processListController;
 	IBOutlet NSTabViewItem			*gsListTabViewItem;
+	IBOutlet NSTableView			*statmonTableView;
+	IBOutlet NSObjectController		*statmonFileSelectedController;
 
 	IBOutlet NSPanel				*taskProgressPanel;
 	IBOutlet NSTextView				*taskProgressText;
@@ -46,17 +49,23 @@
 - (IBAction)cancelTask:(id)sender;
 - (IBAction)clickedDataFile:(id)sender;
 - (IBAction)defaultLogin:(id)sender;
+- (IBAction)deleteStatmonFiles:(id)sender;
+- (void)doRunLoopFor:(double)seconds;
 - (IBAction)installHelperTool:(id)sender;
 - (NSString *)mostAdvancedVersion;
+- (IBAction)openStatmonFiles:(id)sender;
 - (IBAction)removeDatabase:(id)sender;
 - (IBAction)removeHelperTool:(id)sender;
+- (void)doRunLoopFor:(double)seconds;
+- (void)setIsStatmonFileSelected:(BOOL)flag;
 - (void)startTaskProgressSheetAndAllowCancel:(BOOL)allowCancel;
+- (NSTableView *)statmonTableView;
 - (IBAction)taskCloseWhenDone:(id)sender;
 - (void)taskFinishedAfterDelay;
 - (IBAction)unzipRequest:(id)sender;
 - (IBAction)updateVersionList:(id)sender;
 - (NSArray *)versionList;
 
-@property (readonly) Setup *setup;
+ @property (readonly) Setup *setup;
 
 @end

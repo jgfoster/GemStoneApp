@@ -12,9 +12,11 @@
 
 - (NSArray *)arguments;
 { 
-	return [NSArray arrayWithObjects: 
-			[database name],
-			nil];
+	NSMutableArray *list = [NSMutableArray arrayWithObject:[database name]];
+	if ([database restorePath]) {
+		[list addObject:@"-R"];
+	}
+	return list;
 }
 
 - (void)done;

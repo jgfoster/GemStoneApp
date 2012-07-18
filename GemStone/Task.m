@@ -14,8 +14,12 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 
 @implementation Task
 
-- (NSArray *)arguments		{ mustOverride(); return nil; }
 - (NSString *)launchPath	{ mustOverride(); return nil; }
+
+- (NSArray *)arguments		
+{ 
+	return [NSMutableArray new];
+}
 
 - (void)cancelTask;
 {
@@ -38,7 +42,8 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	[self dataString:string];
 }
 
-- (void)dataString:(NSString *)aString { 
+- (void)dataString:(NSString *)aString;
+{ 
 	[standardOutput appendString:aString];
 }
 
@@ -105,7 +110,7 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	 object:nil];
 	if (!task) return;				//	terminated by user, so no need to report error
 	for (NSUInteger i = 0; i < 100 && [task isRunning]; ++i) {
-		[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.001 * i]];
+		[appController doRunLoopFor:0.001 * i];
 	}
 	int status = [task terminationStatus];
 	task = nil;
@@ -126,8 +131,10 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	[self start];
 	[task waitUntilExit];
 	// give a bit of time for output notifications
-	for (int i = 1; doneCount < 2 && i <= 100; ++i) {
-		[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.001 * i]];
+	NSUInteger j = 0;
+	for (NSUInteger i = 1; doneCount < 2 && i <= 100; ++i) {
+		[appController doRunLoopFor:0.001 * i];
+		j = i;
 	}
 	// force things to finish without all the output
 	while (doneCount < 2) {
@@ -157,6 +164,7 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	[task setArguments:[self arguments]];
 	[task setStandardOutput:[NSPipe pipe]];
 	[task setStandardError: [NSPipe pipe]];
+	[task setStandardInput:[NSPipe pipe]];
 	NSFileHandle *taskOut = [[task standardOutput] fileHandleForReading];
 	NSFileHandle *taskErr = [[task standardError]  fileHandleForReading];
 	

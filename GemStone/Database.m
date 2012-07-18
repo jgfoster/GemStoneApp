@@ -14,19 +14,21 @@
 #import "Setup.h"
 #import "Utilities.h"
 #import "Version.h"
+#import "VSD.h"
 #import "WaitStone.h"
 
 @implementation Database
 
 // following are part of the DataModel handled by Core Data
 @dynamic indexInArray;
-@dynamic isRunningCode;
 @dynamic lastStartDate;
 @dynamic name;
 @dynamic netLDI;
 @dynamic spc_mb;
 @dynamic version;
 
+@synthesize isRunningCode;
+@synthesize restorePath;
 
 - (void)archiveCurrentLogFiles;
 {
@@ -85,7 +87,7 @@
 	NSMutableString *string = [NSMutableString new];
 	[string appendFormat: @"DBF_EXTENT_NAMES = \"%@/data/extent0.dbf\";\n", directory];
 	[string appendString: @"STN_TRAN_FULL_LOGGING = TRUE;\n"];
-	[string appendFormat: @"STN_TRAN_LOG_DIRECTORIES = \"/%@/data/\", \n", directory];
+	[string appendFormat: @"STN_TRAN_LOG_DIRECTORIES = \"%@/data/\", \n", directory];
 	[string appendFormat: @"	\"%@/data/\";\n", [self directory]];
 	[string appendString: @"STN_TRAN_LOG_SIZES = 100, 100;\n"];
 	[string appendString: @"KEYFILE = \"$GEMSTONE/seaside/etc/gemstone.key\";\n"];
@@ -217,6 +219,20 @@
 	[self deleteFilesIn:@"data/archive"];
 }
 
+- (void)deleteStatmonFilesAtIndexes:(NSIndexSet *)indexes;
+{
+	[indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+		NSDictionary *statmon = [[self statmonFiles] objectAtIndex:idx];
+		NSError *error = nil;
+		NSString *path = [statmon objectForKey:@"path"];
+		if (![fileManager removeItemAtPath:path error:&error]) {
+			AppError(@"Unable to delete %@ because %@", path, [error description]);
+		}
+	}];
+	statmonFiles = nil;
+	[[appController statmonTableView] reloadData];
+}
+
 - (NSString *)descriptionOfFilesIn:(NSString *)aString;
 {
 	NSString *path = [NSString stringWithFormat:@"%@/%@/archive", [self directory], aString];
@@ -256,6 +272,11 @@
 	return [NSString stringWithFormat: @"%@/db%@", basePath, [self identifier]];
 }
 
+- (void)doubleClickStatmon:(id)sender;
+{
+	[self openStatmonFilesAtIndexes:[NSIndexSet indexSetWithIndex:[sender clickedRow]]];
+}
+
 - (NSString *)gemstone;
 {
 	NSString *path = [NSString stringWithFormat: @"%@/GemStone64Bit%@-i386.Darwin", basePath, [self version]];
@@ -285,17 +306,12 @@
 	}
 }
 
-- (BOOL)hasIdentifier;
-{
-	return 0 < [identifier intValue];
-}
-
 - (NSNumber *)identifier;
 {
 	if (![identifier intValue]) {
-		identifier = [[[NSApp delegate] setup] newDatabaseIdentifier];
+		identifier = [[appController setup] newDatabaseIdentifier];
 		[self createDirectories];
-		version = [[NSApp delegate] mostAdvancedVersion];
+		version = [appController mostAdvancedVersion];
 		[self installBaseExtent];
 	}
 	return identifier;
@@ -332,7 +348,7 @@
 			AppError(@"unable to delete %@ because %@", target, [error description]);
 		}
 	}
-	[[NSApp delegate] startTaskProgressSheetAndAllowCancel:NO];
+	[appController startTaskProgressSheetAndAllowCancel:NO];
 	[notificationCenter postNotificationName:kTaskProgress object:@"Copying extent . . ."];
 	[self archiveCurrentTransactionLogs];
 	NSString *source = [NSString stringWithFormat:@"%@/bin/%@", [self gemstone], aString];
@@ -348,7 +364,7 @@
 		AppError(@"Unable to change permissions of %@ because %@", target, [error description]);
 	}
 	lastStartDate = nil;
-	[[NSApp delegate] taskFinishedAfterDelay];
+	[appController taskFinishedAfterDelay];
 	[notificationCenter postNotificationName:kDababaseInfoChanged object:nil];
 }
 
@@ -407,14 +423,46 @@
 	return [NSString stringWithFormat:@"netldi%@", [self identifier]];
 }
 
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView;
+{
+	if ([appController statmonTableView] == aTableView) {
+		return [[self statmonFiles] count];
+	}
+	NSLog(@"numberOfRownInTableView:%@", aTableView);
+	return 0;
+}
+
 - (void)open;
 {
 	[[NSWorkspace sharedWorkspace] openFile:[self directory]];
 }
 
+- (void)openStatmonFilesAtIndexes:(NSIndexSet *)indexes;
+{
+	[indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+		NSDictionary *statmon = [[self statmonFiles] objectAtIndex:idx];
+		NSString *path = [statmon objectForKey:@"path"];
+		[VSD openPath:path usingDatabase:self];
+	}];
+}
+
+- (void)refreshStatmonFiles;
+{
+	statmonFiles = nil;
+}
+
 - (void)restore;
 {
-	NSLog(@"restore");
+	//	get path to backup
+	NSOpenPanel *op = [NSOpenPanel openPanel];
+	[op setAllowedFileTypes:[NSArray arrayWithObjects:@"bak",@"gz", nil]];
+	[op setTitle:@"Restore From a Full Backup"];
+	[op setMessage:@"Select an on-line backup:"];
+	[op setPrompt:@"Restore"];
+	int result = [op runModal];
+    if (result != NSOKButton) return;
+	restorePath = [[[op URLs] objectAtIndex:0] path];
+	[self start];
 }
 
 - (void)setIsRunning:(BOOL)aBool;
@@ -470,15 +518,100 @@
 
 - (void)start;
 {
-	//
+	// use waitstone to see if a stone with our name is already running?
 	[self createConfigFile];
 	[self archiveCurrentLogFiles];
+	statmonFiles = nil;
 	[notificationCenter postNotificationName:kDatabaseStartRequest object:self];
+}
+
+- (NSArray *)statmonFiles;
+{
+	if (statmonFiles) return statmonFiles;
+	NSMutableArray *list = [NSMutableArray array];
+	statmonFiles = list;
+	NSString *path = [NSString stringWithFormat:@"%@/stat", [self directory]];
+	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:path];
+	NSString *file;
+	NSString *gemstone = [self gemstone];
+	while (file = [dirEnum nextObject]) {
+		NSError *error = nil;
+		NSString *fullPath = [NSString stringWithFormat:@"%@/%@", path, file];
+		NSDictionary *attributes = [fileManager attributesOfItemAtPath:fullPath error:&error];
+		if (error) {
+			AppError(@"Unable to obtain attributes of %@ because %@", fullPath, [error description]);
+		}
+		NSMutableDictionary *statmon = [NSMutableDictionary dictionaryWithDictionary:attributes];
+		[statmon setValue:file forKey:@"name"];
+		[statmon setValue:fullPath forKey:@"path"];
+		[statmon setValue:gemstone forKey:@"gemstone"];
+		[list addObject:statmon];
+	}
+	statmonFiles = [statmonFiles sortedArrayUsingComparator:^NSComparisonResult(id a, id b) {
+		return [[a valueForKey:NSFileCreationDate] compare:[b valueForKey:NSFileCreationDate]];
+	}];
+	return statmonFiles;
 }
 
 - (void)stop;
 {
 	[notificationCenter postNotificationName:kDatabaseStopRequest object:self];
+}
+
+- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex;
+{
+	if ([appController statmonTableView] == aTableView) {
+		NSDictionary *row = [[self statmonFiles] objectAtIndex:rowIndex];
+		NSString *key = [aTableColumn identifier];
+		if ([key compare:@"start"] == NSOrderedSame) {
+			return [row valueForKey:NSFileCreationDate];
+		}
+		if ([key compare:@"end"] == NSOrderedSame) {
+			return [row valueForKey:NSFileModificationDate];
+		}
+		if ([key compare:@"duration"] == NSOrderedSame) {
+			NSTimeInterval seconds = [[row valueForKey:NSFileModificationDate] timeIntervalSinceDate:[row valueForKey:NSFileCreationDate]];	// double
+			NSUInteger number = seconds;
+			if (number < 120) {
+				return [NSString stringWithFormat:@"%lu secs", number];
+			}
+			number = number / 60;
+			if (number < 120) {
+				return [NSString stringWithFormat:@"%lu mins", number];
+			}
+			number = number / 60;	// hours
+			if (number < 48) {
+				return [NSString stringWithFormat:@"lu hrs", number];
+			}
+			return [NSString stringWithFormat:@"lu days", number / 24];
+		}
+		if ([key compare:@"size"] == NSOrderedSame) {
+			NSNumber *number = [row valueForKey:NSFileSize];
+			NSUInteger size = [number unsignedIntegerValue];
+			if (size < 2048) {
+				return [NSString stringWithFormat:@"%lu bytes", size];
+			}
+			size = size / 1024;
+			if (size < 2048) {
+				return [NSString stringWithFormat:@"%lu KB", size];
+			}
+			return [NSString stringWithFormat:@"%lu MB", size / 1024];
+		}
+		NSLog(@"tableView:%@ objectValueForTableColumn:%@ row:%li", aTableView, aTableColumn, rowIndex);
+		return @"foo";
+	}
+	NSLog(@"tableView:%@ objectValueForTableColumn:%@ row:%li", aTableView, aTableColumn, rowIndex);
+	return nil;
+}
+
+- (void)tableViewSelectionDidChange:(NSNotification *)aNotification;
+{
+	NSTableView *tableView = [aNotification object];
+	if ([appController statmonTableView] == tableView) {
+		[appController setIsStatmonFileSelected:0 < [[tableView selectedRowIndexes] count]];
+		return;
+	}
+	NSLog(@"tableViewSelectionDidChange:%@", aNotification);
 }
 
 - (NSString *)version;

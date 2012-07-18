@@ -21,6 +21,7 @@
 #import "Statmonitor.h"
 #import "StopNetLDI.h"
 #import "StopStone.h"
+#import "Topaz.h"
 #import "Utilities.h"
 #import "Version.h"
 
@@ -39,6 +40,7 @@
 	[authenticateButton setEnabled:!isCurrent];
 	[removeButton setEnabled:isCurrent];
 	[taskProgressText setFont:[NSFont fontWithName:@"Monaco" size:9]];
+	[statmonFileSelectedController setContent:[NSNumber numberWithBool:NO]];
 		
 	NotifyMe(kTaskError,				taskError);
 	NotifyMe(kTaskProgress,				taskProgress);
@@ -152,6 +154,7 @@
 
 - (void)databaseStartNetLdiDone:(NSNotification *)notification;
 {
+	[taskProgressText insertText:@"\n============================\n"];
 	[notificationCenter removeObserver:self name:nil object:task];
 	Database *database = [(DatabaseTask *) task database];
 	Statmonitor *monitor = [Statmonitor forDatabase:database];
@@ -159,12 +162,36 @@
 	NSString *key = [[database identifier] stringValue];
 	[statmonitors setValue:monitor forKey:key];
 	[self updateDatabaseList:nil];
-	[self taskFinishedAfterDelay];
 	[self performSelector:@selector(updateDatabaseList:) withObject:nil afterDelay:1.0];
+	[database performSelector:@selector(refreshStatmonFiles) withObject:nil afterDelay:0.4];
+	[statmonTableView performSelector:@selector(reloadData) withObject:nil afterDelay:0.5];
+	NSString *path = [database restorePath];
+	if (path) {
+		[self doRunLoopFor:0.1];
+		[taskProgressText insertText:@"\n============================\n"];
+		Login *login = [self defaultLoginForDatabase:database];
+		Topaz *myTask = [Topaz login:login toDatabase:database];
+		task = myTask;
+		[notificationCenter
+		 addObserver:self 
+		 selector:@selector(databaseStartRestoreDone:) 
+		 name:kTaskDone 
+		 object:task];
+		[myTask restoreFromBackup];
+	} else {
+		[self taskFinishedAfterDelay];
+	}
+}
+
+- (void)databaseStartRestoreDone:(NSNotification *)notification;
+{
+	[notificationCenter removeObserver:self name:nil object:task];
+	[self taskFinishedAfterDelay];
 }
 
 - (void)databaseStartStoneDone:(NSNotification *)notification;
 {
+	[taskProgressText insertText:@"\n============================\n"];
 	[notificationCenter removeObserver:self name:nil object:task];
 	Database *database = [(DatabaseTask *) task database];
 	StartNetLDI *startNetLdiTask = [StartNetLDI forDatabase:database];
@@ -195,8 +222,13 @@
 {
 	[notificationCenter removeObserver:self name:nil object:task];
 	Database *database = [(DatabaseTask *) task database];
-	[statmonitors setValue:nil forKey:[[database identifier] stringValue]];
+	NSString *key = [[database identifier] stringValue];
+	Statmonitor *monitor = [statmonitors valueForKey:key];
+	[statmonitors setValue:nil forKey:key];
+	[monitor cancelTask];
 	[self updateDatabaseList:nil];
+	[database performSelector:@selector(refreshStatmonFiles) withObject:nil afterDelay:0.4];
+	[statmonTableView performSelector:@selector(reloadData) withObject:nil afterDelay:0.5];
 	[self taskFinishedAfterDelay];
 }
 
@@ -231,9 +263,8 @@
 	[taskProgressText insertText:@"Initiating database shutdown . . .\n\n"];
 }
 
-- (IBAction)defaultLogin:(id)sender;
+- (Login *)defaultLoginForDatabase:(Database *)database;
 {
-	Database *database = [self selectedDatabase];
 	NSManagedObjectContext *moc = [self managedObjectContext];
 	NSManagedObjectModel *managedObjectModel = [[moc persistentStoreCoordinator] managedObjectModel];
 	NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Login"];
@@ -241,7 +272,25 @@
 					initWithEntity:entity
 					insertIntoManagedObjectContext:moc];
 	[login initializeForDatabase:database];
+	return login;
+}
+
+- (IBAction)defaultLogin:(id)sender;
+{
+	Login *login = [self defaultLoginForDatabase:[self selectedDatabase]];
 	NSLog(@"login = %@", login);
+}
+
+- (IBAction)deleteStatmonFiles:(id)sender;
+{
+	Database *database = [self selectedDatabase];
+	NSIndexSet *indexes = [statmonTableView selectedRowIndexes];
+	[database deleteStatmonFilesAtIndexes:indexes];
+}
+
+- (void)doRunLoopFor:(double)seconds;
+{
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:seconds]];
 }
 
 - (void)downloadDone:(NSNotification *)notification;
@@ -278,7 +327,7 @@
 - (id)init;
 {
 	if (self = [super init]) {
-		[[Utilities new] setupGlobals];
+		[[Utilities new] setupGlobals:self];
 		[self setupExceptionHandler];
 		statmonitors = [NSMutableDictionary new];
 	}
@@ -416,6 +465,13 @@
 	NSLog(@"keyPath = %@; object = %@; change = %@; context = %@", keyPath, object, change, context);
 }
 
+- (IBAction)openStatmonFiles:(id)sender;
+{
+	Database *database = [self selectedDatabase];
+	NSIndexSet *indexes = [statmonTableView selectedRowIndexes];
+	[database openStatmonFilesAtIndexes:indexes];
+}
+
 //	NSOpenPanelDelegate method for file import
 - (BOOL)panel:(id)sender shouldEnableURL:(NSURL *)url;
 {
@@ -441,6 +497,12 @@
 	if ([alert runModal] == NSAlertSecondButtonReturn) return;
 	NSArray *list = [databaseListController selectedObjects];
 	Database *database = [list objectAtIndex:0];
+	if ([database isRunning]) {
+		[database stop];
+		while ([taskProgressPanel isKeyWindow]) {
+			[self doRunLoopFor:0.1];
+		}
+	}
 	[database deleteAll];
 	[databaseListController remove:sender];
 }
@@ -500,14 +562,28 @@
 {
 	[logFileListController removeObjects:[logFileListController arrangedObjects]];
 	[dataFileListController removeObjects:[dataFileListController arrangedObjects]];
+	[statmonTableView setDataSource:nil];
+	[statmonTableView setDelegate:nil];
+	[statmonTableView setTarget:nil];
 	[oldLogFilesText setStringValue:@""];
 	[oldTranLogsText setStringValue:@""];
 	[dataFileInfo setString:@""];
 	if (aDatabase == nil) return;
+	[aDatabase refreshStatmonFiles];
 	[logFileListController addObjects:[aDatabase logFiles]];
 	[oldLogFilesText setStringValue:[aDatabase descriptionOfOldLogFiles]];
 	[oldTranLogsText setStringValue:[aDatabase descriptionOfOldTranLogs]];
 	[dataFileListController addObjects:[aDatabase dataFiles]];
+	[statmonTableView setDataSource:aDatabase];
+	[statmonTableView setDelegate:aDatabase];
+	[statmonTableView setTarget:aDatabase];
+	[statmonTableView setDoubleAction:@selector(doubleClickStatmon:)];
+	[statmonTableView reloadData];
+}
+
+- (void)setIsStatmonFileSelected:(BOOL)flag;
+{
+	[statmonFileSelectedController setContent:[NSNumber numberWithBool:flag]];
 }
 
 - (void)setupExceptionHandler;
@@ -529,6 +605,11 @@
 	[taskCancelButton setTitle:@"Cancel"];
 	[taskCancelButton setEnabled:allowCancel];
 	[taskCloseWhenDoneButton setState:[setup.taskCloseWhenDoneCode integerValue]];
+}
+
+- (NSTableView *)statmonTableView;
+{
+	return statmonTableView;
 }
 
 - (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem;
@@ -595,7 +676,7 @@
 		}
 		[taskProgressText insertText:nextLine];
 	}
-	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
+	[self doRunLoopFor:0.01];
 }
 
 - (void)unzipDone:(NSNotification *)notification;
@@ -644,15 +725,13 @@
 {
 	Database *database = [self mostAdvancedDatabase];
 	if (!database) return;
-	if (![database hasIdentifier]) {
-		AppError(@"database not yet loaded!");
-	}
 	NSArray *list = [GSList processListUsingDatabase:database];
 	for (database in [databaseListController arrangedObjects]) {
 		[database gsList:list];
 	}
 	[processListController removeObjects:[processListController arrangedObjects]];
 	[processListController addObjects:list];
+	[databaseTableView reloadData];
 }
 
 - (IBAction)updateVersionList:(id)sender;

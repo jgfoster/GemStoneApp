@@ -12,8 +12,9 @@
 
 @implementation Utilities
 
-- (void)setupGlobals;
+- (void)setupGlobals:(AppController *)myApp;
 {
+	appController = myApp;
 	fileManager = [NSFileManager defaultManager];
 	notificationCenter = [NSNotificationCenter defaultCenter];
 	[self setupBasePath];

@@ -31,6 +31,12 @@
 	[standardOutput appendString:aString];
 }
 
+- (void)done;
+{
+	if ([standardOutput length]) return;
+	NSLog(@"done with no output!?");
+}
+
 - (void)doneWithError:(int)statusCode;
 {
 	foundNoProcesses = YES;
@@ -67,7 +73,11 @@
 			}
 		}
 	}
-	[list addObject:process];
+	if (process) {
+		[list addObject:process];
+	} else {
+		NSLog(@"no process!?");
+	}
 	return list;
 }
 

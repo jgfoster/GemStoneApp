@@ -16,6 +16,7 @@
 			[database name],
 			@"DataCurator",
 			@"swordfish",
+			@"-i",
 			nil];
 }
 
