@@ -519,6 +519,7 @@
 - (void)start;
 {
 	// use waitstone to see if a stone with our name is already running?
+	// check kernel settings and call helper tool if necessary
 	[self createConfigFile];
 	[self archiveCurrentLogFiles];
 	statmonFiles = nil;

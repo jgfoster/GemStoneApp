@@ -131,10 +131,8 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	[self start];
 	[task waitUntilExit];
 	// give a bit of time for output notifications
-	NSUInteger j = 0;
 	for (NSUInteger i = 1; doneCount < 2 && i <= 100; ++i) {
 		[appController doRunLoopFor:0.001 * i];
-		j = i;
 	}
 	// force things to finish without all the output
 	while (doneCount < 2) {
