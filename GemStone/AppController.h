@@ -22,6 +22,7 @@
 	IBOutlet NSButton				*removeButton;
 	IBOutlet NSArrayController		*versionListController;
 	IBOutlet NSArrayController		*versionPopupController;
+	IBOutlet NSArrayController		*upgradePopupController;
 	IBOutlet NSTextField			*oldLogFilesText;
 	IBOutlet NSButton				*deleteLogFilesButton;
 	IBOutlet NSTextField			*oldTranLogsText;
@@ -33,6 +34,8 @@
 	IBOutlet NSTabViewItem			*gsListTabViewItem;
 	IBOutlet NSTableView			*statmonTableView;
 	IBOutlet NSObjectController		*statmonFileSelectedController;
+	IBOutlet NSButton				*repositoryConversionCheckbox;
+	IBOutlet NSButton				*upgradeSeasideCheckbox;
 
 	IBOutlet NSPanel				*taskProgressPanel;
 	IBOutlet NSTextView				*taskProgressText;
@@ -51,6 +54,7 @@
 - (IBAction)defaultLogin:(id)sender;
 - (IBAction)deleteStatmonFiles:(id)sender;
 - (void)doRunLoopFor:(double)seconds;
+- (IBAction)doUpgrade:(id)sender;
 - (IBAction)installHelperTool:(id)sender;
 - (NSString *)mostAdvancedVersion;
 - (IBAction)openStatmonFiles:(id)sender;

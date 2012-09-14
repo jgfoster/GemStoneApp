@@ -41,6 +41,8 @@
 	[removeButton setEnabled:isCurrent];
 	[taskProgressText setFont:[NSFont fontWithName:@"Monaco" size:9]];
 	[statmonFileSelectedController setContent:[NSNumber numberWithBool:NO]];
+	[repositoryConversionCheckbox setState:NSOffState];
+	[upgradeSeasideCheckbox setState:NSOffState];
 		
 	NotifyMe(kTaskError,				taskError);
 	NotifyMe(kTaskProgress,				taskProgress);
@@ -59,7 +61,8 @@
 	[self performSelector:@selector(loadRequestForLogin)			withObject:nil afterDelay:0.03];
 	[self performSelector:@selector(loadRequestForVersion)			withObject:nil afterDelay:0.04];
 	[self performSelector:@selector(refreshInstalledVersionsList)	withObject:nil afterDelay:0.05];
-	[self performSelector:@selector(updateDatabaseState)			withObject:nil afterDelay:0.06];
+	[self performSelector:@selector(refreshUpgradeVersionsList)		withObject:nil afterDelay:0.06];
+	[self performSelector:@selector(updateDatabaseState)			withObject:nil afterDelay:0.07];
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender;
@@ -291,6 +294,16 @@
 - (void)doRunLoopFor:(double)seconds;
 {
 	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:seconds]];
+}
+
+- (IBAction)doUpgrade:(id)sender;
+{
+	Database *database = [self selectedDatabase];
+	NSString *oldVersion = [database version];
+	NSString *newVersion = [[upgradePopupController selectedObjects] objectAtIndex:0];
+	BOOL needsConversion = [repositoryConversionCheckbox state];
+	BOOL doSeasideUpgrade = [upgradeSeasideCheckbox state];
+	NSLog(@"doUpgrade: from %@ to %@ with %i and %i", oldVersion, newVersion, needsConversion, doSeasideUpgrade);
 }
 
 - (void)downloadDone:(NSNotification *)notification;
@@ -531,7 +544,8 @@
 - (void)removeVersionDone:(NSNotification *)notification;
 {
 	[notificationCenter removeObserver:self name:nil object:[notification object]];
-	[self refreshInstalledVersionsList];	
+	[self refreshInstalledVersionsList];
+	[self refreshUpgradeVersionsList];
 	[taskProgressText insertText:@" . . . Done!"];
 	[self taskFinishedAfterDelay];
 }
@@ -546,6 +560,21 @@
 		}
 	}
 	[lastUpdateDateField setObjectValue:setup.versionsDownloadDate];
+}
+
+- (void)refreshUpgradeVersionsList;
+{
+	Database *database = [self selectedDatabase];
+	[upgradePopupController removeObjects:[upgradePopupController arrangedObjects]];
+	if (database) {
+		NSString *currentVersion = [database version];
+		for (Version *version in [versionListController arrangedObjects]) {
+			NSString *name = [version name];
+			if ([version isInstalled] && [currentVersion compare:name] == NSOrderedAscending) {
+				[upgradePopupController addObject:name];
+			}
+		}
+	}
 }
 
 - (Database *)selectedDatabase;
@@ -579,6 +608,9 @@
 	[statmonTableView setTarget:aDatabase];
 	[statmonTableView setDoubleAction:@selector(doubleClickStatmon:)];
 	[statmonTableView reloadData];
+	[self refreshUpgradeVersionsList];
+	[repositoryConversionCheckbox setState:NSOffState];
+	[upgradeSeasideCheckbox setState:NSOffState];
 }
 
 - (void)setIsStatmonFileSelected:(BOOL)flag;
@@ -682,7 +714,8 @@
 - (void)unzipDone:(NSNotification *)notification;
 {
 	[notificationCenter removeObserver:self name:nil object:task];
-	[self refreshInstalledVersionsList];	
+	[self refreshInstalledVersionsList];
+	[self refreshUpgradeVersionsList];
 	[self taskFinishedAfterDelay];
 }
 
@@ -778,6 +811,7 @@
 	}
 	setup.versionsDownloadDate = [NSDate date];
 	[self refreshInstalledVersionsList];
+	[self refreshUpgradeVersionsList];
 	[self taskFinishedAfterDelay];
 }
 
