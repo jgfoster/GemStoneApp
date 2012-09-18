@@ -155,6 +155,7 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 - (void)start;
 {
 	[self verifyNoTask];
+	[notificationCenter postNotificationName:kTaskStart object:@"Starting task...\n"];
 	task = [NSTask new];
 	[task setCurrentDirectoryPath:[self currentDirectoryPath]];
 	[task setLaunchPath:[self launchPath]];

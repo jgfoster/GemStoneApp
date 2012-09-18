@@ -39,7 +39,6 @@
 
 - (void)dataString:(NSString *)aString;
 {
-//	NSLog(@"stdout: '%@'", aString);
 	[standardOutput appendString:aString];
 	[super dataString:aString];
 }
@@ -114,7 +113,6 @@
 	int result = [op runModal];
     if (result == NSOKButton) {
 		NSString *path = [[[op URLs] objectAtIndex:0] path];
-		NSLog(@"tranlog path = %@", path);
 	}
  */
 	outString = [self responseFrom:@"login\n"];

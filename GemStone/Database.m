@@ -11,7 +11,6 @@
 #import "Database.h"
 #import "GSList.h"
 #import "LogFile.h"
-#import "Setup.h"
 #import "Utilities.h"
 #import "Version.h"
 #import "VSD.h"
@@ -309,7 +308,7 @@
 - (NSNumber *)identifier;
 {
 	if (![identifier intValue]) {
-		identifier = [[appController setup] newDatabaseIdentifier];
+		identifier = [appController nextDatabaseIdentifier];
 		[self createDirectories];
 		version = [appController mostAdvancedVersion];
 		[self installBaseExtent];
@@ -348,8 +347,7 @@
 			AppError(@"unable to delete %@ because %@", target, [error description]);
 		}
 	}
-	[appController startTaskProgressSheetAndAllowCancel:NO];
-	[notificationCenter postNotificationName:kTaskProgress object:@"Copying extent . . ."];
+	[notificationCenter postNotificationName:kTaskStart object:@"Copying extent . . ."];
 	[self archiveCurrentTransactionLogs];
 	NSString *source = [NSString stringWithFormat:@"%@/bin/%@", [self gemstone], aString];
 	BOOL success = [fileManager copyItemAtPath:source toPath:target error:&error];
@@ -428,7 +426,6 @@
 	if ([appController statmonTableView] == aTableView) {
 		return [[self statmonFiles] count];
 	}
-	NSLog(@"numberOfRownInTableView:%@", aTableView);
 	return 0;
 }
 
@@ -598,10 +595,8 @@
 			}
 			return [NSString stringWithFormat:@"%lu MB", size / 1024];
 		}
-		NSLog(@"tableView:%@ objectValueForTableColumn:%@ row:%li", aTableView, aTableColumn, rowIndex);
 		return @"foo";
 	}
-	NSLog(@"tableView:%@ objectValueForTableColumn:%@ row:%li", aTableView, aTableColumn, rowIndex);
 	return nil;
 }
 
@@ -612,7 +607,6 @@
 		[appController setIsStatmonFileSelected:0 < [[tableView selectedRowIndexes] count]];
 		return;
 	}
-	NSLog(@"tableViewSelectionDidChange:%@", aNotification);
 }
 
 - (NSString *)version;

@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "Helper.h"
-#import "Setup.h"
 #import "Task.h"
 
 @interface AppController : NSObject <NSOpenSavePanelDelegate, NSTabViewDelegate> {
@@ -44,9 +43,11 @@
 	IBOutlet NSButton				*taskCancelButton;
 
 	Helper					*helper;
-	Task					*task;		// to protect it from being garbage collected!
-	Setup					*setup;
+	NSManagedObjectContext	*managedObjectContext;
+	NSManagedObject			*mySetup;	//	'setup' is too common for searches!
+	Task					*task;		//	to protect it from being garbage collected!
 	NSMutableDictionary		*statmonitors;
+	NSOperationQueue		*operations;
 }
 
 - (IBAction)cancelTask:(id)sender;
@@ -57,19 +58,16 @@
 - (IBAction)doUpgrade:(id)sender;
 - (IBAction)installHelperTool:(id)sender;
 - (NSString *)mostAdvancedVersion;
+- (NSNumber *)nextDatabaseIdentifier;
 - (IBAction)openStatmonFiles:(id)sender;
 - (IBAction)removeDatabase:(id)sender;
 - (IBAction)removeHelperTool:(id)sender;
-- (void)doRunLoopFor:(double)seconds;
 - (void)setIsStatmonFileSelected:(BOOL)flag;
-- (void)startTaskProgressSheetAndAllowCancel:(BOOL)allowCancel;
 - (NSTableView *)statmonTableView;
 - (IBAction)taskCloseWhenDone:(id)sender;
 - (void)taskFinishedAfterDelay;
 - (IBAction)unzipRequest:(id)sender;
 - (IBAction)updateVersionList:(id)sender;
 - (NSArray *)versionList;
-
- @property (readonly) Setup *setup;
 
 @end

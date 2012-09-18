@@ -28,9 +28,14 @@
 #define NotifyMe(aString, aSymbol) \
 [notificationCenter addObserver:self selector:@selector(aSymbol:) name:aString object:nil]
 
-@implementation AppController
+@interface NSManagedObject (Setup)
+@property(nonatomic, retain) NSNumber *lastDatabaseIdentifier;
+@property(nonatomic, retain) NSNumber *taskCloseWhenDoneCode;
+@property(nonatomic, retain) NSDate   *versionsDownloadDate;
+@end 
 
-@synthesize setup;
+
+@implementation AppController
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
 {
@@ -46,6 +51,7 @@
 		
 	NotifyMe(kTaskError,				taskError);
 	NotifyMe(kTaskProgress,				taskProgress);
+	NotifyMe(kTaskStart,				taskStart);
 	NotifyMe(kDownloadRequest,			downloadRequest);
 	NotifyMe(kRemoveRequest,			removeRequest);
 	NotifyMe(kDatabaseStartRequest,		databaseStartRequest);
@@ -56,7 +62,7 @@
 							 forKeyPath:@"selection"
 								options:(NSKeyValueObservingOptionNew)
 								context:nil];
-	[self performSelector:@selector(loadSetup)						withObject:nil afterDelay:0.01];
+	[self performSelector:@selector(loadRequestForSetup)			withObject:nil afterDelay:0.01];
 	[self performSelector:@selector(loadRequestForDatabase)			withObject:nil afterDelay:0.02];
 	[self performSelector:@selector(loadRequestForLogin)			withObject:nil afterDelay:0.03];
 	[self performSelector:@selector(loadRequestForVersion)			withObject:nil afterDelay:0.04];
@@ -104,20 +110,13 @@
 			database.indexInArray = [NSNumber numberWithInt:i];
 		}
 	}
-	NSManagedObjectContext *moc = [self managedObjectContext];
-	if (![moc hasChanges]) {
-		return;
-	}
-	NSError *error = nil;
-	if (![moc save:&error]) {
-		AppError(@"Data save failed\n%@",
-			  ([error localizedDescription] != nil) ?
-			  [error localizedDescription] : @"Unknown Error");
-	}
+
+	[self saveData];
 }
 
 - (IBAction)cancelTask:(id)sender
 {
+	[operations cancelAllOperations];
 	if (!task) {	// initializing a database does not use a task but shows the task pane
 		[self taskFinished];
 		return;
@@ -125,7 +124,7 @@
 	if ([task isRunning]) {
 		[taskProgressText insertText:@"\n\nSending task cancel request . . ."];
 		[task cancelTask];
-		[self taskFinishedAfterDelay];
+//		[self taskFinishedAfterDelay];
 	} else {	//	Presumably this means that the title was changed to "Close"
 		[self taskFinished];
 	}
@@ -217,7 +216,6 @@
 	 selector:@selector(databaseStartStoneDone:) 
 	 name:kTaskDone 
 	 object:task];
-	[self startTaskProgressSheetAndAllowCancel:YES];
 	[task start];
 }
 
@@ -261,19 +259,17 @@
 	 selector:@selector(databaseStopStoneDone:) 
 	 name:kTaskDone 
 	 object:task];
-	[self startTaskProgressSheetAndAllowCancel:YES];
 	[task start];
 	[taskProgressText insertText:@"Initiating database shutdown . . .\n\n"];
 }
 
 - (Login *)defaultLoginForDatabase:(Database *)database;
 {
-	NSManagedObjectContext *moc = [self managedObjectContext];
-	NSManagedObjectModel *managedObjectModel = [[moc persistentStoreCoordinator] managedObjectModel];
+	NSManagedObjectModel *managedObjectModel = [[managedObjectContext persistentStoreCoordinator] managedObjectModel];
 	NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Login"];
 	Login *login = [[Login alloc]
 					initWithEntity:entity
-					insertIntoManagedObjectContext:moc];
+					insertIntoManagedObjectContext:managedObjectContext];
 	[login initializeForDatabase:database];
 	return login;
 }
@@ -310,7 +306,6 @@
 {
 	[notificationCenter removeObserver:self name:nil object:task];
 	task = nil;	
-	[taskCancelButton setEnabled:NO];
 	[self unzipPath:[[notification object] zipFilePath]];
 }
 
@@ -325,7 +320,6 @@
 	 selector:@selector(downloadDone:) 
 	 name:kTaskDone 
 	 object:task];
-	[self startTaskProgressSheetAndAllowCancel:YES];
 	[task start];
 }
 
@@ -341,10 +335,36 @@
 {
 	if (self = [super init]) {
 		[[Utilities new] setupGlobals:self];
+		[self initManagedObjectContext];
 		[self setupExceptionHandler];
 		statmonitors = [NSMutableDictionary new];
+		operations = [NSOperationQueue new];
+		[operations setName:@"OperationQueue"];
 	}
 	return self;
+}
+
+- (void) initManagedObjectContext;
+{
+    managedObjectContext = [[NSManagedObjectContext alloc] init];
+	NSManagedObjectModel *model = [NSManagedObjectModel mergedModelFromBundles:nil];
+	NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc]
+												 initWithManagedObjectModel: model];
+    [managedObjectContext setPersistentStoreCoordinator: coordinator];
+	NSURL *url = [NSURL 
+				  fileURLWithPath:[basePath stringByAppendingString:@"/data.binary"] 
+				  isDirectory:NO];
+    NSError *error = nil;
+    NSPersistentStore *newStore = [coordinator addPersistentStoreWithType:NSBinaryStoreType
+															configuration:nil
+																	  URL:url
+																  options:nil
+																	error:&error];
+    if (!newStore) {
+        AppError(@"Store Configuration Failure\n%@",
+				 ([error localizedDescription] != nil) ?
+				 [error localizedDescription] : @"Unknown Error");
+    }
 }
 
 - (IBAction)installHelperTool:(id)sender
@@ -365,6 +385,20 @@
 	[self loadRequest:@"Login" toController:loginListController];
 }
 
+- (void)loadRequestForSetup;
+{
+	NSEntityDescription *entity = [NSEntityDescription entityForName:@"Setup" inManagedObjectContext:managedObjectContext];
+	NSFetchRequest *request = [NSFetchRequest new];
+	[request setEntity:entity];
+	NSError *error = nil;
+	NSArray *list = [managedObjectContext executeFetchRequest:request error:&error];
+	if (!list || ![list count]) {
+		mySetup = [NSEntityDescription insertNewObjectForEntityForName:@"Setup" inManagedObjectContext:managedObjectContext];
+	} else {
+		mySetup = [list objectAtIndex:0];
+	}
+}
+
 - (void)loadRequestForVersion;
 {
 	[self loadRequest:@"Version" toController:versionListController];
@@ -372,11 +406,10 @@
 
 - (void)loadRequest:(NSString *)requestName toController:(NSArrayController *)controller;
 {
-	NSManagedObjectContext *moc = [self managedObjectContext];
 	NSError *error = nil;
 	
 	NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:requestName];
-	NSArray *list = [moc executeFetchRequest:request error:&error];
+	NSArray *list = [managedObjectContext executeFetchRequest:request error:&error];
 	if (!list) {
         AppError(@"Data load failed\n%@",
 			  ([error localizedDescription] != nil) ?
@@ -392,55 +425,6 @@
 	[controller setSelectsInsertedObjects:NO];
 	[controller addObjects:sortedArray];
 	[controller setSelectsInsertedObjects:YES];
-}
-
-- (void)loadSetup;
-{
-	NSArrayController *setupController = [NSArrayController new];
-	[self loadRequest:@"Setup" toController:setupController];
-	int count = [[setupController arrangedObjects] count];
-	if (count) {
-		setup = [[setupController arrangedObjects] objectAtIndex:0];
-	} else {
-		NSManagedObjectContext *moc = [self managedObjectContext];
-		NSManagedObjectModel *managedObjectModel = [[moc persistentStoreCoordinator] managedObjectModel];
-		NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Setup"];
-		setup = [[Setup alloc]
-				 initWithEntity:entity 
-				 insertIntoManagedObjectContext:moc];
-	}
-}
-
-- (NSManagedObjectContext *)managedObjectContext;
-{
-    static NSManagedObjectContext *moc = nil;
-    if (moc != nil) {
-        return moc;
-    }
-	
-    moc = [[NSManagedObjectContext alloc] init];
-
-	NSPersistentStoreCoordinator *coordinator =
-	[[NSPersistentStoreCoordinator alloc]
-	 initWithManagedObjectModel: [NSManagedObjectModel mergedModelFromBundles:nil]];
-    [moc setPersistentStoreCoordinator: coordinator];
-	
-    NSError *error = nil;
-    NSURL *url = [NSURL 
-				  fileURLWithPath:[basePath stringByAppendingString:@"/data.binary"] 
-				  isDirectory:NO];
-	
-    NSPersistentStore *newStore = [coordinator addPersistentStoreWithType:NSBinaryStoreType
-															configuration:nil
-																	  URL:url
-																  options:nil
-																	error:&error];
-    if (newStore == nil) {
-        AppError(@"Store Configuration Failure\n%@",
-			  ([error localizedDescription] != nil) ?
-			  [error localizedDescription] : @"Unknown Error");
-    }
-	return moc;
 }
 
 - (Database *)mostAdvancedDatabase;
@@ -467,6 +451,14 @@
 		}
 	}
 	return version;
+}
+
+- (NSNumber *)nextDatabaseIdentifier;
+{
+	NSNumber *identifier = [mySetup lastDatabaseIdentifier];
+	identifier = [NSNumber numberWithInt:[identifier intValue] + 1];
+	[mySetup setLastDatabaseIdentifier:identifier];
+	return identifier;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context;
@@ -531,7 +523,6 @@
 - (void)removeRequest:(NSNotification *)notification;
 {
 	Version *version = [notification object];
-	[self startTaskProgressSheetAndAllowCancel:NO];
 	[taskProgressText insertText:[@"Deleting version " stringByAppendingString:[version name]]];
 	[notificationCenter
 	 addObserver:self 
@@ -559,7 +550,7 @@
 			[versionPopupController addObject:[version name]];
 		}
 	}
-	[lastUpdateDateField setObjectValue:setup.versionsDownloadDate];
+	[lastUpdateDateField setObjectValue:[mySetup versionsDownloadDate]];
 }
 
 - (void)refreshUpgradeVersionsList;
@@ -574,6 +565,18 @@
 				[upgradePopupController addObject:name];
 			}
 		}
+	}
+}
+
+- (void)saveData;
+{
+	if (![managedObjectContext hasChanges]) return;
+	
+	NSError *error = nil;
+	if (![managedObjectContext save:&error]) {
+		AppError(@"Data save failed\n%@",
+				 ([error localizedDescription] != nil) ?
+				 [error localizedDescription] : @"Unknown Error");
 	}
 }
 
@@ -625,20 +628,6 @@
 	[handler setDelegate:self];
 }
 
-- (void)startTaskProgressSheetAndAllowCancel:(BOOL)allowCancel;
-{
-    [NSApp beginSheet:taskProgressPanel
-       modalForWindow:[NSApp mainWindow]
-        modalDelegate:self
-       didEndSelector:nil
-          contextInfo:nil];
-	[taskProgressIndicator setIndeterminate:YES];
-	[taskProgressIndicator startAnimation:self];
-	[taskCancelButton setTitle:@"Cancel"];
-	[taskCancelButton setEnabled:allowCancel];
-	[taskCloseWhenDoneButton setState:[setup.taskCloseWhenDoneCode integerValue]];
-}
-
 - (NSTableView *)statmonTableView;
 {
 	return statmonTableView;
@@ -656,17 +645,27 @@
 {
 	NSButton *myButton = sender;
 	NSInteger state = [myButton state];
-	setup.taskCloseWhenDoneCode = [NSNumber numberWithInteger:state];
+	[mySetup setTaskCloseWhenDoneCode:[NSNumber numberWithInteger:state]];
 }
 
 - (void)taskError:(NSNotification *)notification;
 {
 	[notificationCenter removeObserver:self name:nil object:task];
+	[self performSelectorOnMainThread:@selector(taskErrorA:) withObject:notification waitUntilDone:NO];
+}
+
+- (void)taskErrorA:(NSNotification *)notification;
+{
 	[self criticalAlert:@"Task Failed" details:[[notification userInfo] objectForKey:@"string"]];
 	[self taskFinishedAfterDelay];
 }
 
 - (void)taskFinished;
+{
+	[self performSelectorOnMainThread:@selector(taskFinishedA) withObject:nil waitUntilDone:NO];
+}
+
+- (void)taskFinishedA;
 {
 	task = nil;
 	[taskProgressText setString:[NSMutableString new]];
@@ -676,15 +675,25 @@
 
 - (void)taskFinishedAfterDelay;
 {
+	[self performSelectorOnMainThread:@selector(taskFinishedAfterDelayA) withObject:nil waitUntilDone:NO];
+}
+
+- (void)taskFinishedAfterDelayA;
+{
 	[taskProgressIndicator stopAnimation:self];
 	[taskCancelButton setTitle:@"Close"];
-	[taskCancelButton setEnabled:YES];
-	if ([setup.taskCloseWhenDoneCode boolValue]) {
-		[self performSelector:@selector(taskFinished) withObject:nil afterDelay:1];
+	if ([[mySetup taskCloseWhenDoneCode] boolValue]) {
+		[self doRunLoopFor: 1.0];
+		[self taskFinishedA];
 	}
 }
 
 - (void)taskProgress:(NSNotification *)notification;
+{
+	[self performSelectorOnMainThread:@selector(taskProgressA:) withObject:notification waitUntilDone:NO];
+}
+
+- (void)taskProgressA:(NSNotification *)notification;
 {
 	NSArray *array = [[notification object] componentsSeparatedByString:@"\r"];
 	[taskProgressText insertText:[array objectAtIndex:0]];
@@ -708,12 +717,29 @@
 		}
 		[taskProgressText insertText:nextLine];
 	}
-	[self doRunLoopFor:0.01];
 }
 
-- (void)unzipDone:(NSNotification *)notification;
+- (void)taskStart:(NSNotification *)notification;
 {
-	[notificationCenter removeObserver:self name:nil object:task];
+	[self performSelectorOnMainThread:@selector(taskStartA:) withObject:notification waitUntilDone:NO];
+}
+
+- (void)taskStartA:(NSNotification *)notification;
+{
+    [NSApp beginSheet:taskProgressPanel
+       modalForWindow:[NSApp mainWindow]
+        modalDelegate:self
+       didEndSelector:nil
+          contextInfo:nil];
+	[taskProgressIndicator setIndeterminate:YES];
+	[taskProgressIndicator startAnimation:self];
+	[taskCancelButton setTitle:@"Cancel"];
+	[taskCloseWhenDoneButton setState:[[mySetup taskCloseWhenDoneCode] integerValue]];
+	[self taskProgressA:notification];
+}
+
+- (void)unzipDone;
+{
 	[self refreshInstalledVersionsList];
 	[self refreshUpgradeVersionsList];
 	[self taskFinishedAfterDelay];
@@ -724,24 +750,24 @@
 	ImportZippedVersion *myTask = [ImportZippedVersion new];
 	task = myTask;
 	myTask.zipFilePath = path;
-	[notificationCenter
-	 addObserver:self 
-	 selector:@selector(unzipDone:) 
-	 name:kTaskDone 
-	 object:task];
-	[task start];
+
+	NSInvocationOperation *unzip = [[NSInvocationOperation alloc] 
+									initWithTarget:task selector:@selector(run) object:nil];
+	NSInvocationOperation *update = [[NSInvocationOperation alloc] 
+									 initWithTarget:self selector:@selector(unzipDone) object:nil];
+	[update addDependency:unzip];
+	[operations addOperation:unzip];
+	[operations addOperation:update];
 }
 
 - (IBAction)unzipRequest:(id)sender;
 {
 	[self verifyNoTask];
-	//	get path to zip file
-	NSOpenPanel *op = [NSOpenPanel openPanel];
+	NSOpenPanel *op = [NSOpenPanel openPanel];		//	get path to zip file
 	[op setDelegate:self];
 	int result = [op runModal];
 	[op setDelegate:nil];
     if (result != NSOKButton) return;
-	[self startTaskProgressSheetAndAllowCancel:NO];
 	[self unzipPath:[[[op URLs] objectAtIndex:0] path]];
 }
 
@@ -771,20 +797,18 @@
 {
 	[self verifyNoTask];
 	task = [DownloadVersionList new];
-	[notificationCenter
-	 addObserver:self 
-	 selector:@selector(updateVersionsDone:) 
-	 name:kTaskDone 
-	 object:task];
-	[self startTaskProgressSheetAndAllowCancel:YES];
-	[task start];
+	NSInvocationOperation *download = [[NSInvocationOperation alloc] 
+									   initWithTarget:task selector:@selector(run) object:nil];
+	NSInvocationOperation *update = [[NSInvocationOperation alloc] 
+									 initWithTarget:self selector:@selector(updateVersionListDone) object:nil];
+	[update addDependency:download];
+	[operations addOperation:download];
+	[operations addOperation:update];
 }
 
-- (void)updateVersionsDone:(NSNotification *)notification;
+- (void)updateVersionListDone;
 {
-	[notificationCenter removeObserver:self name:nil object:task];
-	NSManagedObjectContext *moc = [self managedObjectContext];
-	NSManagedObjectModel *managedObjectModel = [[moc persistentStoreCoordinator] managedObjectModel];
+	NSManagedObjectModel *managedObjectModel = [[managedObjectContext persistentStoreCoordinator] managedObjectModel];
 	NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Version"];
 	
 	NSArray *oldVersions = [versionListController arrangedObjects];
@@ -803,13 +827,13 @@
 		} else {
 			Version *version = [[Version alloc]
 								initWithEntity:entity 
-								insertIntoManagedObjectContext:moc];
+								insertIntoManagedObjectContext:managedObjectContext];
 			[version setName:[dict objectForKey:@"name"]];
 			[version setDate:[dict objectForKey:@"date"]];
 			[versionListController insertObject:version atArrangedObjectIndex:0];
 		}
 	}
-	setup.versionsDownloadDate = [NSDate date];
+	[mySetup setVersionsDownloadDate:[NSDate date]];
 	[self refreshInstalledVersionsList];
 	[self refreshUpgradeVersionsList];
 	[self taskFinishedAfterDelay];

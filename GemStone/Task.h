@@ -8,9 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
-#define kTaskDone @"taskDone"
-#define kTaskError @"taskError"
-#define kTaskProgress @"taskProgress"
+#define kTaskDone		@"taskDone"
+#define kTaskError		@"taskError"
+#define kTaskProgress	@"taskProgress"
+#define kTaskStart		@"taskStart"
 
 @interface Task : NSObject {
 	NSTask			*task;
