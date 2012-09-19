@@ -10,7 +10,6 @@
 
 #define kDownloadRequest	@"downloadRequest"
 #define kRemoveRequest		@"removeVersionRequest"
-#define kRemoveVersionDone	@"removeVersionDone"
 
 @interface Version : NSManagedObject {
 	NSNumber	*isInstalledCode;

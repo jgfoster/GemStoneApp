@@ -9,9 +9,6 @@
 #import "Utilities.h"
 #import "Version.h"
 
-@interface Version ()
-@end
-
 @implementation Version
 
 @dynamic isInstalledCode;
@@ -40,6 +37,10 @@
 
 - (void)remove;
 {
+	[notificationCenter 
+	 postNotificationName:kTaskStart 
+	 object:[@"Deleting version " stringByAppendingString:name]];
+
 	NSError *error = nil;
 	NSString *productPath = [self productPath];
 	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:productPath];
@@ -57,9 +58,7 @@
 			}
 		}
 	}
-	if ([fileManager removeItemAtPath:[self productPath] error:&error]) {
-		[notificationCenter postNotificationName:kRemoveVersionDone object:self];
-	} else {
+	if (![fileManager removeItemAtPath:[self productPath] error:&error]) {
 		AppError(@"Unable to remove %@ because %@", [self productPath], [error description]);
 	}
 }

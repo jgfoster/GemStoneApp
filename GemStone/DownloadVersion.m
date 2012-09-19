@@ -35,8 +35,6 @@
 
 - (NSString *)createZipFile;
 {
-	NSString *zippedFileName = [version zippedFileName];
-	zipFilePath = [NSMutableString stringWithFormat:@"%@/%@", basePath, zippedFileName];
 	BOOL exists, isDirectory = NO, success;
 	exists = [fileManager fileExistsAtPath:zipFilePath isDirectory:&isDirectory];
 	if (exists) {
@@ -90,6 +88,12 @@
 	[fileManager removeItemAtPath:zipFilePath error:nil];
 	zipFilePath = nil;
 	[super doneWithError:statusCode];
+}
+
+- (void)setVersion:(Version *)aVersion;
+{
+	version = aVersion;
+	zipFilePath = [NSMutableString stringWithFormat:@"%@/%@", basePath, [version zippedFileName]];
 }
 
 - (void)start;

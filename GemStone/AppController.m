@@ -312,15 +312,30 @@
 - (void)downloadRequest:(NSNotification *)notification;
 {
 	[self verifyNoTask];
-	DownloadVersion *myTask = [DownloadVersion new];
-	task = myTask;
-	[myTask setVersion:[notification object]];
-	[notificationCenter
-	 addObserver:self 
-	 selector:@selector(downloadDone:) 
-	 name:kTaskDone 
-	 object:task];
-	[task start];
+	
+	DownloadVersion *downloadTask = [DownloadVersion new];
+	[downloadTask setVersion:[notification object]];
+	NSInvocationOperation *download = [[NSInvocationOperation alloc] 
+									initWithTarget:downloadTask 
+									selector:@selector(run) 
+									object:nil];
+	[operations addOperation:download];
+
+	ImportZippedVersion *unzipTask = [ImportZippedVersion new];
+	unzipTask.zipFilePath = [downloadTask zipFilePath];
+	NSInvocationOperation *unzip = [[NSInvocationOperation alloc] 
+									initWithTarget:unzipTask 
+									selector:@selector(run) 
+									object:nil];
+	[unzip addDependency:download];
+	[operations addOperation:unzip];
+	
+	NSInvocationOperation *update = [[NSInvocationOperation alloc] 
+									 initWithTarget:self 
+									 selector:@selector(unzipDone) 
+									 object:nil];
+	[update addDependency:unzip];
+	[operations addOperation:update];
 }
 
 - (BOOL)exceptionHandler:(NSExceptionHandler *)sender shouldLogException:(NSException *)exception mask:(unsigned int)aMask;
@@ -522,19 +537,23 @@
 
 - (void)removeRequest:(NSNotification *)notification;
 {
-	Version *version = [notification object];
-	[taskProgressText insertText:[@"Deleting version " stringByAppendingString:[version name]]];
-	[notificationCenter
-	 addObserver:self 
-	 selector:@selector(removeVersionDone:) 
-	 name:kRemoveVersionDone 
-	 object:version];
-	[version performSelector:@selector(remove) withObject:nil afterDelay:0.1];
+	[self verifyNoTask];
+	NSInvocationOperation *remove = [[NSInvocationOperation alloc] 
+									   initWithTarget:[notification object]
+									   selector:@selector(remove) 
+									   object:nil];
+	[operations addOperation:remove];
+
+	NSInvocationOperation *update = [[NSInvocationOperation alloc] 
+									 initWithTarget:self 
+									 selector:@selector(removeVersionDone) 
+									 object:nil];
+	[update addDependency:remove];
+	[operations addOperation:update];
 }
 
-- (void)removeVersionDone:(NSNotification *)notification;
+- (void)removeVersionDone;
 {
-	[notificationCenter removeObserver:self name:nil object:[notification object]];
 	[self refreshInstalledVersionsList];
 	[self refreshUpgradeVersionsList];
 	[taskProgressText insertText:@" . . . Done!"];
@@ -682,8 +701,12 @@
 {
 	[taskProgressIndicator stopAnimation:self];
 	[taskCancelButton setTitle:@"Close"];
+	[self performSelector:@selector(taskFinishedAfterDelayB) withObject:nil afterDelay:1.0];
+}
+
+- (void)taskFinishedAfterDelayB;
+{
 	if ([[mySetup taskCloseWhenDoneCode] boolValue]) {
-		[self doRunLoopFor: 1.0];
 		[self taskFinishedA];
 	}
 }
@@ -726,15 +749,17 @@
 
 - (void)taskStartA:(NSNotification *)notification;
 {
-    [NSApp beginSheet:taskProgressPanel
-       modalForWindow:[NSApp mainWindow]
-        modalDelegate:self
-       didEndSelector:nil
-          contextInfo:nil];
-	[taskProgressIndicator setIndeterminate:YES];
-	[taskProgressIndicator startAnimation:self];
-	[taskCancelButton setTitle:@"Cancel"];
-	[taskCloseWhenDoneButton setState:[[mySetup taskCloseWhenDoneCode] integerValue]];
+	if (![taskProgressPanel isVisible]) {
+		[NSApp beginSheet:taskProgressPanel
+		   modalForWindow:[NSApp mainWindow]
+			modalDelegate:self
+		   didEndSelector:nil
+			  contextInfo:nil];
+		[taskProgressIndicator setIndeterminate:YES];
+		[taskProgressIndicator startAnimation:self];
+		[taskCancelButton setTitle:@"Cancel"];
+		[taskCloseWhenDoneButton setState:[[mySetup taskCloseWhenDoneCode] integerValue]];
+	}
 	[self taskProgressA:notification];
 }
 
@@ -747,17 +772,7 @@
 
 - (void)unzipPath:(NSString *)path;
 {
-	ImportZippedVersion *myTask = [ImportZippedVersion new];
-	task = myTask;
-	myTask.zipFilePath = path;
-
-	NSInvocationOperation *unzip = [[NSInvocationOperation alloc] 
-									initWithTarget:task selector:@selector(run) object:nil];
-	NSInvocationOperation *update = [[NSInvocationOperation alloc] 
-									 initWithTarget:self selector:@selector(unzipDone) object:nil];
-	[update addDependency:unzip];
-	[operations addOperation:unzip];
-	[operations addOperation:update];
+	NSLog(@"how did we get here?");
 }
 
 - (IBAction)unzipRequest:(id)sender;
@@ -768,7 +783,21 @@
 	int result = [op runModal];
 	[op setDelegate:nil];
     if (result != NSOKButton) return;
-	[self unzipPath:[[[op URLs] objectAtIndex:0] path]];
+	
+	ImportZippedVersion *myTask = [ImportZippedVersion new];
+	myTask.zipFilePath = [[[op URLs] objectAtIndex:0] path];
+	NSInvocationOperation *unzip = [[NSInvocationOperation alloc] 
+									initWithTarget:myTask 
+									selector:@selector(run) 
+									object:nil];
+	[operations addOperation:unzip];
+	
+	NSInvocationOperation *update = [[NSInvocationOperation alloc] 
+									 initWithTarget:self 
+									 selector:@selector(unzipDone) 
+									 object:nil];
+	[update addDependency:unzip];
+	[operations addOperation:update];
 }
 
 - (void)updateDatabaseList:(id)sender;
@@ -796,13 +825,16 @@
 - (IBAction)updateVersionList:(id)sender;
 {
 	[self verifyNoTask];
-	task = [DownloadVersionList new];
 	NSInvocationOperation *download = [[NSInvocationOperation alloc] 
-									   initWithTarget:task selector:@selector(run) object:nil];
-	NSInvocationOperation *update = [[NSInvocationOperation alloc] 
-									 initWithTarget:self selector:@selector(updateVersionListDone) object:nil];
-	[update addDependency:download];
+									   initWithTarget:[DownloadVersionList new] 
+									   selector:@selector(run) 
+									   object:nil];
 	[operations addOperation:download];
+	NSInvocationOperation *update = [[NSInvocationOperation alloc] 
+									 initWithTarget:self 
+									 selector:@selector(updateVersionListDone) 
+									 object:nil];
+	[update addDependency:download];
 	[operations addOperation:update];
 }
 
@@ -841,7 +873,7 @@
 
 - (void)verifyNoTask;
 {
-	if (!task) return;
+	if (!task && ![operations operationCount]) return;
 	AppError(@"Task should not be in progress!");
 }
 
