@@ -7,6 +7,7 @@
 //
 
 #import "StopStone.h"
+#import "Utilities.h"
 
 @implementation StopStone
 
@@ -23,12 +24,20 @@
 - (void)done;
 {
 	[database setIsRunning:NO];
+	[database archiveCurrentLogFiles];
+	[database archiveCurrentTransactionLogs];
 	[super done];
 }
 
 - (NSString *)launchPath;
 { 
 	return [NSString stringWithFormat:@"%@/bin/stopstone", [database gemstone]];
+}
+
+- (void)main;
+{
+	[notificationCenter postNotificationName:kTaskProgress object:@"\nStopping Stone . . .\n"];	
+	[super main];
 }
 
 @end

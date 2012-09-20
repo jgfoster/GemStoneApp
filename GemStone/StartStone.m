@@ -7,6 +7,7 @@
 //
 
 #import "StartStone.h"
+#import "Utilities.h"
 
 @implementation StartStone
 
@@ -28,6 +29,12 @@
 - (NSString *)launchPath;
 { 
 	return [NSString stringWithFormat:@"%@/bin/startstone", [database gemstone]];
+}
+
+- (void)main;
+{
+	[notificationCenter postNotificationName:kTaskProgress object:@"\n"];	
+	[super main];
 }
 
 @end

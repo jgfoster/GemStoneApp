@@ -114,19 +114,10 @@
 
 - (IBAction)cancelTask:(id)sender
 {
-	if (taskX) {
-		if ([taskX isExecuting]) {
-			[taskProgressText insertText:@"\n\nSending task cancel request . . ."];
-			[taskX cancel];
-		} else {	//	Presumably this means that the title was changed to "Close"
-			[self taskFinished];
-		}
-	} else {
-		if (0 < [operations operationCount]) {
-			[operations cancelAllOperations];
-		} else {	//	Presumably this means that the title was changed to "Close"
-			[self taskFinished];
-		}
+	if (0 < [operations operationCount]) {
+		[operations cancelAllOperations];
+	} else {	//	Presumably this means that the title was changed to "Close"
+		[self taskFinished];
 	}
 }
 
@@ -154,113 +145,75 @@
 	[alert runModal];
 }
 
-- (void)databaseStartNetLdiDone:(NSNotification *)notification;
-{
-	[taskProgressText insertText:@"\n============================\n"];
-	[notificationCenter removeObserver:self name:nil object:taskX];
-	Database *database = [(DatabaseTask *) taskX database];
-	Statmonitor *monitor = [Statmonitor forDatabase:database];
-	[monitor start];
-	NSString *key = [[database identifier] stringValue];
-	[statmonitors setValue:monitor forKey:key];
-	[self updateDatabaseList:nil];
-	[self performSelector:@selector(updateDatabaseList:) withObject:nil afterDelay:1.0];
-	[database performSelector:@selector(refreshStatmonFiles) withObject:nil afterDelay:0.4];
-	[statmonTableView performSelector:@selector(reloadData) withObject:nil afterDelay:0.5];
-	NSString *path = [database restorePath];
-	if (path) {
-		[self doRunLoopFor:0.1];
-		[taskProgressText insertText:@"\n============================\n"];
-		Login *login = [self defaultLoginForDatabase:database];
-		Topaz *myTask = [Topaz login:login toDatabase:database];
-		taskX = myTask;
-		[notificationCenter
-		 addObserver:self 
-		 selector:@selector(databaseStartRestoreDone:) 
-		 name:kTaskDone 
-		 object:taskX];
-		[myTask restoreFromBackup];
-	} else {
-		[self taskFinishedAfterDelay];
-	}
-}
-
 - (void)databaseStartRestoreDone:(NSNotification *)notification;
 {
+/*
+	Login *login = [self defaultLoginForDatabase:database];
+	Topaz *myTask = [Topaz login:login toDatabase:database];
+	[myTask restoreFromBackup];
 	[notificationCenter removeObserver:self name:nil object:taskX];
 	[self taskFinishedAfterDelay];
+ */
 }
 
-- (void)databaseStartStoneDone:(NSNotification *)notification;
+- (void)databaseStartDone:(Database *)aDatabase;
 {
-	[taskProgressText insertText:@"\n============================\n"];
-	[notificationCenter removeObserver:self name:nil object:taskX];
-	Database *database = [(DatabaseTask *) taskX database];
-	StartNetLDI *startNetLdiTask = [StartNetLDI forDatabase:database];
-	taskX = startNetLdiTask;
-	[notificationCenter
-	 addObserver:self 
-	 selector:@selector(databaseStartNetLdiDone:) 
-	 name:kTaskDone 
-	 object:taskX];
-	[taskX start];
+	[self updateDatabaseList:nil];
+	[aDatabase			performSelector:@selector(refreshStatmonFiles)	withObject:nil afterDelay:0.4];
+	[statmonTableView	performSelector:@selector(reloadData)			withObject:nil afterDelay:0.5];
+	[self				performSelector:@selector(updateDatabaseList:)	withObject:nil afterDelay:1.0];
+	[self taskFinishedAfterDelay];
 }
 
 - (void)databaseStartRequest:(NSNotification *)notification;
 {
 	[self verifyNoTask];
-	StartStone *myTask = [StartStone forDatabase:[notification object]];
-	taskX = myTask;
-	[notificationCenter
-	 addObserver:self 
-	 selector:@selector(databaseStartStoneDone:) 
-	 name:kTaskDone 
-	 object:taskX];
-	[taskX start];
-}
-
-- (void)databaseStopNetLdiDone:(NSNotification *)notification;
-{
-	[notificationCenter removeObserver:self name:nil object:taskX];
-	Database *database = [(DatabaseTask *) taskX database];
+	[self taskStartA:@"Starting NetLDI, Stone, and Statmonitor . . .\n\n"];
+	Database *database = [notification object];
+	StartNetLDI *startNetLdi = [StartNetLDI forDatabase:database];
+	StartStone *startStone = [StartStone forDatabase:database];
+	[startStone addDependency:startNetLdi];
+	Statmonitor *monitor = [Statmonitor forDatabase:database];
+	[monitor addDependency:startStone];
 	NSString *key = [[database identifier] stringValue];
-	Statmonitor *monitor = [statmonitors valueForKey:key];
-	[statmonitors setValue:nil forKey:key];
-	[monitor cancel];
-	[self updateDatabaseList:nil];
-	[database performSelector:@selector(refreshStatmonFiles) withObject:nil afterDelay:0.4];
-	[statmonTableView performSelector:@selector(reloadData) withObject:nil afterDelay:0.5];
-	[self taskFinishedAfterDelay];
+	[statmonitors setValue:monitor forKey:key];
+	[monitor setCompletionBlock:^(){
+		[self performSelectorOnMainThread:@selector(databaseStartDone:) 
+							   withObject:database
+							waitUntilDone:NO];
+	}];
+	
+	[operations addOperation:startNetLdi];
+	[operations addOperation:startStone];
+	[operations addOperation:monitor];
 }
 
-- (void)databaseStopStoneDone:(NSNotification *)notification;
+- (void)databaseStopDone:(Database *)aDatabase;
 {
-	[notificationCenter removeObserver:self name:nil object:taskX];
-	Database *database = [(DatabaseTask *) taskX database];
-	[database archiveCurrentLogFiles];
-	[database archiveCurrentTransactionLogs];
-	StopNetLDI *stopNetLdiTask = [StopNetLDI forDatabase:database];
-	taskX = stopNetLdiTask;
-	[notificationCenter
-	 addObserver:self 
-	 selector:@selector(databaseStopNetLdiDone:) 
-	 name:kTaskDone 
-	 object:taskX];
-	[taskX start];
+	[self updateDatabaseList:nil];
+	[aDatabase			performSelector:@selector(refreshStatmonFiles)	withObject:nil afterDelay:0.4];
+	[statmonTableView	performSelector:@selector(reloadData)			withObject:nil afterDelay:0.5];
+	[self taskFinishedAfterDelay];
 }
 
 - (void)databaseStopRequest:(NSNotification *)notification;
 {
 	[self verifyNoTask];
-	StopStone *myTask = [StopStone forDatabase:[notification object]];
-	taskX = myTask;
-	[notificationCenter
-	 addObserver:self 
-	 selector:@selector(databaseStopStoneDone:) 
-	 name:kTaskDone 
-	 object:taskX];
-	[taskX start];
-	[taskProgressText insertText:@"Initiating database shutdown . . .\n\n"];
+	[self taskStartA:@"Stopping NetLDI and Stone . . .\n\n"];
+	Database *database = [notification object];
+	StopNetLDI *stopNetLdi = [StopNetLDI forDatabase:database];
+	StopStone *stopStone = [StopStone forDatabase:database];
+	[stopStone addDependency:stopNetLdi];
+	NSString *key = [[database identifier] stringValue];
+	[statmonitors setValue:nil forKey:key];
+	[stopStone setCompletionBlock:^(){
+		[self performSelectorOnMainThread:@selector(databaseStopDone:) 
+							   withObject:database
+							waitUntilDone:NO];
+	}];
+	
+	[operations addOperation:stopNetLdi];
+	[operations addOperation:stopStone];
 }
 
 - (Login *)defaultLoginForDatabase:(Database *)database;
@@ -380,6 +333,9 @@
 
 - (void)loadRequestForVersion;
 {
+	NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES];
+	NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
+	[versionListController setSortDescriptors:sortDescriptors];
 	[self loadRequest:@"Version" toController:versionListController];
 }
 
@@ -421,15 +377,13 @@
 
 - (NSString *)mostAdvancedVersion;
 {
-	NSArray *versions = [self versionList];
-	Version *aVersion = [versions objectAtIndex:0];
-	NSString *version = aVersion.name;
-	for (Version *each in versions) {
-		if ([version compare:each.name]== NSOrderedAscending) {
-			version = each.name;
+	NSString *name = nil;
+	for (Version *each in [self versionList]) {
+		if ([each isInstalled] && (name == nil || [name compare:each.name]== NSOrderedAscending)) {
+			name = each.name;
 		}
 	}
-	return version;
+	return name;
 }
 
 - (NSNumber *)nextDatabaseIdentifier;
@@ -608,12 +562,12 @@
 
 - (void)taskError:(NSNotification *)notification;
 {
-	[notificationCenter removeObserver:self name:nil object:taskX];
 	[self performSelectorOnMainThread:@selector(taskErrorA:) withObject:notification waitUntilDone:NO];
 }
 
 - (void)taskErrorA:(NSNotification *)notification;
 {
+	[operations cancelAllOperations];
 	[self criticalAlert:@"Task Failed" details:[[notification userInfo] objectForKey:@"string"]];
 	[self taskFinishedAfterDelay];
 }
@@ -625,7 +579,6 @@
 
 - (void)taskFinishedA;
 {
-	taskX = nil;
 	[taskProgressText setString:[NSMutableString new]];
 	[NSApp endSheet:taskProgressPanel];
 	[taskProgressPanel orderOut:nil];
@@ -735,7 +688,7 @@
 
 - (void)verifyNoTask;
 {
-	if (!taskX && ![operations operationCount]) return;
+	if ([operations operationCount] == 0) return;
 	AppError(@"Task should not be in progress!");
 }
 
@@ -788,10 +741,11 @@
 									insertIntoManagedObjectContext:managedObjectContext];
 				[version setName:[dict objectForKey:@"name"]];
 				[version setDate:[dict objectForKey:@"date"]];
-				[versionListController insertObject:version atArrangedObjectIndex:0];
+				[versionListController addObject:version];
 			}
 		}
 		[mySetup setVersionsDownloadDate:[NSDate date]];
+		[versionListController rearrangeObjects];
 		[self refreshInstalledVersionsList];
 		[self refreshUpgradeVersionsList];
 		[self taskProgressA:@"New version list received!"];
@@ -830,18 +784,32 @@
 									 selector:@selector(remove) 
 									 object:nil];
 	[operations addOperation:remove];
-	
-	NSInvocationOperation *update = [[NSInvocationOperation alloc] 
-									 initWithTarget:self 
-									 selector:@selector(versionRemoveDone) 
-									 object:nil];
-	[update addDependency:remove];
-	[operations addOperation:update];
 }
 
-- (void)versionUnzipDone:(Task *)aTask;
+- (void)versionUnzipDone:(UnzipVersion *)unzipTask;
 {
-	if (![aTask isCancelled]) {
+	if (![unzipTask isCancelled]) {
+		NSManagedObjectModel *managedObjectModel = [[managedObjectContext persistentStoreCoordinator] managedObjectModel];
+		NSString *path = [unzipTask zipFilePath];
+		NSInteger lastSlash = -1, lastDash = -1;
+		for (NSUInteger i = 0; i < [path length]; ++i) {
+			char myChar = [path characterAtIndex:i];
+			if (myChar == '/') lastSlash = i;
+			if (myChar == '-') lastDash = i;
+		}
+		NSString *name = [[path substringToIndex:lastDash] substringFromIndex:lastSlash + 14];
+		Boolean isVersionPresent = NO;
+		for (Version *version in [versionListController arrangedObjects]) {
+			isVersionPresent = isVersionPresent || [[version name] isEqualToString:name];
+		}
+		if (!isVersionPresent) {
+			NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Version"];
+			Version *version = [[Version alloc]
+								initWithEntity:entity 
+								insertIntoManagedObjectContext:managedObjectContext];
+			[version setName:name];
+			[versionListController addObject:version];
+		}
 		[self refreshInstalledVersionsList];
 		[self refreshUpgradeVersionsList];
 		[self taskProgressA:@"Finished import of zip file!"];

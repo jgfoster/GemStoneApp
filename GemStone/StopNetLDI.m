@@ -7,6 +7,7 @@
 //
 
 #import "StopNetLDI.h"
+#import "Utilities.h"
 
 @implementation StopNetLDI
 

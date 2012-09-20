@@ -64,6 +64,7 @@
 - (void)remove;
 {
 	[Version removeVersionAtPath:[self productPath]];
+	[appController performSelectorOnMainThread:@selector(versionRemoveDone) withObject:nil waitUntilDone:NO];
 }
 
 - (void)setIsInstalledCode:(NSNumber *)aNumber;

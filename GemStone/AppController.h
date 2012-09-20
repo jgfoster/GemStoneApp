@@ -46,7 +46,6 @@
 	Helper					*helper;
 	NSManagedObjectContext	*managedObjectContext;
 	NSManagedObject			*mySetup;	//	'setup' is too common for searches!
-	Task					*taskX;		//	to protect it from being garbage collected!
 	NSMutableDictionary		*statmonitors;
 	NSOperationQueue		*operations;
 }

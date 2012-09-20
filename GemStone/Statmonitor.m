@@ -7,6 +7,7 @@
 //
 
 #import "Statmonitor.h"
+#import "Utilities.h"
 
 @implementation Statmonitor
 
@@ -30,6 +31,23 @@
 - (NSString *)launchPath;
 { 
 	return [NSString stringWithFormat:@"%@/bin/statmonitor", [database gemstone]];
+}
+
+//	override to leave task running
+- (void)main;
+{
+	@try {
+		[notificationCenter postNotificationName:kTaskProgress object:@"\nStarting Statmonitor . . .\n"];	
+		[self startTask];
+		[self doRunLoopFor:1.0];
+		[notificationCenter postNotificationName:kTaskProgress object:@"\nStatmonitor started!\n"];	
+	}
+	@catch (NSException *exception) {
+		NSLog(@"Exception in task: %@", exception);
+	}
+	@finally {
+		//		<#statements#>
+	}
 }
 
 @end
