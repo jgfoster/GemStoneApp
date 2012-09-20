@@ -38,7 +38,7 @@
 - (NSString *)infoForPath:(NSString *)aString;
 {
 	path = aString;
-	[self run];
+	[self main];
 	return errorOutput;
 }
 

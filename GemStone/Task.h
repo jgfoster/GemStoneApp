@@ -13,24 +13,21 @@
 #define kTaskProgress	@"taskProgress"
 #define kTaskStart		@"taskStart"
 
-@interface Task : NSObject {
+@interface Task : NSOperation {
 	NSTask			*task;
-	int				doneCount;
+	int				 doneCount;
 	NSMutableString *errorOutput;
 	NSMutableString *standardOutput;
 }
 
-- (void)cancelTask;
 - (NSString *)currentDirectoryPath;
 - (void)dataString:(NSString *)aString;
 - (void)done;
 - (void)doneWithError:(int)statusCode;
+- (void)doRunLoopFor:(double)seconds;
 - (NSMutableDictionary *)environment;
-- (BOOL)isRunning;
 - (void)errorOutputString:(NSString *)message;
 - (void)progress:(NSString *)aString;
-- (void)run;
-- (void)start;
-- (void)verifyNoTask;
+- (void)startTask;
 
 @end

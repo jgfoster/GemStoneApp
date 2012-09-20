@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "Helper.h"
 #import "Task.h"
+#import "Version.h"
 
 @interface AppController : NSObject <NSOpenSavePanelDelegate, NSTabViewDelegate> {
 	IBOutlet NSTextField			*helperToolMessage;
@@ -45,7 +46,7 @@
 	Helper					*helper;
 	NSManagedObjectContext	*managedObjectContext;
 	NSManagedObject			*mySetup;	//	'setup' is too common for searches!
-	Task					*task;		//	to protect it from being garbage collected!
+	Task					*taskX;		//	to protect it from being garbage collected!
 	NSMutableDictionary		*statmonitors;
 	NSOperationQueue		*operations;
 }
@@ -54,7 +55,6 @@
 - (IBAction)clickedDataFile:(id)sender;
 - (IBAction)defaultLogin:(id)sender;
 - (IBAction)deleteStatmonFiles:(id)sender;
-- (void)doRunLoopFor:(double)seconds;
 - (IBAction)doUpgrade:(id)sender;
 - (IBAction)installHelperTool:(id)sender;
 - (NSString *)mostAdvancedVersion;
@@ -66,8 +66,10 @@
 - (NSTableView *)statmonTableView;
 - (IBAction)taskCloseWhenDone:(id)sender;
 - (void)taskFinishedAfterDelay;
-- (IBAction)unzipRequest:(id)sender;
-- (IBAction)updateVersionList:(id)sender;
+- (void)versionDownloadRequest:(Version *)aVersion;
 - (NSArray *)versionList;
+- (IBAction)versionListDownloadRequest:(id)sender;
+- (void)versionRemoveRequest:(Version *)aVersion;
+- (IBAction)versionUnzipRequest:(id)sender;
 
 @end

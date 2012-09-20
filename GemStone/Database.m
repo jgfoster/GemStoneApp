@@ -459,7 +459,7 @@
 	int result = [op runModal];
     if (result != NSOKButton) return;
 	restorePath = [[[op URLs] objectAtIndex:0] path];
-	[self start];
+	[self startDatabase];
 }
 
 - (void)setIsRunning:(BOOL)aBool;
@@ -513,7 +513,7 @@
 	return spc_mb;
 }
 
-- (void)start;
+- (void)startDatabase;
 {
 	// use waitstone to see if a stone with our name is already running?
 	// check kernel settings and call helper tool if necessary
@@ -551,7 +551,7 @@
 	return statmonFiles;
 }
 
-- (void)stop;
+- (void)stopDatabase;
 {
 	[notificationCenter postNotificationName:kDatabaseStopRequest object:self];
 }

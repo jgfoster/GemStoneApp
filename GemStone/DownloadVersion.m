@@ -24,27 +24,32 @@
 	return [NSArray arrayWithObjects: @"--raw", http, nil];
 }
 
-- (void)cancelTask;
+- (void)cancel;
 {
+	[notificationCenter postNotificationName:kTaskProgress 
+									  object:@"\n\nCancel request received.\nDeleting zip file . . .\n"];
 	[zipFile closeFile];
 	zipFile = nil;
 	[fileManager removeItemAtPath:zipFilePath error:nil];
 	zipFilePath = nil;
-	[super cancelTask];
+	[super cancel];
+	[notificationCenter postNotificationName:kTaskProgress 
+									  object:@"Download cancel completed!\n"];
 }
 
-- (NSString *)createZipFile;
+- (void)createZipFile;
 {
 	BOOL exists, isDirectory = NO, success;
 	exists = [fileManager fileExistsAtPath:zipFilePath isDirectory:&isDirectory];
 	if (exists) {
 		if (isDirectory) {
-			return [@"Please delete directory at:" stringByAppendingString:zipFilePath];
+			AppError(@"%@", [@"Please delete directory at:" stringByAppendingString:zipFilePath]);
 		}
 		NSError *error;
 		success = [fileManager removeItemAtPath:zipFilePath error:&error];
 		if (!success) {
-			return [@"Unable to delete existing file: " stringByAppendingString:[error localizedDescription]];
+			AppError(@"%@", [@"Unable to delete existing file: " 
+							 stringByAppendingString:[error localizedDescription]]);
 		}
 	}
 	success = [fileManager
@@ -52,13 +57,12 @@
 			   contents:[NSData new] 
 			   attributes:nil];
 	if (!success) {
-		return [@"Unable to create file: " stringByAppendingString:zipFilePath];
+		AppError(@"%@", [@"Unable to create file: " stringByAppendingString:zipFilePath]);
 	}
 	zipFile = [NSFileHandle fileHandleForWritingAtPath:zipFilePath];
 	if (!zipFile) {
-		return [@"Unable to open file: " stringByAppendingString:zipFilePath];
+		AppError(@"%@", [@"Unable to open file: " stringByAppendingString:zipFilePath]);
 	}
-	return nil;
 }
 
 - (void)data:(NSData *)data;
@@ -96,14 +100,10 @@
 	zipFilePath = [NSMutableString stringWithFormat:@"%@/%@", basePath, [version zippedFileName]];
 }
 
-- (void)start;
+- (void)startTask;
 {
-	[self verifyNoTask];
-	NSString *errorString = [self createZipFile];
-	if (errorString) {
-		AppError(@"%@", errorString);
-	}
-	[super start];
+	[self createZipFile];
+	[super startTask];
 }
 
 @end

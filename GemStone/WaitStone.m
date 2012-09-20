@@ -16,7 +16,7 @@
 + (BOOL)isStoneRunningForDatabase:(Database *)database;
 {
 	WaitStone *task = [self forDatabase:database];
-	[task run];
+	[task main];
 	return [task isReady];
 }
 
@@ -24,7 +24,7 @@
 {
 	WaitStone *task = [self forDatabase:database];
 	[task setName:[database netLDI]];
-	[task run];
+	[task main];
 	return [task isReady];
 }
 

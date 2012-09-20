@@ -52,7 +52,7 @@
 	NSMutableArray *list = [NSMutableArray new];
 	NSMutableDictionary *process = nil;
 	foundNoProcesses = NO;
-	[self run];
+	[self main];
 	if (foundNoProcesses) return list;
 	for (NSString *line in [standardOutput componentsSeparatedByString:@"\n"]) {
 		if ([line length]) {

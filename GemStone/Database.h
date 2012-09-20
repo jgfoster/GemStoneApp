@@ -64,8 +64,7 @@
 - (void)restore;
 - (void)setIsRunning:(BOOL)aBool;
 - (NSString *)sizeForDataFile:(NSString *)file;
-- (void)start;
-// - (NSArray *)statmonFiles;
-- (void)stop;
+- (void)startDatabase;
+- (void)stopDatabase;
 
 @end

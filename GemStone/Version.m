@@ -16,6 +16,32 @@
 @dynamic date;
 @dynamic indexInArray;
 
++ (void)removeVersionAtPath:(NSString *)productPath;
+{
+	NSError *error = nil;
+	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:productPath];
+	NSString *file;
+	NSDictionary *attributes = [NSDictionary 
+								dictionaryWithObject:[NSNumber numberWithUnsignedLong:0777U] 
+								forKey:NSFilePosixPermissions];
+	[notificationCenter postNotificationName:kTaskProgress object:@"Update permissions to allow delete . . .\n"];
+	while (file = [dirEnum nextObject]) {
+		NSString *path = [[productPath stringByAppendingString:@"/"]stringByAppendingString:file];
+		BOOL isDirectory;
+		BOOL exists = [fileManager fileExistsAtPath:path isDirectory:&isDirectory];
+		if (exists && isDirectory) {
+			if (![fileManager setAttributes:attributes ofItemAtPath:path error:&error]) {
+				AppError(@"Unable to set directory permissions for %@ because %@", path, [error description]);
+			}
+		}
+	}
+	[notificationCenter postNotificationName:kTaskProgress object:@"Start delete . . .\n"];
+	if (![fileManager removeItemAtPath:productPath error:&error]) {
+		AppError(@"Unable to remove %@ because %@", productPath, [error description]);
+	}
+	[notificationCenter postNotificationName:kTaskProgress object:@"Finish delete . . .\n"];
+}
+
 - (BOOL)isActuallyInstalled;
 {
 	BOOL isDirectory;
@@ -37,30 +63,7 @@
 
 - (void)remove;
 {
-	[notificationCenter 
-	 postNotificationName:kTaskStart 
-	 object:[@"Deleting version " stringByAppendingString:name]];
-
-	NSError *error = nil;
-	NSString *productPath = [self productPath];
-	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:productPath];
-	NSString *file;
-	NSDictionary *attributes = [NSDictionary 
-								dictionaryWithObject:[NSNumber numberWithUnsignedLong:0777U] 
-								forKey:NSFilePosixPermissions];
-	while (file = [dirEnum nextObject]) {
-		NSString *path = [[productPath stringByAppendingString:@"/"]stringByAppendingString:file];
-		BOOL isDirectory;
-		BOOL exists = [fileManager fileExistsAtPath:path isDirectory:&isDirectory];
-		if (exists && isDirectory) {
-			if (![fileManager setAttributes:attributes ofItemAtPath:path error:&error]) {
-				AppError(@"Unable to set directory permissions for %@ because %@", path, [error description]);
-			}
-		}
-	}
-	if (![fileManager removeItemAtPath:[self productPath] error:&error]) {
-		AppError(@"Unable to remove %@ because %@", [self productPath], [error description]);
-	}
+	[Version removeVersionAtPath:[self productPath]];
 }
 
 - (void)setIsInstalledCode:(NSNumber *)aNumber;
@@ -71,9 +74,9 @@
 		return;
 	}
 	if ([aNumber boolValue]) {
-		[notificationCenter postNotificationName:kDownloadRequest object:self];
+		[appController versionDownloadRequest: self];
 	} else {
-		[notificationCenter postNotificationName:kRemoveRequest object:self];
+		[appController versionRemoveRequest: self];
 	}
 }
 

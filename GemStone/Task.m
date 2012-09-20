@@ -15,23 +15,20 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 @implementation Task
 
 - (NSString *)launchPath	{ mustOverride(); return nil; }
+- (NSArray *)arguments		{ return [NSMutableArray new]; }
 
-- (NSArray *)arguments		
-{ 
-	return [NSMutableArray new];
-}
-
-- (void)cancelTask;
+//	override NSOperation to do our own stuff
+- (void)cancel;
 {
-	[notificationCenter
-	 removeObserver:self 
-	 name:NSFileHandleReadCompletionNotification 
-	 object:nil];
-	NSTask *myTask = task;
-	task = nil;
-	[myTask terminate];
+	if (task) {
+		NSTask *myTask = task;
+		task = nil;
+		[myTask terminate];
+	}
+	[super cancel];
 }
 
+//	DatabaseTask has an override for this method
 - (NSString *)currentDirectoryPath;
 {
 	return basePath;
@@ -65,6 +62,11 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 									   object:self
 									   userInfo:userInfo];
 	[notificationCenter postNotification:outNotification];
+}
+
+- (void)doRunLoopFor:(double)seconds;
+{
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:seconds]];
 }
 
 - (NSMutableDictionary *)environment;
@@ -110,7 +112,7 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	 object:nil];
 	if (!task) return;				//	terminated by user, so no need to report error
 	for (NSUInteger i = 0; i < 100 && [task isRunning]; ++i) {
-		[appController doRunLoopFor:0.001 * i];
+		[self doRunLoopFor:0.001 * i];
 	}
 	int status = [task terminationStatus];
 	task = nil;
@@ -126,17 +128,26 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	[notificationCenter postNotificationName:kTaskProgress object:aString];
 }
 
-- (void)run;
+//	override NSOperation to do our work; do not return until done!
+- (void)main;
 {
-	[self start];
-	[task waitUntilExit];
-	// give a bit of time for output notifications
-	for (NSUInteger i = 1; doneCount < 2 && i <= 100; ++i) {
-		[appController doRunLoopFor:0.001 * i];
+	@try {
+		[self startTask];
+		[task waitUntilExit];
+		// give a bit of time for output notifications
+		for (NSUInteger i = 1; doneCount < 2 && i <= 100; ++i) {
+			[self doRunLoopFor:0.001 * i];
+		}
+		// force things to finish without all the output
+		while (doneCount < 2) {
+			[self mightBeDone];
+		}
 	}
-	// force things to finish without all the output
-	while (doneCount < 2) {
-		[self mightBeDone];
+	@catch (NSException *exception) {
+		NSLog(@"Exception in task: %@", exception);
+	}
+	@finally {
+//		<#statements#>
 	}
 }
 
@@ -152,10 +163,8 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	}
 }
 
-- (void)start;
+- (void)startTask;
 {
-	[self verifyNoTask];
-	[notificationCenter postNotificationName:kTaskStart object:@"Starting task...\n"];
 	task = [NSTask new];
 	[task setCurrentDirectoryPath:[self currentDirectoryPath]];
 	[task setLaunchPath:[self launchPath]];
@@ -184,14 +193,6 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	errorOutput = [NSMutableString new];
 	standardOutput = [NSMutableString new];
 	[task launch];	
-}
-
-- (void)verifyNoTask;
-{
-	if (task) {
-		[NSException raise:NSInternalInconsistencyException
-					format:@"Task should not be in progress!"];	
-	}
 }
 
 @end

@@ -8,9 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-#define kDownloadRequest	@"downloadRequest"
-#define kRemoveRequest		@"removeVersionRequest"
-
 @interface Version : NSManagedObject {
 	NSNumber	*isInstalledCode;
 	NSString	*name;
@@ -24,6 +21,7 @@
 @property (nonatomic, retain) NSDate	*date;
 @property (nonatomic, retain) NSNumber	*indexInArray;  
 
++ (void)removeVersionAtPath:(NSString *)productPath;
 - (BOOL)isInstalled;
 - (NSString *)productPath;
 - (void)remove;

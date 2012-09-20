@@ -27,14 +27,14 @@
 			nil];
 }
 
-- (void)cancelTask;
+- (void)cancel;
 {
 	if (session) {
 		[task interrupt];	// sends SIGINT, equivalent of <Ctrl>+<C>
 		[self send:@"logout\n"];
 	}
 	[self send:@"exit 1\n"];
-	[super cancelTask];
+	[super cancel];
 }
 
 - (void)dataString:(NSString *)aString;
@@ -52,7 +52,7 @@
 {
 	NSRange range0, range1, range2, range3;
 	do {
-		[appController doRunLoopFor:0.01];
+		[self doRunLoopFor:0.01];
 		NSInteger index = [standardOutput length] - 10;
 		if (index < 0) index = 0;
 		range0.location = index;
@@ -98,7 +98,7 @@
 	if (range.location == NSNotFound) {
 		errorOutput = [NSMutableString stringWithString:outString];
 		[self doneWithError:0];
-		[self cancelTask];
+		[self cancel];
 		return;
 	}
 /*
@@ -119,7 +119,7 @@
 	if (!session) {
 		errorOutput = [NSMutableString stringWithString:[outString substringFromIndex:range.location]];
 		[self doneWithError:0];
-		[self cancelTask];
+		[self cancel];
 		return;
 	}
 	outString = [self responseFrom:@"run\nSystemRepository commitRestore\n%\n"];
@@ -130,7 +130,7 @@
 	if (session || range.location == NSNotFound) {
 		errorOutput = [NSMutableString stringWithString:outString];
 		[self doneWithError:0];
-		[self cancelTask];
+		[self cancel];
 		return;
 	}
 	[self send:@"exit 0\n"];
@@ -141,9 +141,9 @@
 	[[[task standardInput] fileHandleForWriting] writeData:[inString dataUsingEncoding:NSUTF8StringEncoding]];
 }
 
-- (void)start;
+- (void)startTask;
 {
-	[super start];
+	[super startTask];
 	[self outputUpToPrompt];
 	NSString *inString = [NSString 
 						stringWithFormat:@"set user %@ password %@ gemstone %@\n", 
@@ -160,7 +160,7 @@
 	}
 	errorOutput = [NSMutableString stringWithString:[outString substringFromIndex:range.location]];
 	[self doneWithError:0];
-	[self cancelTask];
+	[self cancel];
 }
 
 @end
