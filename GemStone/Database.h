@@ -8,10 +8,10 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
+#import "Login.h"
+#import "Task.h"
 
-#define kDababaseInfoChanged @"databaseInfoChanged"
-#define kDatabaseStartRequest @"databaseStartRequest"
-#define kDatabaseStopRequest @"databaseStopRequest"
+@class Login;
 
 @interface Database : NSManagedObject <NSTableViewDataSource, NSTableViewDelegate> {
 	// persistent
@@ -24,9 +24,9 @@
 	NSString *version;
 
 	// transient
-	NSNumber *isRunningCode;
-	NSString *restorePath;
-	NSArray *statmonFiles;
+	NSNumber	*isRunningCode;
+	NSArray		*statmonFiles;
+	Task		*statmonitor;
 }
 
 @property (readonly)			NSNumber *identifier;  
@@ -38,18 +38,18 @@
 @property (nonatomic, retain)	NSString *version;
 
 @property (nonatomic, retain)	NSNumber *isRunningCode;
-@property (nonatomic, retain)	NSString *restorePath;
 
 - (void)archiveCurrentLogFiles;
 - (void)archiveCurrentTransactionLogs;
 - (NSArray *)dataFiles;
-- (NSString *)directory;
+- (Login *)defaultLogin;
 - (void)deleteAll;
 - (void)deleteOldLogFiles;
 - (void)deleteOldTranLogs;
 - (void)deleteStatmonFilesAtIndexes:(NSIndexSet *)indexes;
 - (NSString *)descriptionOfOldLogFiles;
 - (NSString *)descriptionOfOldTranLogs;
+- (NSString *)directory;
 - (NSString *)gemstone;
 - (void)gsList:(NSArray *)list;
 - (NSString *)infoForDataFile:(NSString *)file;
@@ -64,7 +64,6 @@
 - (void)restore;
 - (void)setIsRunning:(BOOL)aBool;
 - (NSString *)sizeForDataFile:(NSString *)file;
-- (void)startDatabase;
 - (void)stopDatabase;
 
 @end

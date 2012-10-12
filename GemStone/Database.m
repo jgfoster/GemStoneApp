@@ -11,6 +11,14 @@
 #import "Database.h"
 #import "GSList.h"
 #import "LogFile.h"
+#import "Login.h"
+#import "Utilities.h"
+#import "StartNetLDI.h"
+#import "StartStone.h"
+#import "Statmonitor.h"
+#import "StopNetLDI.h"
+#import "StopStone.h"
+#import "Topaz.h"
 #import "Utilities.h"
 #import "Version.h"
 #import "VSD.h"
@@ -27,7 +35,6 @@
 @dynamic version;
 
 @synthesize isRunningCode;
-@synthesize restorePath;
 
 - (void)archiveCurrentLogFiles;
 {
@@ -77,6 +84,27 @@
 			}
 		}
 	}
+}
+
+- (void)backup;
+{
+	//	get path to backup
+	NSSavePanel *panel = [NSSavePanel savePanel];
+	[panel setAllowedFileTypes:[NSArray arrayWithObjects:@"bak",@"gz", nil]];
+	[panel setTitle:@"Create From a Full Backup"];
+	[panel setMessage:@"Name of on-line backup:"];
+	[panel setNameFieldStringValue:[NSString stringWithFormat:@"%@.bak.gz",[self name]]];
+	[panel setExtensionHidden:NO];
+	[panel setPrompt:@"Backup"];
+	int result = [panel runModal];
+    if (result != NSOKButton) return;
+	
+	NSString *path = [[panel URL] path];
+	Login *login = [self defaultLogin];
+	Topaz *topaz = [Topaz login:login 
+					   toDatabase:self 
+							andDo: ^(Topaz *aTopaz){ [aTopaz fullBackupTo:path]; }];
+	[appController addOperation:topaz];
 }
 
 - (void)createConfigFile;
@@ -185,6 +213,19 @@
 	return list;
 }
 
+- (Login *)defaultLogin;
+{
+	NSManagedObjectContext *moc = [appController managedObjectContext];
+	NSManagedObjectModel *managedObjectModel = [[moc persistentStoreCoordinator] 
+												managedObjectModel];
+	NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Login"];
+	Login *login = [[Login alloc]
+					initWithEntity:entity
+					insertIntoManagedObjectContext:moc];
+	[login initializeForDatabase:self];
+	return login;
+}
+
 - (void)deleteAll;
 {
 	NSString *path = [self directory];
@@ -205,7 +246,7 @@
 			AppError(@"unable to delete %@ because %@", fullPath, [error description]);
 		};
 	}
-	[notificationCenter postNotificationName:kDababaseInfoChanged object:nil];
+	[appController updateDatabaseList:nil];
 }
 
 - (void)deleteOldLogFiles;
@@ -347,7 +388,7 @@
 			AppError(@"unable to delete %@ because %@", target, [error description]);
 		}
 	}
-	[notificationCenter postNotificationName:kTaskStart object:@"Copying extent . . ."];
+	[appController taskStart:[NSString stringWithFormat:@"Copying %@/bin/%@ . . .", [self gemstone], aString]];
 	[self archiveCurrentTransactionLogs];
 	NSString *source = [NSString stringWithFormat:@"%@/bin/%@", [self gemstone], aString];
 	BOOL success = [fileManager copyItemAtPath:source toPath:target error:&error];
@@ -363,7 +404,7 @@
 	}
 	lastStartDate = nil;
 	[appController taskFinishedAfterDelay];
-	[notificationCenter postNotificationName:kDababaseInfoChanged object:nil];
+	[appController updateDatabaseList:nil];
 }
 
 - (void)installGlassExtent;
@@ -451,15 +492,25 @@
 - (void)restore;
 {
 	//	get path to backup
-	NSOpenPanel *op = [NSOpenPanel openPanel];
-	[op setAllowedFileTypes:[NSArray arrayWithObjects:@"bak",@"gz", nil]];
-	[op setTitle:@"Restore From a Full Backup"];
-	[op setMessage:@"Select an on-line backup:"];
-	[op setPrompt:@"Restore"];
-	int result = [op runModal];
+	NSOpenPanel *panel = [NSOpenPanel openPanel];
+	[panel setAllowedFileTypes:[NSArray arrayWithObjects:@"bak",@"gz", nil]];
+	[panel setTitle:@"Restore From a Full Backup"];
+	[panel setMessage:@"Select an on-line backup:"];
+	[panel setPrompt:@"Restore"];
+	int result = [panel runModal];
     if (result != NSOKButton) return;
-	restorePath = [[[op URLs] objectAtIndex:0] path];
-	[self startDatabase];
+	
+	NSString	*path = [[[panel URLs] objectAtIndex:0] path];
+	[self startDatabaseWithArgsA:[NSArray arrayWithObject:@"-R"]];		// this does not add the statmonitor operation
+	Login *login = [self defaultLogin];
+	Topaz *topaz = [Topaz login:login 
+					 toDatabase:self 
+						  andDo:^(Topaz *aTopaz) { [aTopaz restoreFromBackup:path]; }];
+	[topaz addDependency:statmonitor];
+	__block id me = self;
+	[topaz setCompletionBlock:^(){ [me startIsDone]; }];
+	[appController addOperation:statmonitor];
+	[appController addOperation:topaz];
 }
 
 - (void)setIsRunning:(BOOL)aBool;
@@ -515,12 +566,49 @@
 
 - (void)startDatabase;
 {
+	[self startDatabaseWithArgsA:nil];
+	__block id me = self;
+	[statmonitor setCompletionBlock:^(){ [me startIsDone]; }];
+	[appController addOperation:statmonitor];
+}
+
+- (void)startDatabaseWithArgsA:(NSArray *)args;		// this does not add the statmonitor operation
+{
 	// use waitstone to see if a stone with our name is already running?
 	// check kernel settings and call helper tool if necessary
 	[self createConfigFile];
 	[self archiveCurrentLogFiles];
 	statmonFiles = nil;
-	[notificationCenter postNotificationName:kDatabaseStartRequest object:self];
+
+	[appController taskStart:@"Starting NetLDI, Stone, and Statmonitor . . .\n\n"];
+	StartNetLDI *startNetLdi = [StartNetLDI forDatabase:self];
+	StartStone *startStone = [StartStone forDatabase:self];
+	[startStone setArgs:args];
+	[startStone addDependency:startNetLdi];
+	statmonitor = [Statmonitor forDatabase:self];
+	[statmonitor addDependency:startStone];
+	
+	[appController addOperation:startNetLdi];
+	[appController addOperation:startStone];
+}
+
+- (void)startIsDone;
+{
+	[self			performSelector:@selector(refreshStatmonFiles)	
+				 withObject:nil 
+				 afterDelay:0.4];
+	[appController	performSelectorOnMainThread:@selector(databaseStartDone:) 
+									withObject:self
+								 waitUntilDone:NO];
+}
+
+- (void)startStop;
+{
+	if ([self isRunning]) {
+		[self stopDatabase];
+	} else {
+		[self startDatabase];
+	}
 }
 
 - (NSArray *)statmonFiles;
@@ -553,7 +641,27 @@
 
 - (void)stopDatabase;
 {
-	[notificationCenter postNotificationName:kDatabaseStopRequest object:self];
+	[appController taskStart:@"Stopping NetLDI and Stone . . .\n\n"];
+	StopNetLDI *stopNetLdi = [StopNetLDI forDatabase:self];
+	StopStone *stopStone = [StopStone forDatabase:self];
+	[stopStone addDependency:stopNetLdi];
+	[statmonitor terminateTask];
+	statmonitor = nil;
+	__block id me = self;
+	[stopStone setCompletionBlock:^(){ [me stopIsDone]; }];
+	
+	[appController addOperation:stopNetLdi];
+	[appController addOperation:stopStone];
+}
+
+- (void)stopIsDone;
+{
+	[self	performSelector:@selector(refreshStatmonFiles)	
+				 withObject:nil 
+				 afterDelay:0.4];
+	[appController performSelectorOnMainThread:@selector(databaseStopDone:) 
+									withObject:self
+								 waitUntilDone:NO];
 }
 
 - (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex;

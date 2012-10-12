@@ -8,11 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-#define kTaskDone		@"taskDone"
-#define kTaskError		@"taskError"
-#define kTaskProgress	@"taskProgress"
-#define kTaskStart		@"taskStart"
-
 @interface Task : NSOperation {
 	NSTask			*task;
 	int				 doneCount;
@@ -29,5 +24,6 @@
 - (void)errorOutputString:(NSString *)message;
 - (void)progress:(NSString *)aString;
 - (void)startTask;
+- (void)terminateTask;
 
 @end

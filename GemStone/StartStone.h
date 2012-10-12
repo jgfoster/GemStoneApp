@@ -8,6 +8,10 @@
 
 #import "DatabaseTask.h"
 
-@interface StartStone : DatabaseTask
+@interface StartStone : DatabaseTask {
+	NSArray *args;
+}
+
+@property(nonatomic, retain) NSArray *args;
 
 @end

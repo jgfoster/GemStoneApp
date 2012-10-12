@@ -12,11 +12,13 @@
 @implementation Topaz
 
 @synthesize login;
+@synthesize block;
 
-+ (id)login:(Login *)aLogin toDatabase:(Database *)aDatabase;
++ (id)login:(Login *)aLogin toDatabase:(Database *)aDatabase andDo:(block_t)aBlock;
 {
 	Topaz *instance = [super forDatabase:aDatabase];
 	[instance setLogin:aLogin];
+	[instance setBlock:aBlock];
 	return instance;
 }
 
@@ -41,6 +43,37 @@
 {
 	[standardOutput appendString:aString];
 	[super dataString:aString];
+}
+
+- (void)fullBackupTo:(NSString *)aString;
+{
+	[appController taskStart:[NSString stringWithFormat:@"\n\n"]];
+	if ([fileManager fileExistsAtPath:aString]) {
+		NSError *error;
+		[appController taskProgress:[NSString stringWithFormat:@"Deleting existing file at '%@'\n", aString]];
+		BOOL flag = [fileManager removeItemAtPath:aString error:&error];
+		if (flag == NO) {
+			errorOutput = [NSMutableString stringWithFormat:@"Unable to delete %@ because %@\n", aString, [error description]];
+			[self cancel];
+			[self doneWithError:0];
+			return;
+		}
+	}
+	NSString *inString = [NSString 
+						  stringWithFormat:@"run\nSystemRepository fullBackupCompressedTo:'%@'\n%%\n", 
+						  aString];
+	[appController taskProgress:inString];
+	NSString *outString = [self responseFrom:inString];
+	if (![outString length]) {
+		outString = [self outputUpToPrompt];
+	}
+	if (![outString isEqualToString:@"true\n"]) {
+		errorOutput = [NSMutableString stringWithString:outString];
+		[self cancel];
+		[self doneWithError:0];
+	}
+	[self send:@"exit 0\n"];
+	[appController taskFinishedAfterDelay];
 }
 
 - (NSString *)launchPath;
@@ -83,38 +116,27 @@
 	return [self outputUpToPrompt];
 }
 
-- (void)restoreFromBackup;
+- (void)restoreFromBackup:(NSString *)aString;
 {
-	[self start];
-	if (!session) return;
 	NSString *inString = [NSString 
 						  stringWithFormat:@"run\nSystemRepository restoreFromBackup:'%@'\n%%\n", 
-						  [database restorePath]];
+						  aString];
 	NSString *outString = [self responseFrom:inString];
 	if (![outString length]) {
 		outString = [self outputUpToPrompt];
 	}
 	NSRange range = [outString rangeOfString:@"The restore from full backup completed"];
+	
+	if (range.location == NSNotFound) {
+		range = [outString rangeOfString:@"The restore from backup completed"];
+	}
 	if (range.location == NSNotFound) {
 		errorOutput = [NSMutableString stringWithString:outString];
 		[self doneWithError:0];
 		[self cancel];
 		return;
 	}
-/*
-	//	get path to backup
-	NSOpenPanel *op = [NSOpenPanel openPanel];
-	[op setAllowedFileTypes:[NSArray arrayWithObjects:@"dbf", nil]];
-	[op setCanChooseDirectories:YES];
-	[op setAllowsMultipleSelection:YES];
-	[op setTitle:@"Restore Transaction Logs"];
-	[op setMessage:@"Select directory or file(s) to restore, or Cancel to commit restore without logs:"];
-	[op setPrompt:@"Select"];
-	int result = [op runModal];
-    if (result == NSOKButton) {
-		NSString *path = [[[op URLs] objectAtIndex:0] path];
-	}
- */
+
 	outString = [self responseFrom:@"login\n"];
 	if (!session) {
 		errorOutput = [NSMutableString stringWithString:[outString substringFromIndex:range.location]];
@@ -152,7 +174,12 @@
 						[login stoneName]];
 	NSString *outString = [self responseFrom:inString];
 	outString = [self responseFrom:@"login\n"];
-	if (session) return;
+	if (session) {
+		if (block) {
+			block(self);
+		}
+		return;
+	}
 	NSString *expect = @"GemStone: Error";
 	NSRange range = [outString rangeOfString:expect];
 	if (range.location == NSNotFound) {

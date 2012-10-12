@@ -8,11 +8,13 @@
 
 #import "Download.h"
 
-@interface UnzipVersion : Task {
+@interface UnzipVersion : Task <NSOpenSavePanelDelegate> {
 	NSString	*zipFilePath;
 	NSArray		*directoryContents;
 }
 
 @property (nonatomic, readwrite, retain) NSString *zipFilePath;
+
+- (void)unzip;
 
 @end

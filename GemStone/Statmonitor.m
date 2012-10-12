@@ -37,10 +37,10 @@
 - (void)main;
 {
 	@try {
-		[notificationCenter postNotificationName:kTaskProgress object:@"\nStarting Statmonitor . . .\n"];	
+		[appController taskProgress:@"\nStarting Statmonitor . . .\n"];	
 		[self startTask];
 		[self doRunLoopFor:1.0];
-		[notificationCenter postNotificationName:kTaskProgress object:@"\nStatmonitor started!\n"];	
+		[appController taskProgress:@"\nStatmonitor started!\n"];	
 	}
 	@catch (NSException *exception) {
 		NSLog(@"Exception in task: %@", exception);

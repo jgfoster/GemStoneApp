@@ -11,6 +11,8 @@
 
 #import "Database.h"
 
+@class Database; 
+
 @interface Login : NSManagedObject {
 	NSString * name;
 	NSString * version;

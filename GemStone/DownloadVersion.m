@@ -26,15 +26,13 @@
 
 - (void)cancel;
 {
-	[notificationCenter postNotificationName:kTaskProgress 
-									  object:@"\n\nCancel request received.\nDeleting zip file . . .\n"];
+	[appController taskProgress:@"\n\nCancel request received.\nDeleting zip file . . .\n"];
 	[zipFile closeFile];
 	zipFile = nil;
 	[fileManager removeItemAtPath:zipFilePath error:nil];
 	zipFilePath = nil;
 	[super cancel];
-	[notificationCenter postNotificationName:kTaskProgress 
-									  object:@"Download cancel completed!\n"];
+	[appController taskProgress:@"Download cancel completed!\n"];
 }
 
 - (void)createZipFile;

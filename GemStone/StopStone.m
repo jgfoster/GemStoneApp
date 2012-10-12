@@ -36,7 +36,7 @@
 
 - (void)main;
 {
-	[notificationCenter postNotificationName:kTaskProgress object:@"\nStopping Stone . . .\n"];	
+	[appController taskProgress:@"\nStopping Stone . . .\n"];	
 	[super main];
 }
 

@@ -11,7 +11,7 @@
 #import "Task.h"
 #import "Version.h"
 
-@interface AppController : NSObject <NSOpenSavePanelDelegate, NSTabViewDelegate> {
+@interface AppController : NSObject <NSTabViewDelegate> {
 	IBOutlet NSTextField			*helperToolMessage;
 	IBOutlet NSButton				*authenticateButton;
 	IBOutlet NSTextField			*lastUpdateDateField;
@@ -50,6 +50,9 @@
 	NSOperationQueue		*operations;
 }
 
+@property(readonly) NSManagedObjectContext	*managedObjectContext;
+
+- (void)addOperation:(NSOperation *)anOperation;
 - (IBAction)cancelTask:(id)sender;
 - (IBAction)clickedDataFile:(id)sender;
 - (IBAction)defaultLogin:(id)sender;
@@ -61,14 +64,17 @@
 - (IBAction)openStatmonFiles:(id)sender;
 - (IBAction)removeDatabase:(id)sender;
 - (IBAction)removeHelperTool:(id)sender;
+- (void)removeVersionDone;
 - (void)setIsStatmonFileSelected:(BOOL)flag;
 - (NSTableView *)statmonTableView;
+- (void)taskStart:(NSString *)aString;
 - (IBAction)taskCloseWhenDone:(id)sender;
+- (void)taskError:(NSString *)aString;
 - (void)taskFinishedAfterDelay;
-- (void)versionDownloadRequest:(Version *)aVersion;
+- (void)taskProgress:(NSString *)aString;
+- (void)updateDatabaseList:(id)sender;
 - (NSArray *)versionList;
 - (IBAction)versionListDownloadRequest:(id)sender;
-- (void)versionRemoveRequest:(Version *)aVersion;
 - (IBAction)versionUnzipRequest:(id)sender;
 
 @end

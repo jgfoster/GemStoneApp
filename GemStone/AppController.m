@@ -37,6 +37,13 @@
 
 @implementation AppController
 
+@synthesize managedObjectContext;
+
+- (void)addOperation:(NSOperation *)anOperation;
+{
+	[operations addOperation:anOperation];
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
 {
 	helper = [Helper new];
@@ -49,13 +56,6 @@
 	[repositoryConversionCheckbox setState:NSOffState];
 	[upgradeSeasideCheckbox setState:NSOffState];
 		
-	NotifyMe(kTaskError,				taskError);
-	NotifyMe(kTaskProgress,				taskProgress);
-	NotifyMe(kTaskStart,				taskStart);
-	NotifyMe(kDatabaseStartRequest,		databaseStartRequest);
-	NotifyMe(kDatabaseStopRequest,		databaseStopRequest);
-	NotifyMe(kDababaseInfoChanged,		updateDatabaseList);
-	
 	[databaseListController addObserver:self
 							 forKeyPath:@"selection"
 								options:(NSKeyValueObservingOptionNew)
@@ -159,77 +159,21 @@
 - (void)databaseStartDone:(Database *)aDatabase;
 {
 	[self updateDatabaseList:nil];
-	[aDatabase			performSelector:@selector(refreshStatmonFiles)	withObject:nil afterDelay:0.4];
 	[statmonTableView	performSelector:@selector(reloadData)			withObject:nil afterDelay:0.5];
 	[self				performSelector:@selector(updateDatabaseList:)	withObject:nil afterDelay:1.0];
 	[self taskFinishedAfterDelay];
 }
 
-- (void)databaseStartRequest:(NSNotification *)notification;
-{
-	[self verifyNoTask];
-	[self taskStartA:@"Starting NetLDI, Stone, and Statmonitor . . .\n\n"];
-	Database *database = [notification object];
-	StartNetLDI *startNetLdi = [StartNetLDI forDatabase:database];
-	StartStone *startStone = [StartStone forDatabase:database];
-	[startStone addDependency:startNetLdi];
-	Statmonitor *monitor = [Statmonitor forDatabase:database];
-	[monitor addDependency:startStone];
-	NSString *key = [[database identifier] stringValue];
-	[statmonitors setValue:monitor forKey:key];
-	[monitor setCompletionBlock:^(){
-		[self performSelectorOnMainThread:@selector(databaseStartDone:) 
-							   withObject:database
-							waitUntilDone:NO];
-	}];
-	
-	[operations addOperation:startNetLdi];
-	[operations addOperation:startStone];
-	[operations addOperation:monitor];
-}
-
 - (void)databaseStopDone:(Database *)aDatabase;
 {
 	[self updateDatabaseList:nil];
-	[aDatabase			performSelector:@selector(refreshStatmonFiles)	withObject:nil afterDelay:0.4];
 	[statmonTableView	performSelector:@selector(reloadData)			withObject:nil afterDelay:0.5];
 	[self taskFinishedAfterDelay];
 }
 
-- (void)databaseStopRequest:(NSNotification *)notification;
-{
-	[self verifyNoTask];
-	[self taskStartA:@"Stopping NetLDI and Stone . . .\n\n"];
-	Database *database = [notification object];
-	StopNetLDI *stopNetLdi = [StopNetLDI forDatabase:database];
-	StopStone *stopStone = [StopStone forDatabase:database];
-	[stopStone addDependency:stopNetLdi];
-	NSString *key = [[database identifier] stringValue];
-	[statmonitors setValue:nil forKey:key];
-	[stopStone setCompletionBlock:^(){
-		[self performSelectorOnMainThread:@selector(databaseStopDone:) 
-							   withObject:database
-							waitUntilDone:NO];
-	}];
-	
-	[operations addOperation:stopNetLdi];
-	[operations addOperation:stopStone];
-}
-
-- (Login *)defaultLoginForDatabase:(Database *)database;
-{
-	NSManagedObjectModel *managedObjectModel = [[managedObjectContext persistentStoreCoordinator] managedObjectModel];
-	NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Login"];
-	Login *login = [[Login alloc]
-					initWithEntity:entity
-					insertIntoManagedObjectContext:managedObjectContext];
-	[login initializeForDatabase:database];
-	return login;
-}
-
 - (IBAction)defaultLogin:(id)sender;
 {
-	Login *login = [self defaultLoginForDatabase:[self selectedDatabase]];
+	Login *login = [[self selectedDatabase] defaultLogin];
 	NSLog(@"login = %@", login);
 }
 
@@ -410,21 +354,6 @@
 	[database openStatmonFilesAtIndexes:indexes];
 }
 
-//	NSOpenPanelDelegate method for file import
-- (BOOL)panel:(id)sender shouldEnableURL:(NSURL *)url;
-{
-	NSString *path = [url path];
-	BOOL isDirectory;
-	[fileManager fileExistsAtPath:path isDirectory:&isDirectory];
-	if (isDirectory) {
-		return ![[NSWorkspace sharedWorkspace] isFilePackageAtPath:path];
-	}
-	NSRange range = [path rangeOfString:@"/GemStone64Bit"];
-	if (range.location == NSNotFound) return NO;
-	range = [path rangeOfString:@"-i386.Darwin.zip"];
-	return range.location + range.length == [path length];
-}
-
 - (IBAction)removeDatabase:(id)sender;
 {
 	NSAlert *alert = [[NSAlert alloc] init];
@@ -451,6 +380,14 @@
 	[authenticateButton setEnabled:YES];
 	[helperToolMessage setHidden:YES];
 	[removeButton setEnabled:NO];
+}
+
+- (void)removeVersionDone;
+{
+	[self refreshInstalledVersionsList];
+	[self refreshUpgradeVersionsList];
+	[taskProgressText insertText:@" . . . Done!"];
+	[self taskFinishedAfterDelay];
 }
 
 - (void)refreshInstalledVersionsList;
@@ -560,15 +497,17 @@
 	[mySetup setTaskCloseWhenDoneCode:[NSNumber numberWithInteger:state]];
 }
 
-- (void)taskError:(NSNotification *)notification;
+- (void)taskError:(NSString *)aString;
 {
-	[self performSelectorOnMainThread:@selector(taskErrorA:) withObject:notification waitUntilDone:NO];
+	[self performSelectorOnMainThread:@selector(taskErrorA:) 
+						   withObject:aString 
+						waitUntilDone:NO];
 }
 
-- (void)taskErrorA:(NSNotification *)notification;
+- (void)taskErrorA:(NSString *)aString;
 {
 	[operations cancelAllOperations];
-	[self criticalAlert:@"Task Failed" details:[[notification userInfo] objectForKey:@"string"]];
+	[self criticalAlert:@"Task Failed" details:aString];
 	[self taskFinishedAfterDelay];
 }
 
@@ -603,10 +542,10 @@
 	}
 }
 
-- (void)taskProgress:(NSNotification *)notification;
+- (void)taskProgress:(NSString *)aString;
 {
 	[self performSelectorOnMainThread:@selector(taskProgressA:)
-						   withObject:[notification object] 
+						   withObject:aString
 						waitUntilDone:NO];
 }
 
@@ -636,10 +575,10 @@
 	}
 }
 
-- (void)taskStart:(NSNotification *)notification;
+- (void)taskStart:(NSString *)aString;
 {
 	[self performSelectorOnMainThread:@selector(taskStartA:) 
-						   withObject:[notification object] 
+						   withObject:aString
 						waitUntilDone:NO];
 }
 
@@ -657,11 +596,6 @@
 		[taskCloseWhenDoneButton setState:[[mySetup taskCloseWhenDoneCode] integerValue]];
 	}
 	[self taskProgressA:aString];
-}
-
-- (void)unzipPath:(NSString *)path;
-{
-	NSLog(@"how did we get here?");
 }
 
 - (void)updateDatabaseList:(id)sender;
@@ -684,32 +618,6 @@
 	[processListController removeObjects:[processListController arrangedObjects]];
 	[processListController addObjects:list];
 	[databaseTableView reloadData];
-}
-
-- (void)verifyNoTask;
-{
-	if ([operations operationCount] == 0) return;
-	AppError(@"Task should not be in progress!");
-}
-
-- (void)versionDownloadRequest:(Version *)aVersion;
-{
-	[self verifyNoTask];
-	[self taskStartA:[NSString stringWithFormat:@"Downloading %@ . . .\n", [aVersion name]]];
-	DownloadVersion *download = [DownloadVersion new];
-	[download setVersion:aVersion];
-	
-	UnzipVersion *unzip = [UnzipVersion new];
-	unzip.zipFilePath = [download zipFilePath];
-	[unzip addDependency:download];
-	__block Task *blockTask = unzip;
-	[unzip setCompletionBlock:^(){
-		[self performSelectorOnMainThread:@selector(versionUnzipDone:) 
-							   withObject:blockTask
-							waitUntilDone:NO];
-	}];
-	[operations addOperation:download];
-	[operations addOperation:unzip];
 }
 
 - (NSArray *)versionList;
@@ -755,8 +663,7 @@
 
 - (IBAction)versionListDownloadRequest:(id)sender;
 {
-	[self verifyNoTask];
-	[self taskStartA:@"Obtaining GemStone/S 64 Bit version list ...\n"];
+	[appController taskStart:@"Obtaining GemStone/S 64 Bit version list ...\n"];
 	DownloadVersionList *task = [DownloadVersionList new];
 	__block Task *blockTask = task;
 	[task setCompletionBlock:^(){
@@ -765,25 +672,6 @@
 							waitUntilDone:NO];
 	}];
 	[operations addOperation:task];
-}
-
-- (void)versionRemoveDone;
-{
-	[self refreshInstalledVersionsList];
-	[self refreshUpgradeVersionsList];
-	[taskProgressText insertText:@" . . . Done!"];
-	[self taskFinishedAfterDelay];
-}
-
-- (void)versionRemoveRequest:(Version *)aVersion;
-{
-	[self verifyNoTask];
-	[self taskStartA:@"Removing GemStone/S 64 Bit product tree . . .\n"];
-	NSInvocationOperation *remove = [[NSInvocationOperation alloc] 
-									 initWithTarget:aVersion
-									 selector:@selector(remove) 
-									 object:nil];
-	[operations addOperation:remove];
 }
 
 - (void)versionUnzipDone:(UnzipVersion *)unzipTask;
@@ -819,24 +707,7 @@
 
 - (IBAction)versionUnzipRequest:(id)sender;
 {
-	[self verifyNoTask];
-	NSOpenPanel *op = [NSOpenPanel openPanel];		//	get path to zip file
-	[op setDelegate:self];
-	int result = [op runModal];
-	[op setDelegate:nil];
-    if (result != NSOKButton) return;
-	[self taskStartA:@"Starting import of zip file . . .\n"];
-	
-	UnzipVersion *task = [UnzipVersion new];
-	__block Task *blockTask = task;
-	[task setZipFilePath: [[[op URLs] objectAtIndex:0] path]];
-	[task setCompletionBlock:^(){
-		[self performSelectorOnMainThread:@selector(versionUnzipDone:) 
-							   withObject:blockTask
-							waitUntilDone:NO];
-	}];
-	[operations addOperation:task];
-	
+	[[UnzipVersion new] unzip];
 }
 
 @end

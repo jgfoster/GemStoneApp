@@ -6,6 +6,8 @@
 //  Copyright (c) 2012 VMware Inc. All rights reserved.
 //
 
+#import "DownloadVersion.h"
+#import "UnzipVersion.h"
 #import "Utilities.h"
 #import "Version.h"
 
@@ -24,7 +26,7 @@
 	NSDictionary *attributes = [NSDictionary 
 								dictionaryWithObject:[NSNumber numberWithUnsignedLong:0777U] 
 								forKey:NSFilePosixPermissions];
-	[notificationCenter postNotificationName:kTaskProgress object:@"Update permissions to allow delete . . .\n"];
+	[appController taskProgress:@"Update permissions to allow delete . . .\n"];
 	while (file = [dirEnum nextObject]) {
 		NSString *path = [[productPath stringByAppendingString:@"/"]stringByAppendingString:file];
 		BOOL isDirectory;
@@ -35,11 +37,30 @@
 			}
 		}
 	}
-	[notificationCenter postNotificationName:kTaskProgress object:@"Start delete . . .\n"];
+	[appController taskProgress:@"Start delete . . .\n"];
 	if (![fileManager removeItemAtPath:productPath error:&error]) {
 		AppError(@"Unable to remove %@ because %@", productPath, [error description]);
 	}
-	[notificationCenter postNotificationName:kTaskProgress object:@"Finish delete . . .\n"];
+	[appController taskProgress:@"Finish delete . . .\n"];
+}
+
+- (void)download;
+{
+	[appController taskStart:[NSString stringWithFormat:@"Downloading %@ . . .\n", name]];
+	DownloadVersion *download = [DownloadVersion new];
+	[download setVersion:self];
+	
+	UnzipVersion *unzip = [UnzipVersion new];
+	[unzip setZipFilePath: [download zipFilePath]];
+	[unzip addDependency:download];
+	__block Task *blockTask = unzip;
+	[unzip setCompletionBlock:^(){
+		[self performSelectorOnMainThread:@selector(versionUnzipDone:) 
+							   withObject:blockTask
+							waitUntilDone:NO];
+	}];
+	[appController addOperation:download];
+	[appController addOperation:unzip];
 }
 
 - (BOOL)isActuallyInstalled;
@@ -63,8 +84,9 @@
 
 - (void)remove;
 {
+	[appController taskStart:@"Removing GemStone/S 64 Bit product tree . . .\n"];
 	[Version removeVersionAtPath:[self productPath]];
-	[appController performSelectorOnMainThread:@selector(versionRemoveDone) withObject:nil waitUntilDone:NO];
+	[appController removeVersionDone];
 }
 
 - (void)setIsInstalledCode:(NSNumber *)aNumber;
@@ -75,9 +97,9 @@
 		return;
 	}
 	if ([aNumber boolValue]) {
-		[appController versionDownloadRequest: self];
+		[self download];
 	} else {
-		[appController versionRemoveRequest: self];
+		[self remove];
 	}
 }
 

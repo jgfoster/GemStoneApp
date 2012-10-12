@@ -11,11 +11,13 @@
 
 @implementation StartStone
 
+@synthesize args;
+
 - (NSArray *)arguments;
 { 
 	NSMutableArray *list = [NSMutableArray arrayWithObject:[database name]];
-	if ([database restorePath]) {
-		[list addObject:@"-R"];
+	if (args) {
+		[list addObjectsFromArray:args];
 	}
 	return list;
 }
@@ -33,7 +35,7 @@
 
 - (void)main;
 {
-	[notificationCenter postNotificationName:kTaskProgress object:@"\n"];	
+	[appController taskProgress:@"\n"];	
 	[super main];
 }
 

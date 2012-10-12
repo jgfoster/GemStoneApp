@@ -20,11 +20,7 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 //	override NSOperation to do our own stuff
 - (void)cancel;
 {
-	if (task) {
-		NSTask *myTask = task;
-		task = nil;
-		[myTask terminate];
-	}
+	[self terminateTask];
 	[super cancel];
 }
 
@@ -46,7 +42,7 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 
 - (void)done;
 {
-	[notificationCenter postNotificationName:kTaskDone object:self];
+//	method is here to allow for override; default is to do nothing
 }
 
 - (void)doneWithError:(int)statusCode;
@@ -54,14 +50,7 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	if (![errorOutput length]) {
 		errorOutput = [NSString stringWithFormat:@"Task returned status code %i", statusCode];
 	}
-	NSDictionary *userInfo = [NSDictionary
-							  dictionaryWithObject:errorOutput
-							  forKey:@"string"];
-	NSNotification *outNotification = [NSNotification
-									   notificationWithName:kTaskError
-									   object:self
-									   userInfo:userInfo];
-	[notificationCenter postNotification:outNotification];
+	[appController taskError:errorOutput];
 }
 
 - (void)doRunLoopFor:(double)seconds;
@@ -125,7 +114,7 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 
 - (void)progress:(NSString *)aString;
 {
-	[notificationCenter postNotificationName:kTaskProgress object:aString];
+	[appController taskProgress:aString];
 }
 
 //	override NSOperation to do our work; do not return until done!
@@ -193,6 +182,16 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	errorOutput = [NSMutableString new];
 	standardOutput = [NSMutableString new];
 	[task launch];	
+}
+
+- (void)terminateTask;
+{
+	if (task) {
+		NSTask *myTask = task;
+		task = nil;
+		[myTask terminate];
+	}
+	
 }
 
 @end
