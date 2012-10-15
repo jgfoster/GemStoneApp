@@ -103,7 +103,12 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	for (NSUInteger i = 0; i < 100 && [task isRunning]; ++i) {
 		[self doRunLoopFor:0.001 * i];
 	}
-	int status = [task terminationStatus];
+	int status;
+	if (didLaunch) {
+		status = [task terminationStatus];
+	} else {
+		status = 1;
+	}
 	task = nil;
 	if (status) {
 		[self doneWithError:status];
@@ -120,6 +125,7 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 //	override NSOperation to do our work; do not return until done!
 - (void)main;
 {
+	didLaunch = NO;
 	@try {
 		[self startTask];
 		[task waitUntilExit];
@@ -127,16 +133,18 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 		for (NSUInteger i = 1; doneCount < 2 && i <= 100; ++i) {
 			[self doRunLoopFor:0.001 * i];
 		}
+	}
+	@catch (NSException *exception) {
+		NSLog(@"Exception in task: %@", exception);
+		if (didLaunch) {
+			[task terminate];
+		}
+	}
+	@finally {
 		// force things to finish without all the output
 		while (doneCount < 2) {
 			[self mightBeDone];
 		}
-	}
-	@catch (NSException *exception) {
-		NSLog(@"Exception in task: %@", exception);
-	}
-	@finally {
-//		<#statements#>
 	}
 }
 
@@ -181,7 +189,8 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	doneCount = 0;
 	errorOutput = [NSMutableString new];
 	standardOutput = [NSMutableString new];
-	[task launch];	
+	[task launch];
+	didLaunch = YES;
 }
 
 - (void)terminateTask;

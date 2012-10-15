@@ -55,9 +55,9 @@
 	[unzip addDependency:download];
 	__block Task *blockTask = unzip;
 	[unzip setCompletionBlock:^(){
-		[self performSelectorOnMainThread:@selector(versionUnzipDone:) 
-							   withObject:blockTask
-							waitUntilDone:NO];
+		[appController performSelectorOnMainThread:@selector(versionUnzipDone:) 
+										withObject:blockTask
+									 waitUntilDone:NO];
 	}];
 	[appController addOperation:download];
 	[appController addOperation:unzip];

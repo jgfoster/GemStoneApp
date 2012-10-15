@@ -17,6 +17,7 @@
 	IBOutlet NSTextField			*lastUpdateDateField;
 	IBOutlet NSArrayController		*databaseListController;
 	IBOutlet NSTableView			*databaseTableView;
+	IBOutlet NSTextView				*infoPanelTextView;
 	IBOutlet NSArrayController		*logFileListController;
 	IBOutlet NSArrayController		*loginListController;
 	IBOutlet NSButton				*removeButton;
@@ -37,6 +38,7 @@
 	IBOutlet NSButton				*repositoryConversionCheckbox;
 	IBOutlet NSButton				*upgradeSeasideCheckbox;
 
+	IBOutlet NSPanel				*infoPanel;
 	IBOutlet NSPanel				*taskProgressPanel;
 	IBOutlet NSTextView				*taskProgressText;
 	IBOutlet NSProgressIndicator	*taskProgressIndicator;
@@ -55,6 +57,7 @@
 - (void)addOperation:(NSOperation *)anOperation;
 - (IBAction)cancelTask:(id)sender;
 - (IBAction)clickedDataFile:(id)sender;
+- (IBAction)closeInfoPanel:(id)sender;
 - (IBAction)defaultLogin:(id)sender;
 - (IBAction)deleteStatmonFiles:(id)sender;
 - (IBAction)doUpgrade:(id)sender;
@@ -66,6 +69,7 @@
 - (IBAction)removeHelperTool:(id)sender;
 - (void)removeVersionDone;
 - (void)setIsStatmonFileSelected:(BOOL)flag;
+- (IBAction)showHelperToolInfo:(id)sender;
 - (NSTableView *)statmonTableView;
 - (void)taskStart:(NSString *)aString;
 - (IBAction)taskCloseWhenDone:(id)sender;

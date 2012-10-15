@@ -135,6 +135,12 @@
 	[dataFileSizeText setStringValue:[database sizeForDataFile:file]];
 }
 
+- (IBAction)closeInfoPanel:(id)sender;
+{
+	[NSApp endSheet:infoPanel];
+	[infoPanel orderOut:nil];
+}
+
 - (void)criticalAlert:(NSString *)textString details:(NSString *)detailsString;
 {
 	NSAlert *alert = [[NSAlert alloc] init];
@@ -173,8 +179,16 @@
 
 - (IBAction)defaultLogin:(id)sender;
 {
-	Login *login = [[self selectedDatabase] defaultLogin];
-	NSLog(@"login = %@", login);
+//	Login *login = [[self selectedDatabase] defaultLogin];
+	Database *database = [self selectedDatabase];
+	NSString *string = [database gemToolsLogin];
+	[infoPanelTextView setString:string];
+	[NSApp beginSheet:infoPanel
+	   modalForWindow:[NSApp mainWindow]
+		modalDelegate:self
+	   didEndSelector:nil
+		  contextInfo:nil];
+	
 }
 
 - (IBAction)deleteStatmonFiles:(id)sender;
@@ -475,6 +489,17 @@
 	NSExceptionHandler *handler = [NSExceptionHandler defaultExceptionHandler];
 	[handler setExceptionHandlingMask:[handler exceptionHandlingMask] | NSLogOtherExceptionMask];
 	[handler setDelegate:self];
+}
+
+- (IBAction)showHelperToolInfo:(id)sender;
+{
+	NSString *string = @"Each running GemStone/S 64 Bit database requires a local \"Shared Page Cache (SPC)\" that can be accessed by related processes.\n\nIn order to allocate this shared memory, certain kernel settings (kern.sysv.shmall and kern.sysv.shmmax) need be be adjusted. Since this can only be done as root, we can install a \"helper tool\" that is managed by launchd and updates the kernel settings (if necessary) when starting a local database.\n\nIf you click the \"Authenticate\" button and provide authentication as an administrative user then we will use the SMJobBless() function to install\n\t'/Library/LaunchDaemons/com.VMware.GemStone.plist'\nand the tool as\n\t'/Library/PrivilegedHelperTools/com.VMware.GemStone.Helper'.\n\nIf you have manually configured the kernel settings then this might not be necessary. Also, if your only use of this application is to access databases running on another host, then you don't need to install the helper tool.\n\nIn any case, you may skip this step for now and we will ask for permission if the tool is needed.";
+	[infoPanelTextView setString:string];
+	[NSApp beginSheet:infoPanel
+	   modalForWindow:[NSApp mainWindow]
+		modalDelegate:self
+	   didEndSelector:nil
+		  contextInfo:nil];
 }
 
 - (NSTableView *)statmonTableView;

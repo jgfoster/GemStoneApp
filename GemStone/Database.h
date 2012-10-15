@@ -51,6 +51,7 @@
 - (NSString *)descriptionOfOldTranLogs;
 - (NSString *)directory;
 - (NSString *)gemstone;
+- (NSString *)gemToolsLogin;
 - (void)gsList:(NSArray *)list;
 - (NSString *)infoForDataFile:(NSString *)file;
 - (void)installBaseExtent;

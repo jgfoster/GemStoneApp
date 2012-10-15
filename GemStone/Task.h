@@ -10,6 +10,7 @@
 
 @interface Task : NSOperation {
 	NSTask			*task;
+	BOOL			 didLaunch;
 	int				 doneCount;
 	NSMutableString *errorOutput;
 	NSMutableString *standardOutput;
