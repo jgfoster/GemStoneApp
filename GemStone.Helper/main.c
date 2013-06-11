@@ -3,7 +3,7 @@
 //  Helper
 //
 //  Created by James Foster on 4/18/12.
-//  Copyright (c) 2012 VMware. All rights reserved.
+//  Copyright (c) 2012-2013 GemTalks Systems LLC. All rights reserved.
 //
 
 #include <syslog.h>
@@ -137,9 +137,9 @@ int respondToRequests() {
             }
 			case Helper_Remove: {
 				int error = 0, result;
-				result = unlink("/Library/LaunchDaemons/com.VMware.GemStone.Helper.plist");
+				result = unlink("/Library/LaunchDaemons/com.GemTalk.GemStone.Helper.plist");
 				if (0 == result) {
-					result = unlink("/Library/PrivilegedHelperTools/com.VMware.GemStone.Helper");
+					result = unlink("/Library/PrivilegedHelperTools/com.GemTalk.GemStone.Helper");
 				}
 				if (result) {
 					error = errno;

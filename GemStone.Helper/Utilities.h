@@ -3,14 +3,14 @@
 //  GemStone
 //
 //  Created by James Foster on 4/18/12.
-//  Copyright (c) 2012 VMware. All rights reserved.
+//  Copyright (c) 2012-2013 GemTalks Systems LLC. All rights reserved.
 //
 
 #ifndef GemStone_Utilities_h
 #define GemStone_Utilities_h
 
-#define kSocketPath "/var/run/com.VMware.GemStone.socket"
-#define kHelperIdentifier "com.VMware.GemStone.Helper"
+#define kSocketPath "/var/run/com.GemTalk.GemStone.socket"
+#define kHelperIdentifier "com.GemTalk.GemStone.Helper"
 
 //	Also edit Info.plist Bundle Version
 #define kVersionPart1 1

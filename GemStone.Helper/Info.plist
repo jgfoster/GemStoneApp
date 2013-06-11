@@ -3,16 +3,16 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>com.VMware.GemStone.Helper</string>
+	<string>com.GemTalk.GemStone.Helper</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>GemStone.Helper</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.6</string>
+	<string>1.0.9</string>
 	<key>SMAuthorizedClients</key>
 	<array>
-		<string>identifier com.VMware.GemStone and certificate leaf[subject.CN] = &quot;GemStone&quot;</string>
+		<string>identifier com.GemTalk.GemStone and certificate leaf[subject.CN] = &quot;GemStone&quot;</string>
 	</array>
 </dict>
 </plist>
