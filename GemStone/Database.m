@@ -10,6 +10,7 @@
 #import "CopyDBF.h"
 #import "Database.h"
 #import "GSList.h"
+#import "Helper.h"
 #import "LogFile.h"
 #import "Login.h"
 #import "Utilities.h"
@@ -96,7 +97,7 @@
 	[panel setNameFieldStringValue:[NSString stringWithFormat:@"%@.bak.gz",[self name]]];
 	[panel setExtensionHidden:NO];
 	[panel setPrompt:@"Backup"];
-	int result = [panel runModal];
+	NSInteger result = [panel runModal];
     if (result != NSOKButton) return;
 	
 	NSString *path = [[panel URL] path];
@@ -515,18 +516,22 @@
 	[panel setTitle:@"Restore From a Full Backup"];
 	[panel setMessage:@"Select an on-line backup:"];
 	[panel setPrompt:@"Restore"];
-	int result = [panel runModal];
+	NSInteger result = [panel runModal];
     if (result != NSOKButton) return;
 	
 	NSString	*path = [[[panel URLs] objectAtIndex:0] path];
-	[self startDatabaseWithArgsA:[NSArray arrayWithObject:@"-R"]];		// this does not add the statmonitor operation
+	[self startDatabaseWithArgs:[NSArray arrayWithObject:@"-R"]];	//	defines statmonitor, but does not add it as an operation
 	Login *login = [self defaultLogin];
 	Topaz *topaz = [Topaz login:login 
 					 toDatabase:self 
-						  andDo:^(Topaz *aTopaz) { [aTopaz restoreFromBackup:path]; }];
+						  andDo:^(Topaz *aTopaz) {
+							  [aTopaz restoreFromBackup:path]; }
+					];
 	[topaz addDependency:statmonitor];
 	__block id me = self;
-	[topaz setCompletionBlock:^(){ [me startIsDone]; }];
+	[topaz setCompletionBlock:^(){
+		[me startIsDone];
+	}];
 	[appController addOperation:statmonitor];
 	[appController addOperation:topaz];
 }
@@ -584,16 +589,27 @@
 
 - (void)startDatabase;
 {
-	[self startDatabaseWithArgsA:nil];
+	[self startDatabaseWithArgs:nil];
 	__block id me = self;
 	[statmonitor setCompletionBlock:^(){ [me startIsDone]; }];
 	[appController addOperation:statmonitor];
 }
 
-- (void)startDatabaseWithArgsA:(NSArray *)args;		// this does not add the statmonitor operation
+//	starts statmonitor, but does not add it as an operation
+//	called directly by restore since it has other things to do after stone starts
+- (void)startDatabaseWithArgs:(NSArray *)args;
 {
-	// use waitstone to see if a stone with our name is already running?
-	// check kernel settings and call helper tool if necessary
+	if ([WaitStone isStoneRunningForDatabase: self]) {
+		isRunningCode = [NSNumber numberWithBool:true];
+		NSAlert *alert = [[NSAlert alloc] init];
+		[alert setMessageText:@"Database is already running!"];
+		[alert setInformativeText:@"No need to start it again!"];
+		[alert addButtonWithTitle:@"Dismiss"];
+		[alert runModal];
+		return;
+	}
+	// should  check kernel settings and call helper tool if necessary
+	[appController ensureSharedMemoryMB:spc_mb];
 	[self createConfigFile];
 	[self archiveCurrentLogFiles];
 	statmonFiles = nil;
@@ -705,9 +721,9 @@
 			}
 			number = number / 60;	// hours
 			if (number < 48) {
-				return [NSString stringWithFormat:@"lu hrs", number];
+				return [NSString stringWithFormat:@"%lu hrs", number];
 			}
-			return [NSString stringWithFormat:@"lu days", number / 24];
+			return [NSString stringWithFormat:@"%lu days", number / 24];
 		}
 		if ([key compare:@"size"] == NSOrderedSame) {
 			NSNumber *number = [row valueForKey:NSFileSize];
