@@ -78,7 +78,7 @@
 	<key>CFBundleIconFile</key>
 	<string>GemStone.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.VMware.${PRODUCT_NAME:rfc1034identifier}</string>
+	<string>com.GemTalk.${PRODUCT_NAME:rfc1034identifier}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -90,21 +90,21 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>2C</string>
+	<string>50</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.developer-tools</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>${MACOSX_DEPLOYMENT_TARGET}</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2012 VMware Inc. All rights reserved.</string>
+	<string>Copyright © 2012-2013 GemTalk Systems LLC. All rights reserved.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>SMPrivilegedExecutables</key>
 	<dict>
-		<key>com.VMware.GemStone.Helper</key>
-		<string>identifier com.VMware.GemStone.Helper and certificate leaf[subject.CN] = "GemStone"</string>
+		<key>com.GemTalk.GemStone.Helper</key>
+		<string>identifier com.GemTalk.GemStone.Helper and certificate leaf[subject.CN] = &quot;GemStone&quot;</string>
 	</dict>
 </dict>
 </plist>

@@ -4,7 +4,7 @@
 #  GemStone
 #
 #  Created by James Foster on 10/12/12.
-#  Copyright (c) 2012 VMware Inc. All rights reserved.
+#  Copyright (c) 2012-2013 GemTalk Systems LLC. All rights reserved.
 
 cd $TARGET_BUILD_DIR/
 rm GemStoneApp.dmg GemStoneApp.sparseimage /Users/$USER/Desktop/GemStoneApp.dmg 2> /dev/null

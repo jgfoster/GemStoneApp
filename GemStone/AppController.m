@@ -3,7 +3,7 @@
 //  GemStone
 //
 //  Created by James Foster on 4/20/12.
-//  Copyright (c) 2012 VMware Inc. All rights reserved.
+//  Copyright (c) 2012-2013 GemTalk Systems LLC. All rights reserved.
 //
 
 #import <ExceptionHandling/NSExceptionHandler.h>
@@ -491,7 +491,7 @@
 
 - (IBAction)showHelperToolInfo:(id)sender;
 {
-	NSString *string = @"Each running GemStone/S 64 Bit database requires a local \"Shared Page Cache (SPC)\" that can be accessed by related processes.\n\nIn order to allocate this shared memory, certain kernel settings (kern.sysv.shmall and kern.sysv.shmmax) need be be adjusted. Since this can only be done as root, we can install a \"helper tool\" that is managed by launchd and updates the kernel settings (if necessary) when starting a local database.\n\nIf you click the \"Authenticate\" button and provide authentication as an administrative user then we will use the SMJobBless() function to install\n\t'/Library/LaunchDaemons/com.VMware.GemStone.plist'\nand the tool as\n\t'/Library/PrivilegedHelperTools/com.VMware.GemStone.Helper'.\n\nIf you have manually configured the kernel settings then this might not be necessary. Also, if your only use of this application is to access databases running on another host, then you don't need to install the helper tool.\n\nIn any case, you may skip this step for now and we will ask for permission if the tool is needed.";
+	NSString *string = @"Each running GemStone/S 64 Bit database requires a local \"Shared Page Cache (SPC)\" that can be accessed by related processes.\n\nIn order to allocate this shared memory, certain kernel settings (kern.sysv.shmall and kern.sysv.shmmax) need be be adjusted. Since this can only be done as root, we can install a \"helper tool\" that is managed by launchd and updates the kernel settings (if necessary) when starting a local database.\n\nIf you click the \"Authenticate\" button and provide authentication as an administrative user then we will use the SMJobBless() function to install\n\t'/Library/LaunchDaemons/com.GemTalk.GemStone.plist'\nand the tool as\n\t'/Library/PrivilegedHelperTools/com.GemTalk.GemStone.Helper'.\n\nIf you have manually configured the kernel settings then this might not be necessary. Also, if your only use of this application is to access databases running on another host, then you don't need to install the helper tool.\n\nIn any case, you may skip this step for now and we will ask for permission if the tool is needed.";
 	[infoPanelTextView setString:string];
 	[NSApp beginSheet:infoPanel
 	   modalForWindow:[NSApp mainWindow]
