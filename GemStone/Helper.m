@@ -9,6 +9,8 @@
 #import "Helper.h"
 #import "../Gemstone.Helper/Utilities.h"
 #include <sys/socket.h>
+#include <sys/sysctl.h>
+//	#include <sys/types.h>
 #import <ServiceManagement/ServiceManagement.h>
 #import <Security/Authorization.h>
 
@@ -46,6 +48,49 @@
 	result = SMJobBless(kSMDomainSystemLaunchd, (__bridge CFStringRef)label, authRef, &cfError);
 	*error = (__bridge NSError*) cfError;
 	return result;
+}
+
+- (void)ensureSharedMemoryMB:(NSNumber *)sizeMB;
+{
+	struct HelperMessage messageOut, messageIn;
+	NSUInteger	shmmaxNeeded = [sizeMB unsignedIntegerValue] * 1024 * 1126;	//	add 10% for non-page data structures
+	NSUInteger	shmallNeeded = (shmmaxNeeded + 4096) / 4096;
+	NSUInteger	shmallNow = 0;
+	NSUInteger	shmmaxNow = 0;
+	size_t		mySize = sizeof(NSUInteger);
+	int			result;
+	result = sysctlbyname("kern.sysv.shmall", &shmallNow, &mySize, NULL, 0);
+	if (shmallNow < shmmaxNeeded || true) {
+		if (![self isCurrent]) {
+			[self install];
+			[appController updateHelperToolStatus];
+		}
+		initMessage(messageOut, Helper_shmall);
+		messageOut.dataSize = sizeof(shmallNeeded);
+		memcpy(messageOut.data, &shmallNeeded, messageOut.dataSize);
+		if (sendMessage(&messageOut, &messageIn)) {
+			NSLog(@"Error sending message to set shmall");
+		}
+		if (messageIn.command == Helper_Error) {
+			NSLog(@"sysctlbyname() returned %i", (int)messageIn.data);
+		}
+	}
+	result = sysctlbyname("kern.sysv.shmmax", &shmmaxNow, &mySize, NULL, 0);
+	if (shmmaxNow < shmmaxNeeded || true) {
+		if (![self isCurrent]) {
+			[self install];
+			[appController updateHelperToolStatus];
+		}
+		initMessage(messageOut, Helper_shmmax);
+		messageOut.dataSize = sizeof(shmmaxNeeded);
+		memcpy(messageOut.data, &shmmaxNeeded, messageOut.dataSize);
+		if (sendMessage(&messageOut, &messageIn)) {
+			NSLog(@"Error sending message to set shmmax");
+		}
+		if (messageIn.command == Helper_Error) {
+			NSLog(@"sysctlbyname() returned %i", (int)messageIn.data);
+		}
+	}
 }
 
 - (void)install;
@@ -93,9 +138,9 @@ int sendMessage(const struct HelperMessage * messageOut, struct HelperMessage * 
         return 1;
     }
     int count = messageSize(messageOut);
-    int written = write(socket_fd, messageOut, count);
+    long written = write(socket_fd, messageOut, count);
     if (count != written) {
-        NSLog(@"tried to write %i, but wrote %i", count, written);
+        NSLog(@"tried to write %i, but wrote %li", count, written);
         close(socket_fd);
         return 1;
     }
