@@ -60,7 +60,7 @@
 	size_t		mySize = sizeof(NSUInteger);
 	int			result;
 	result = sysctlbyname("kern.sysv.shmall", &shmallNow, &mySize, NULL, 0);
-	if (shmallNow < shmmaxNeeded || true) {
+	if (shmallNow < shmallNeeded ) {
 		if (![self isCurrent]) {
 			[self install];
 			[appController updateHelperToolStatus];
@@ -76,7 +76,7 @@
 		}
 	}
 	result = sysctlbyname("kern.sysv.shmmax", &shmmaxNow, &mySize, NULL, 0);
-	if (shmmaxNow < shmmaxNeeded || true) {
+	if (shmmaxNow < shmmaxNeeded) {
 		if (![self isCurrent]) {
 			[self install];
 			[appController updateHelperToolStatus];

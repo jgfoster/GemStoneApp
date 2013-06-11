@@ -14,6 +14,7 @@
 #import "LogFile.h"
 #import "Login.h"
 #import "Utilities.h"
+#import "StartCacheWarmer.h"
 #import "StartNetLDI.h"
 #import "StartStone.h"
 #import "Statmonitor.h"
@@ -628,10 +629,12 @@
 
 - (void)startIsDone;
 {
-	[self			performSelector:@selector(refreshStatmonFiles)	
-				 withObject:nil 
-				 afterDelay:0.4];
-	[appController	performSelectorOnMainThread:@selector(databaseStartDone:) 
+	StartCacheWarmer *startCacheWarmer = [StartCacheWarmer forDatabase:self];
+	[appController addOperation:startCacheWarmer];
+	[self performSelector:@selector(refreshStatmonFiles)
+			   withObject:nil
+			   afterDelay:0.4];
+	[appController performSelectorOnMainThread:@selector(databaseStartDone:) 
 									withObject:self
 								 waitUntilDone:NO];
 }
