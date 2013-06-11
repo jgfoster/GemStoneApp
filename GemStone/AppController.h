@@ -61,6 +61,7 @@
 - (IBAction)defaultLogin:(id)sender;
 - (IBAction)deleteStatmonFiles:(id)sender;
 - (IBAction)doUpgrade:(id)sender;
+- (void)ensureSharedMemoryMB:(NSNumber *)sizeMB;
 - (IBAction)installHelperTool:(id)sender;
 - (NSString *)mostAdvancedVersion;
 - (NSNumber *)nextDatabaseIdentifier;
@@ -77,6 +78,7 @@
 - (void)taskFinishedAfterDelay;
 - (void)taskProgress:(NSString *)aString;
 - (void)updateDatabaseList:(id)sender;
+- (void)updateHelperToolStatus;
 - (NSArray *)versionList;
 - (IBAction)versionListDownloadRequest:(id)sender;
 - (IBAction)versionUnzipRequest:(id)sender;

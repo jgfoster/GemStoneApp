@@ -47,10 +47,7 @@
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
 {
 	helper = [Helper new];
-	BOOL isCurrent = [helper isCurrent];
-	[helperToolMessage setHidden:!isCurrent];
-	[authenticateButton setEnabled:!isCurrent];
-	[removeButton setEnabled:isCurrent];
+	[self updateHelperToolStatus];
 	[taskProgressText setFont:[NSFont fontWithName:@"Monaco" size:9]];
 	[statmonFileSelectedController setContent:[NSNumber numberWithBool:NO]];
 	[repositoryConversionCheckbox setState:NSOffState];
@@ -88,21 +85,21 @@
 {
 	NSArray *list;
 	list = [versionListController arrangedObjects];
-	for (NSInteger i = 0; i < [list count]; ++i) {
+	for (int i = 0; i < [list count]; ++i) {
 		Version *version = [list objectAtIndex:i];
 		if (version.indexInArray != [NSNumber numberWithInt:i]) {
 			version.indexInArray = [NSNumber numberWithInt:i];
 		}
 	}
 	list = [loginListController arrangedObjects];
-	for (NSInteger i = 0; i < [list count]; ++i) {
+	for (int i = 0; i < [list count]; ++i) {
 		Login *login = [list objectAtIndex:i];
 		if (login.indexInArray != [NSNumber numberWithInt:i]) {
 			login.indexInArray = [NSNumber numberWithInt:i];
 		}
 	}
 	list = [databaseListController arrangedObjects];
-	for (NSInteger i = 0; i < [list count]; ++i) {
+	for (int i = 0; i < [list count]; ++i) {
 		Database *database = [list objectAtIndex:i];
 		if (database.indexInArray != [NSNumber numberWithInt:i]) {
 			database.indexInArray = [NSNumber numberWithInt:i];
@@ -213,6 +210,11 @@
 	NSLog(@"doUpgrade: from %@ to %@ with %i and %i", oldVersion, newVersion, needsConversion, doSeasideUpgrade);
 }
 
+- (void)ensureSharedMemoryMB:(NSNumber *)sizeMB;
+{
+	[helper ensureSharedMemoryMB:sizeMB];
+}
+
 - (BOOL)exceptionHandler:(NSExceptionHandler *)sender shouldLogException:(NSException *)exception mask:(unsigned int)aMask;
 {
 	NSString *string = [NSString stringWithFormat:@"%@\n\nSee Console for details.", [exception reason]];
@@ -260,9 +262,7 @@
 - (IBAction)installHelperTool:(id)sender
 {
 	[helper install];
-	[authenticateButton setEnabled:NO];
-	[helperToolMessage setHidden:NO];
-	[removeButton setEnabled:YES];
+	[self updateHelperToolStatus];
 }
 
 - (void)loadRequestForDatabase;
@@ -391,9 +391,7 @@
 - (IBAction)removeHelperTool:(id)sender;
 {
 	[helper remove];
-	[authenticateButton setEnabled:YES];
-	[helperToolMessage setHidden:YES];
-	[removeButton setEnabled:NO];
+	[self updateHelperToolStatus];
 }
 
 - (void)removeVersionDone;
@@ -643,6 +641,14 @@
 	[processListController removeObjects:[processListController arrangedObjects]];
 	[processListController addObjects:list];
 	[databaseTableView reloadData];
+}
+
+- (void)updateHelperToolStatus;
+{
+	BOOL isCurrent = [helper isCurrent];
+	[helperToolMessage setHidden:!isCurrent];
+	[authenticateButton setEnabled:!isCurrent];
+	[removeButton setEnabled:isCurrent];
 }
 
 - (NSArray *)versionList;
