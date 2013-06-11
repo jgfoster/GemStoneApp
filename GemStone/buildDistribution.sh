@@ -8,6 +8,12 @@
 
 cd $TARGET_BUILD_DIR/
 rm GemStoneApp.dmg GemStoneApp.sparseimage /Users/$USER/Desktop/GemStoneApp.dmg 2> /dev/null
+
+if [[ $1 = "clean" ]] ; then
+echo "clean does not require any further activity"
+exit 0
+fi
+
 echo "** Copy disk image template"
 hdiutil convert $PROJECT_DIR/GemStoneApp.dmg -format UDSP -o ./GemStoneApp.sparseimage
 rc=$?
