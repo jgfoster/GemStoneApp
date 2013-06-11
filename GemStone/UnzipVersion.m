@@ -61,6 +61,17 @@
 	[super done];
 }
 
+- (void)errorOutputString:(NSString *)aString;
+{
+	NSLog(@"%@", aString);
+	NSAlert *alert = [[NSAlert alloc] init];
+	[alert setMessageText:@"Unzip error!"];
+	[alert setInformativeText:aString];
+	[alert addButtonWithTitle:@"Dismiss"];
+	[alert runModal];
+	[self cancel];
+}
+
 - (NSString *)launchPath;
 {
 	return @"/usr/bin/unzip";
@@ -93,7 +104,7 @@
 {
 	NSOpenPanel *op = [NSOpenPanel openPanel];		//	get path to zip file
 	[op setDelegate:self];
-	int result = [op runModal];
+	NSInteger result = [op runModal];
 	[op setDelegate:nil];
     if (result != NSOKButton) return;
 	[appController taskStart:@"Starting import of zip file . . .\n"];
