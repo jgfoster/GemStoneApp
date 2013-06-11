@@ -72,7 +72,7 @@
 { 
 	[zipFile closeFile];
 	zipFile = nil;
-	int fileSize = [[fileManager
+	unsigned long long fileSize = [[fileManager
 					 attributesOfItemAtPath:zipFilePath 
 					 error:nil] fileSize];
 	if (!fileSize) {
