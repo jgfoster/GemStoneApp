@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <sys/socket.h>
+#include <sys/sysctl.h>
 #include <stdlib.h>
 #include <string.h>
 #include <launch.h>
@@ -147,6 +148,28 @@ int respondToRequests() {
 				memcpy(messageOut.data, &error, messageOut.dataSize);
 				break;
 			}
+			case Helper_shmall: {
+				unsigned long	shmall = (unsigned long)messageIn.data;
+				int				result = sysctlbyname("kern.sysv.shmall", NULL, 0, &shmall, sizeof(shmall));
+				syslog(LOG_NOTICE, "shmall set to %lu", shmall);
+				if (result) {
+					messageOut.command = Helper_Error;
+					messageOut.dataSize = sizeof(result);
+					memcpy(messageOut.data, &result, messageOut.dataSize);
+				}
+				break;
+			}
+			case Helper_shmmax: {
+				unsigned long	shmmax = (unsigned long)messageIn.data;
+				int				result = sysctlbyname("kern.sysv.shmmax", NULL, 0, &shmmax, sizeof(shmmax));
+				syslog(LOG_NOTICE, "shmmax set to %lu", shmmax);
+				if (result) {
+					messageOut.command = Helper_Error;
+					messageOut.dataSize = sizeof(result);
+					memcpy(messageOut.data, &result, messageOut.dataSize);
+				}
+				break;
+			}
             default:
                 syslog(LOG_NOTICE, "Unknown command: %hhd\n", messageIn.command);
                 char* message = "Unknown command!";
@@ -156,9 +179,9 @@ int respondToRequests() {
                 break;
         }
         int count = messageSize(&messageOut);
-        int written = write(connection_fd, &messageOut, count);
+        long written = write(connection_fd, &messageOut, count);
         if (written != count) {
-            syslog(LOG_NOTICE, "tried to write %i, but wrote %i", count, written);
+            syslog(LOG_NOTICE, "tried to write %i, but wrote %li", count, written);
             break;
         }
         close(connection_fd);
