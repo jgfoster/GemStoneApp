@@ -32,7 +32,7 @@ int readBytes(int size, int fd, unsigned char * buffer) {
             syslog(LOG_NOTICE, "no bytes available on socket!");
             return 1;
         }
-        int numberRead = read(fd, pointer, left);
+        long numberRead = read(fd, pointer, left);
         if (numberRead == 0) {
             syslog(LOG_NOTICE, "poll() said that data was available but we didn't get any!");
             return 1;
