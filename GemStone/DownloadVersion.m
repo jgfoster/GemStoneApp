@@ -41,13 +41,12 @@
 	exists = [fileManager fileExistsAtPath:zipFilePath isDirectory:&isDirectory];
 	if (exists) {
 		if (isDirectory) {
-			AppError(@"%@", [@"Please delete directory at:" stringByAppendingString:zipFilePath]);
+			AppError(@"Please delete directory at: %@", zipFilePath);
 		}
 		NSError *error;
 		success = [fileManager removeItemAtPath:zipFilePath error:&error];
 		if (!success) {
-			AppError(@"%@", [@"Unable to delete existing file: " 
-							 stringByAppendingString:[error localizedDescription]]);
+			AppError(@"Unable to delete existing file: %@", [error localizedDescription]);
 		}
 	}
 	success = [fileManager
@@ -55,11 +54,11 @@
 			   contents:[NSData new] 
 			   attributes:nil];
 	if (!success) {
-		AppError(@"%@", [@"Unable to create file: " stringByAppendingString:zipFilePath]);
+		AppError(@"Unable to create file: %@", zipFilePath);
 	}
 	zipFile = [NSFileHandle fileHandleForWritingAtPath:zipFilePath];
 	if (!zipFile) {
-		AppError(@"%@", [@"Unable to open file: " stringByAppendingString:zipFilePath]);
+		AppError(@"Unable to open file: %@", zipFilePath);
 	}
 }
 

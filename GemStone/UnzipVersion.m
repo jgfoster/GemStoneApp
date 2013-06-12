@@ -30,7 +30,9 @@
 	[appController taskProgress:@"\n\nCancel request received.\nDeleting unzipped items . . .\n"];
 	NSError *error = nil;
 	NSArray *currentList = [fileManager contentsOfDirectoryAtPath:basePath error:&error];
-	if (!currentList) AppError(@"Unable to obtain contents of directory at %@", basePath);
+	if (!currentList) {
+		AppError(@"Unable to obtain contents of directory at %@", basePath);
+	}
 	for (id current in currentList) {
 		Boolean	flag = NO;
 		for (id prior in directoryContents) {
@@ -81,7 +83,9 @@
 {
 	NSError *error = nil;
 	directoryContents = [fileManager contentsOfDirectoryAtPath:basePath error:&error];
-	if (!directoryContents) AppError(@"Unable to obtain contents of %@", basePath);
+	if (!directoryContents) {
+		AppError(@"Unable to obtain contents of %@", basePath);
+	}
 	[super main];
 }
 
