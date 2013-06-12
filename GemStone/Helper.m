@@ -53,12 +53,12 @@
 - (void)ensureSharedMemoryMB:(NSNumber *)sizeMB;
 {
 	struct HelperMessage messageOut, messageIn;
-	NSUInteger	shmmaxNeeded = [sizeMB unsignedIntegerValue] * 1024 * 1126;	//	add 10% for non-page data structures
-	NSUInteger	shmallNeeded = (shmmaxNeeded + 4096) / 4096;
-	NSUInteger	shmallNow = 0;
-	NSUInteger	shmmaxNow = 0;
-	size_t		mySize = sizeof(NSUInteger);
-	int			result;
+	unsigned long	shmmaxNeeded = [sizeMB unsignedIntegerValue] * 1024 * 1126;	//	add 10% for non-page data structures;
+	unsigned long	shmallNeeded = shmmaxNeeded = (shmmaxNeeded + 4096) / 4096;
+	unsigned long	shmallNow = 0;
+	unsigned long	shmmaxNow = 0;
+	size_t			mySize = sizeof(NSUInteger);
+	int				result;
 	result = sysctlbyname("kern.sysv.shmall", &shmallNow, &mySize, NULL, 0);
 	if (shmallNow < shmallNeeded ) {
 		if (![self isCurrent]) {
@@ -66,13 +66,13 @@
 			[appController updateHelperToolStatus];
 		}
 		initMessage(messageOut, Helper_shmall);
-		messageOut.dataSize = sizeof(shmallNeeded);
-		memcpy(messageOut.data, &shmallNeeded, messageOut.dataSize);
+		messageOut.data.ul = shmallNeeded;
+		messageOut.dataSize = sizeof(messageOut.data.ul);
 		if (sendMessage(&messageOut, &messageIn)) {
 			NSLog(@"Error sending message to set shmall");
 		}
-		if (messageIn.command == Helper_Error) {
-			NSLog(@"sysctlbyname() returned %i", (int)messageIn.data);
+		if (messageIn.data.i) {
+			NSLog(@"sysctlbyname() returned %i", messageIn.data.i);
 		}
 	}
 	result = sysctlbyname("kern.sysv.shmmax", &shmmaxNow, &mySize, NULL, 0);
@@ -82,13 +82,13 @@
 			[appController updateHelperToolStatus];
 		}
 		initMessage(messageOut, Helper_shmmax);
-		messageOut.dataSize = sizeof(shmmaxNeeded);
-		memcpy(messageOut.data, &shmmaxNeeded, messageOut.dataSize);
+		messageOut.data.ul = shmmaxNeeded;
+		messageOut.dataSize = sizeof(messageOut.data.ul);
 		if (sendMessage(&messageOut, &messageIn)) {
 			NSLog(@"Error sending message to set shmmax");
 		}
-		if (messageIn.command == Helper_Error) {
-			NSLog(@"sysctlbyname() returned %i", (int)messageIn.data);
+		if (messageIn.data.i) {
+			NSLog(@"sysctlbyname() returned %i", messageIn.data.i);
 		}
 	}
 }
@@ -103,18 +103,19 @@
 
 - (BOOL)isCurrent;
 {
-    if (![fileManager fileExistsAtPath:@kSocketPath]) {
-		return NO;	
-	}
+    if (![fileManager fileExistsAtPath:@kSocketPath])		return NO;
+    if (![fileManager fileExistsAtPath:@kHelperPlistPath])	return NO;
+    if (![fileManager fileExistsAtPath:@kHelperToolPath])	return NO;
+
 	struct HelperMessage messageOut, messageIn;
     initMessage(messageOut, Helper_Version)
     if (sendMessage(&messageOut, &messageIn)) {
 		return NO;
 	}
     return messageIn.command == kHelperMessageVersion
-		&&  messageIn.data[0] == kVersionPart1
-		&&  messageIn.data[1] == kVersionPart2
-		&&  messageIn.data[2] == kVersionPart3;
+		&&  messageIn.data.bytes[0] == kVersionPart1
+		&&  messageIn.data.bytes[1] == kVersionPart2
+		&&  messageIn.data.bytes[2] == kVersionPart3;
 }
 
 // returns 0 for success, 1 for error
@@ -158,23 +159,12 @@ int sendMessage(const struct HelperMessage * messageOut, struct HelperMessage * 
 	struct HelperMessage messageOut, messageIn;
     initMessage(messageOut, Helper_Remove)
     if (sendMessage(&messageOut, &messageIn)) {
-		AppError(@"sendMessage failed!");
+		AppError(@"Error sending message to remove helper!");
 	}
-	if (messageIn.command == Helper_Error) {
-		AppError(@"%@", [NSString stringWithCString:(const char *)messageIn.data encoding:NSUTF8StringEncoding]);
-	}
-	if (messageIn.command != Helper_Remove) {
-		AppError(@"unknown error");
-	}
-	int error;
-	if (messageIn.dataSize != sizeof(error)) {
-		AppError(@"wrong size!");
-	}
-	memcpy(&error, messageIn.data, messageIn.dataSize);
-	if (error) {
-		// see usr/include/sys/errno.h for errors, such as 
+	if (messageIn.data.i) {
+		// see usr/include/sys/errno.h for errors, such as
 		// ENOENT		2		/* No such file or directory */
-		AppError(@"errno = %i", error);
+		AppError(@"Helper remove attempt got errno = %i", messageIn.data.i);
 	}
 }
 

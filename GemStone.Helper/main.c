@@ -122,60 +122,53 @@ int respondToRequests() {
         initMessage(messageOut, messageIn.command);
         switch (messageIn.command) {
             case Helper_Version:
-                messageOut.dataSize = 3;
-                messageOut.data[0] = kVersionPart1;
-                messageOut.data[1] = kVersionPart2;
-                messageOut.data[2] = kVersionPart3;
+				messageOut.dataSize = 3;
+                messageOut.data.bytes[0] = kVersionPart1;
+                messageOut.data.bytes[1] = kVersionPart2;
+                messageOut.data.bytes[2] = kVersionPart3;
                 break;
                 
 			//	answer our PID as a demo of things we can do and to allow debugging
             case Helper_PID: {
-                int pid = getpid();
-                messageOut.dataSize = sizeof(pid);
-                memcpy(messageOut.data, &pid, messageOut.dataSize);
+                messageOut.data.i = getpid();
+				messageOut.dataSize = sizeof(messageOut.data.i);
                 break;
             }
 			case Helper_Remove: {
-				int error = 0, result;
-				result = unlink("/Library/LaunchDaemons/com.GemTalk.GemStone.Helper.plist");
-				if (0 == result) {
-					result = unlink("/Library/PrivilegedHelperTools/com.GemTalk.GemStone.Helper");
+				int error = unlink(kHelperPlistPath);
+				if (0 == error) {
+					error = unlink(kHelperToolPath);
 				}
-				if (result) {
-					error = errno;
-				}
-				messageOut.dataSize = sizeof(error);
-				memcpy(messageOut.data, &error, messageOut.dataSize);
+				messageOut.data.i = error;
+				messageOut.dataSize = sizeof(messageOut.data.i);
 				break;
 			}
 			case Helper_shmall: {
-				unsigned long	shmall = (unsigned long)messageIn.data;
+				unsigned long	shmall = messageIn.data.ul;
 				int				result = sysctlbyname("kern.sysv.shmall", NULL, 0, &shmall, sizeof(shmall));
 				syslog(LOG_NOTICE, "shmall set to %lu", shmall);
 				if (result) {
-					messageOut.command = Helper_Error;
-					messageOut.dataSize = sizeof(result);
-					memcpy(messageOut.data, &result, messageOut.dataSize);
+					messageOut.data.i = result;
+					messageOut.dataSize = sizeof(messageOut.data.i);
 				}
 				break;
 			}
 			case Helper_shmmax: {
-				unsigned long	shmmax = (unsigned long)messageIn.data;
+				unsigned long	shmmax = (unsigned long)messageIn.data.ul;
 				int				result = sysctlbyname("kern.sysv.shmmax", NULL, 0, &shmmax, sizeof(shmmax));
 				syslog(LOG_NOTICE, "shmmax set to %lu", shmmax);
 				if (result) {
-					messageOut.command = Helper_Error;
-					messageOut.dataSize = sizeof(result);
-					memcpy(messageOut.data, &result, messageOut.dataSize);
+					messageOut.data.i = result;
+					messageOut.dataSize = sizeof(messageOut.data.i);
 				}
 				break;
 			}
             default:
                 syslog(LOG_NOTICE, "Unknown command: %hhd\n", messageIn.command);
-                char* message = "Unknown command!";
+                char *message = "Unknown command!";
                 messageOut.command = Helper_Error;
                 messageOut.dataSize = strlen(message) + 1;    // add trailing \0
-                strcpy((char *) messageOut.data, message);
+                strcpy((char *) messageOut.data.bytes, message);
                 break;
         }
         int count = messageSize(&messageOut);
@@ -184,6 +177,7 @@ int respondToRequests() {
             syslog(LOG_NOTICE, "tried to write %i, but wrote %li", count, written);
             break;
         }
+		syslog(LOG_NOTICE, "wrote %i", count);
         close(connection_fd);
     }
     close(listener_fd);
