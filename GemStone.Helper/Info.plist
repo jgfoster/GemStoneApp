@@ -9,10 +9,10 @@
 	<key>CFBundleName</key>
 	<string>GemStone.Helper</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.9</string>
+	<string>1.0.10</string>
 	<key>SMAuthorizedClients</key>
 	<array>
-		<string>identifier com.GemTalk.GemStone and certificate leaf[subject.CN] = &quot;GemStone&quot;</string>
+		<string>identifier com.GemTalk.GemStone and certificate leaf[subject.CN] = &quot;GemTalk Dev&quot;</string>
 	</array>
 </dict>
 </plist>
