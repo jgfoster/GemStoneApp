@@ -253,9 +253,8 @@
 																  options:nil
 																	error:&error];
     if (!newStore) {
-        AppError(@"Store Configuration Failure\n%@",
-				 ([error localizedDescription] != nil) ?
-				 [error localizedDescription] : @"Unknown Error");
+		NSString *myString = ([error localizedDescription] != nil) ? [error localizedDescription] : @"Unknown Error";
+        AppError(@"Store Configuration Failure\n%@", myString);
     }
 }
 
@@ -304,9 +303,8 @@
 	NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:requestName];
 	NSArray *list = [managedObjectContext executeFetchRequest:request error:&error];
 	if (!list) {
-        AppError(@"Data load failed\n%@",
-			  ([error localizedDescription] != nil) ?
-			  [error localizedDescription] : @"Unknown Error");
+		NSString *myString = ([error localizedDescription] != nil) ? [error localizedDescription] : @"Unknown Error";
+        AppError(@"Data load failed\n%@",myString);
 		exit(1);		// not much point in running if we can't load our data
 	}
 	for (id each in list) {		// iterate over each object and cause the "fault" to be replaced with the object
@@ -435,9 +433,8 @@
 	
 	NSError *error = nil;
 	if (![managedObjectContext save:&error]) {
-		AppError(@"Data save failed\n%@",
-				 ([error localizedDescription] != nil) ?
-				 [error localizedDescription] : @"Unknown Error");
+		NSString *myString = [error localizedDescription] != nil ? [error localizedDescription] : @"Unknown Error";
+        AppError(@"Data save failed\n%@",myString);
 	}
 }
 

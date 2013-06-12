@@ -9,8 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "AppController.h"
 
-#define AppError(...) 	[NSException raise:NSInternalInconsistencyException \
-									format:[NSString stringWithFormat:__VA_ARGS__]]
+#define AppError(...) 	[NSException raise:NSInternalInconsistencyException format:__VA_ARGS__]
 
 #ifdef __Utilities__
 			AppController			*appController = nil;

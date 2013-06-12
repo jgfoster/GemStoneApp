@@ -90,7 +90,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>5C</string>
+	<string>8B</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.developer-tools</string>
 	<key>LSMinimumSystemVersion</key>
@@ -104,7 +104,7 @@
 	<key>SMPrivilegedExecutables</key>
 	<dict>
 		<key>com.GemTalk.GemStone.Helper</key>
-		<string>identifier com.GemTalk.GemStone.Helper and certificate leaf[subject.CN] = "GemStone"</string>
+		<string>identifier com.GemTalk.GemStone.Helper and certificate leaf[subject.CN] = "GemTalk Dev"</string>
 	</dict>
 </dict>
 </plist>

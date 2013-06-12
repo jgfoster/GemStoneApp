@@ -1,4 +1,4 @@
-//
+ //
 //  Helper.m
 //  GemStone
 //
@@ -161,7 +161,7 @@ int sendMessage(const struct HelperMessage * messageOut, struct HelperMessage * 
 		AppError(@"sendMessage failed!");
 	}
 	if (messageIn.command == Helper_Error) {
-		AppError([NSString stringWithCString:(const char *)messageIn.data encoding:NSUTF8StringEncoding]);
+		AppError(@"%@", [NSString stringWithCString:(const char *)messageIn.data encoding:NSUTF8StringEncoding]);
 	}
 	if (messageIn.command != Helper_Remove) {
 		AppError(@"unknown error");
