@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1171" systemVersion="11E53" minimumToolsVersion="Xcode 4.1" macOSVersion="Automatic" iOSVersion="Automatic">
+<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="2061" systemVersion="12E55" minimumToolsVersion="Xcode 4.1" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="Database" representedClassName="Database" syncable="YES">
         <attribute name="identifier" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="indexInArray" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="lastStartDate" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="netLDI" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="spc_mb" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="version" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
@@ -36,7 +37,7 @@
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Database" positionX="160" positionY="192" width="128" height="135"/>
+        <element name="Database" positionX="160" positionY="192" width="128" height="150"/>
         <element name="Login" positionX="160" positionY="192" width="128" height="255"/>
         <element name="Setup" positionX="160" positionY="192" width="128" height="90"/>
         <element name="Version" positionX="160" positionY="192" width="128" height="105"/>
