@@ -17,7 +17,7 @@
 //	Also edit Info.plist Bundle Version
 #define kVersionPart1 1
 #define kVersionPart2 0
-#define kVersionPart3 16
+#define kVersionPart3 17
 
 enum HelperCommand {
     Helper_Error    = 0,	// out data is a (null-terminated) C string

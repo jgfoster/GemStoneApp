@@ -146,21 +146,17 @@ int respondToRequests() {
 			case Helper_shmall: {
 				unsigned long	shmall = messageIn.data.ul;
 				int				result = sysctlbyname("kern.sysv.shmall", NULL, 0, &shmall, sizeof(shmall));
-				syslog(LOG_NOTICE, "shmall set to %lu", shmall);
-				if (result) {
-					messageOut.data.i = result;
-					messageOut.dataSize = sizeof(messageOut.data.i);
-				}
+				syslog(LOG_NOTICE, "shmall returned %i (errno = %i) when set to %lu", result, errno, shmall);
+				messageOut.data.i = result ? errno : 0;
+				messageOut.dataSize = sizeof(messageOut.data.i);
 				break;
 			}
 			case Helper_shmmax: {
 				unsigned long	shmmax = (unsigned long)messageIn.data.ul;
 				int				result = sysctlbyname("kern.sysv.shmmax", NULL, 0, &shmmax, sizeof(shmmax));
-				syslog(LOG_NOTICE, "shmmax set to %lu", shmmax);
-				if (result) {
-					messageOut.data.i = result;
-					messageOut.dataSize = sizeof(messageOut.data.i);
-				}
+				syslog(LOG_NOTICE, "shmmax returned %i (errno = %i) when set to %lu", result, errno, shmmax);
+				messageOut.data.i = result ? errno : 0;
+				messageOut.dataSize = sizeof(messageOut.data.i);
 				break;
 			}
             default:

@@ -584,7 +584,7 @@
 
 - (NSNumber *)spc_mb;
 {
-	if (![spc_mb intValue]) return nil;
+	if (![spc_mb intValue]) return nil;	// return nil so we know if we have a default
 	return spc_mb;
 }
 
@@ -610,7 +610,8 @@
 		return;
 	}
 	// should  check kernel settings and call helper tool if necessary
-	[appController ensureSharedMemoryMB:spc_mb];
+	unsigned long sharedMemoryMB = [self spc_kb] / 1024;
+	[appController ensureSharedMemoryMB:[NSNumber numberWithUnsignedLong:sharedMemoryMB]];
 	[self createConfigFile];
 	[self archiveCurrentLogFiles];
 	statmonFiles = nil;

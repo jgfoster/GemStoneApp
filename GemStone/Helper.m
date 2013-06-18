@@ -53,8 +53,9 @@
 - (void)ensureSharedMemoryMB:(NSNumber *)sizeMB;
 {
 	struct HelperMessage messageOut, messageIn;
-	unsigned long	shmmaxNeeded = [sizeMB unsignedIntegerValue] * 1024 * 1126;	//	add 10% for non-page data structures;
-	unsigned long	shmallNeeded = shmmaxNeeded = (shmmaxNeeded + 4096) / 4096;
+	unsigned long	shmmaxNeeded = [sizeMB unsignedLongValue];
+					shmmaxNeeded = shmmaxNeeded * 1024 * 1126;	//	add 10% for non-page data structures;
+	unsigned long	shmallNeeded = (shmmaxNeeded + 4095) / 4096;
 	unsigned long	shmallNow = 0;
 	unsigned long	shmmaxNow = 0;
 	size_t			mySize = sizeof(NSUInteger);
@@ -72,7 +73,7 @@
 			NSLog(@"Error sending message to set shmall");
 		}
 		if (messageIn.data.i) {
-			NSLog(@"sysctlbyname() returned %i", messageIn.data.i);
+			NSLog(@"sysctlbyname() returned errno %i", messageIn.data.i);
 		}
 	}
 	result = sysctlbyname("kern.sysv.shmmax", &shmmaxNow, &mySize, NULL, 0);
@@ -88,7 +89,7 @@
 			NSLog(@"Error sending message to set shmmax");
 		}
 		if (messageIn.data.i) {
-			NSLog(@"sysctlbyname() returned %i", messageIn.data.i);
+			NSLog(@"sysctlbyname() returned errno %i", messageIn.data.i);
 		}
 	}
 }
