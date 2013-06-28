@@ -19,7 +19,7 @@
 { 
 	NSString *zippedFileName = [version zippedFileName];
 	NSMutableString *http = [NSMutableString new];
-	[http appendString:@"http://seaside.gemstone.com/downloads/i386.Darwin/"];
+	[http appendString:@kDownloadSite];
 	[http appendString:zippedFileName];
 	return [NSArray arrayWithObjects: @"--raw", http, nil];
 }

@@ -5,6 +5,7 @@
 //  Created by James Foster on 5/7/12.
 //  Copyright (c) 2012-2013 GemTalk Systems LLC. All rights reserved.
 //
+//	Note that this is expecting a very specific format (from lighttp)
 
 #import "DownloadVersionList.h"
 #import "Utilities.h"
@@ -17,7 +18,7 @@
 - (NSArray *)arguments;
 {
 	return [NSArray arrayWithObjects:
-			@"http://seaside.gemstone.com/downloads/i386.Darwin/",
+			@kDownloadSite,
 			nil];
 }
 
@@ -40,19 +41,18 @@
 	if (error) {
 		AppError(@"error parsing version list HTML: %@", [error description]);
 	}
-	NSArray *nodes = [doc nodesForXPath:@"/html/body/table/tr" error:&error];
-	NSRange nodeRange = {3, [nodes count] - 4};
+	NSArray *nodes = [doc nodesForXPath:@"/html/body/div/table/tbody/tr" error:&error];
+	NSRange nodeRange = {1, [nodes count] - 1};
 	nodes = [nodes subarrayWithRange:nodeRange];
-	
 	NSDateFormatter *inFormatter = [NSDateFormatter new];
-	[inFormatter setDateFormat:@"dd-MMM-yyyy hh:mm"];
+	[inFormatter setDateFormat:@"yyyy-MMM-dd hh:mm:ss"];
 	NSDateFormatter *outFormatter = [NSDateFormatter new];
 	[outFormatter setDateFormat:@"yyyy-mm-dd"];
 	versions = [NSMutableArray arrayWithCapacity:[nodes count]];
 	for (id node in nodes) {
 		NSArray *fields = [node nodesForXPath:@"td" error:&error];
-		NSString *name = [[fields objectAtIndex:1] stringValue];
-		NSDate   *date = [inFormatter dateFromString:[[fields objectAtIndex:2] stringValue]];
+		NSString *name = [[fields objectAtIndex:0] stringValue];
+		NSDate   *date = [inFormatter dateFromString:[[fields objectAtIndex:1] stringValue]];
 		NSRange  range = {13, [name length] - 29};
 		name = [name substringWithRange:range];
 		NSDictionary *version = [NSMutableDictionary dictionaryWithCapacity:3];

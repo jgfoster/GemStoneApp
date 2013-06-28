@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+#define kDownloadSite "http://seaside.gemtalksystems.com/downloads/i386.Darwin/"
+
 @interface Version : NSManagedObject {
 	NSNumber	*isInstalledCode;
 	NSString	*name;

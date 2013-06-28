@@ -140,6 +140,14 @@
 
 - (void)criticalAlert:(NSString *)textString details:(NSString *)detailsString;
 {
+	NSArray *args = [NSArray arrayWithObjects:textString, detailsString, nil];
+	[self performSelectorOnMainThread:@selector(criticalAlertA:) withObject:args waitUntilDone:false];
+}
+
+- (void)criticalAlertA:(NSArray *)args;
+{
+	NSString *textString = [args objectAtIndex:0];
+	NSString *detailsString = [args objectAtIndex:1];
 	NSAlert *alert = [[NSAlert alloc] init];
 	[alert setAlertStyle:NSCriticalAlertStyle];
 	[alert setMessageText:textString];
