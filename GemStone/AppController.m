@@ -20,8 +20,8 @@
 #import "Statmonitor.h"
 #import "StopNetLDI.h"
 #import "StopStone.h"
+#import "Terminal.h"
 #import "Topaz.h"
-#import "UnzipVersion.h"
 #import "Utilities.h"
 #import "Version.h"
 
@@ -38,6 +38,16 @@
 @implementation AppController
 
 @synthesize managedObjectContext;
+
+- (IBAction)addDatabase:(id)sender;
+{
+	NSManagedObjectModel *managedObjectModel = [[managedObjectContext persistentStoreCoordinator] managedObjectModel];
+	NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Database"];
+	Database *database = [[Database alloc]
+						initWithEntity:entity
+						insertIntoManagedObjectContext:managedObjectContext];
+	[databaseListController addObject:database];
+}
 
 - (void)addOperation:(NSOperation *)anOperation;
 {
@@ -223,7 +233,7 @@
 	[helper ensureSharedMemoryMB:sizeMB];
 }
 
-- (BOOL)exceptionHandler:(NSExceptionHandler *)sender shouldLogException:(NSException *)exception mask:(unsigned int)aMask;
+- (BOOL)exceptionHandler:(NSExceptionHandler *)sender shouldLogException:(NSException *)exception mask:(NSUInteger)aMask;
 {
 	NSString *string = [NSString stringWithFormat:@"%@\n\nSee Console for details.", [exception reason]];
 	[self criticalAlert:@"Internal Application Error!" details:string];
@@ -372,6 +382,27 @@
 	Database *database = [self selectedDatabase];
 	NSIndexSet *indexes = [statmonTableView selectedRowIndexes];
 	[database openStatmonFilesAtIndexes:indexes];
+}
+
+- (IBAction)openTerminal:(id)sender;
+{
+	Database *database = [self selectedDatabase];
+	Terminal *terminal = [Terminal forDatabase:database];
+	NSString *directory = [database directory];
+	NSString *path = [NSString stringWithFormat:@"%@/.topazini", directory];
+	if (![fileManager fileExistsAtPath:path]) {
+		NSMutableString *string = [NSMutableString new];
+		[string appendString: @"! default initialization for Topaz session\n"];
+		[string appendString: @"set user DataCurator pass swordfish\n"];
+		[string appendFormat: @"set gems %@\n", [database name]];
+		if (![fileManager
+			  createFileAtPath:path
+			  contents:[string dataUsingEncoding:NSUTF8StringEncoding]
+			  attributes:nil]) {
+			AppError(@"Unable to create .topazini file at %@", path);
+		};
+	}
+	[self addOperation:terminal];
 }
 
 - (IBAction)removeDatabase:(id)sender;

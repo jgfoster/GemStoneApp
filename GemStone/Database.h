@@ -50,6 +50,7 @@
 - (NSString *)descriptionOfOldLogFiles;
 - (NSString *)descriptionOfOldTranLogs;
 - (NSString *)directory;
+- (void)doubleClickStatmon:(id)sender;
 - (NSString *)gemstone;
 - (NSString *)gemToolsLogin;
 - (void)gsList:(NSArray *)list;

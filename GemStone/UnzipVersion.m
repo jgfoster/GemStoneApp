@@ -6,6 +6,7 @@
 //  Copyright (c) 2012-2013 GemTalk Systems LLC. All rights reserved.
 //
 
+#import "AppController.h"
 #import "UnzipVersion.h"
 #import "Utilities.h"
 

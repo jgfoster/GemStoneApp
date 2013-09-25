@@ -12,7 +12,7 @@
 	<string>1.0.17</string>
 	<key>SMAuthorizedClients</key>
 	<array>
-		<string>identifier com.GemTalk.GemStone and certificate leaf[subject.CN] = &quot;GemTalk Dev&quot;</string>
+		<string>identifier com.GemTalk.GemStone and certificate leaf[subject.CN] = &quot;Developer ID Application: GemTalk Systems LLC (72G58AHU7P)&quot;</string>
 	</array>
 </dict>
 </plist>

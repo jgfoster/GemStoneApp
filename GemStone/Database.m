@@ -453,7 +453,7 @@
 			[dirEnum skipDescendents];
 			continue;
 		}
-		if (NSOrderedSame == [@".log" compare:[file substringFromIndex:[file length]-4]]) {
+		if ((4 < [file length]) && (NSOrderedSame == [@".log" compare:[file substringFromIndex:[file length]-4]])) {
 			NSError *error = nil;
 			NSString *fullPath = [NSString stringWithFormat:@"%@/%@", path, file];
 			NSDictionary *dict = [fileManager attributesOfItemAtPath:fullPath error:&error];

@@ -7,8 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "Database.h"
 #import "Helper.h"
 #import "Task.h"
+#import "UnzipVersion.h"
 #import "Version.h"
 
 @interface AppController : NSObject <NSTabViewDelegate> {
@@ -54,10 +56,13 @@
 
 @property(readonly) NSManagedObjectContext	*managedObjectContext;
 
+- (IBAction)addDatabase:(id)sender;
 - (void)addOperation:(NSOperation *)anOperation;
 - (IBAction)cancelTask:(id)sender;
 - (IBAction)clickedDataFile:(id)sender;
 - (IBAction)closeInfoPanel:(id)sender;
+- (void)databaseStartDone:(Database *)aDatabase;
+- (void)databaseStopDone:(Database *)aDatabase;
 - (IBAction)defaultLogin:(id)sender;
 - (IBAction)deleteStatmonFiles:(id)sender;
 - (IBAction)doUpgrade:(id)sender;
@@ -66,6 +71,7 @@
 - (NSString *)mostAdvancedVersion;
 - (NSNumber *)nextDatabaseIdentifier;
 - (IBAction)openStatmonFiles:(id)sender;
+- (IBAction)openTerminal:(id)sender;
 - (IBAction)removeDatabase:(id)sender;
 - (IBAction)removeHelperTool:(id)sender;
 - (void)removeVersionDone;
@@ -81,6 +87,7 @@
 - (void)updateHelperToolStatus;
 - (NSArray *)versionList;
 - (IBAction)versionListDownloadRequest:(id)sender;
+- (void)versionUnzipDone:(UnzipVersion *)unzipTask;
 - (IBAction)versionUnzipRequest:(id)sender;
 
 @end
