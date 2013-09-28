@@ -7,22 +7,19 @@
 //
 
 #import "DatabaseTask.h"
-#import "Login.h"
 
 @class Topaz;
 
 typedef void(^block_t)(Topaz *);
 
 @interface Topaz : DatabaseTask {
-	Login		*login;
 	NSInteger	 session;
 	block_t		 block;
 }
 
-@property (nonatomic, retain)	Login	*login;
 @property (nonatomic, copy)		block_t	 block;
 
-+ (id)login:(Login *)aLogin toDatabase:(Database *)aDatabase andDo:(block_t)aBlock;
++ (id)database:(Database *)aDatabase do:(block_t)aBlock;
 
 - (void)fullBackupTo:(NSString *)aString;
 - (void)restoreFromBackup:(NSString *)aString;

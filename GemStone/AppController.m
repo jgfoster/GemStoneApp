@@ -14,7 +14,6 @@
 #import "DownloadVersionList.h"
 #import "GSList.h"
 #import "LogFile.h"
-#import "Login.h"
 #import "StartNetLDI.h"
 #import "StartStone.h"
 #import "Statmonitor.h"
@@ -69,7 +68,6 @@
 								context:nil];
 	[self performSelector:@selector(loadRequestForSetup)			withObject:nil afterDelay:0.01];
 	[self performSelector:@selector(loadRequestForDatabase)			withObject:nil afterDelay:0.02];
-	[self performSelector:@selector(loadRequestForLogin)			withObject:nil afterDelay:0.03];
 	[self performSelector:@selector(loadRequestForVersion)			withObject:nil afterDelay:0.04];
 	[self performSelector:@selector(refreshInstalledVersionsList)	withObject:nil afterDelay:0.05];
 	[self performSelector:@selector(refreshUpgradeVersionsList)		withObject:nil afterDelay:0.06];
@@ -99,13 +97,6 @@
 		Version *version = [list objectAtIndex:i];
 		if (version.indexInArray != [NSNumber numberWithInt:i]) {
 			version.indexInArray = [NSNumber numberWithInt:i];
-		}
-	}
-	list = [loginListController arrangedObjects];
-	for (int i = 0; i < [list count]; ++i) {
-		Login *login = [list objectAtIndex:i];
-		if (login.indexInArray != [NSNumber numberWithInt:i]) {
-			login.indexInArray = [NSNumber numberWithInt:i];
 		}
 	}
 	list = [databaseListController arrangedObjects];
@@ -169,8 +160,7 @@
 - (void)databaseStartRestoreDone:(NSNotification *)notification;
 {
 /*
-	Login *login = [self defaultLoginForDatabase:database];
-	Topaz *myTask = [Topaz login:login toDatabase:database];
+	Topaz *myTask = [Topaz database:database];
 	[myTask restoreFromBackup];
 	[notificationCenter removeObserver:self name:nil object:taskX];
 	[self taskFinishedAfterDelay];
@@ -190,20 +180,6 @@
 	[self updateDatabaseList:nil];
 	[statmonTableView	performSelector:@selector(reloadData)			withObject:nil afterDelay:0.5];
 	[self taskFinishedAfterDelay];
-}
-
-- (IBAction)defaultLogin:(id)sender;
-{
-//	Login *login = [[self selectedDatabase] defaultLogin];
-	Database *database = [self selectedDatabase];
-	NSString *string = [database gemToolsLogin];
-	[infoPanelTextView setString:string];
-	[NSApp beginSheet:infoPanel
-	   modalForWindow:[NSApp mainWindow]
-		modalDelegate:self
-	   didEndSelector:nil
-		  contextInfo:nil];
-	
 }
 
 - (IBAction)deleteStatmonFiles:(id)sender;
@@ -239,6 +215,19 @@
 	[self criticalAlert:@"Internal Application Error!" details:string];
 	[self taskFinishedAfterDelay];
 	return YES;
+}
+
+- (IBAction)gemToolsSession:(id)sender;
+{
+	Database *database = [self selectedDatabase];
+	NSString *string = [database gemToolsLogin];
+	[infoPanelTextView setString:string];
+	[NSApp beginSheet:infoPanel
+	   modalForWindow:[NSApp mainWindow]
+		modalDelegate:self
+	   didEndSelector:nil
+		  contextInfo:nil];
+	
 }
 
 - (id)init;
@@ -285,11 +274,6 @@
 - (void)loadRequestForDatabase;
 {
 	[self loadRequest:@"Database" toController:databaseListController];
-}
-
-- (void)loadRequestForLogin;
-{
-	[self loadRequest:@"Login" toController:loginListController];
 }
 
 - (void)loadRequestForSetup;
@@ -386,23 +370,18 @@
 
 - (IBAction)openTerminal:(id)sender;
 {
-	Database *database = [self selectedDatabase];
-	Terminal *terminal = [Terminal forDatabase:database];
-	NSString *directory = [database directory];
-	NSString *path = [NSString stringWithFormat:@"%@/.topazini", directory];
-	if (![fileManager fileExistsAtPath:path]) {
-		NSMutableString *string = [NSMutableString new];
-		[string appendString: @"! default initialization for Topaz session\n"];
-		[string appendString: @"set user DataCurator pass swordfish\n"];
-		[string appendFormat: @"set gems %@\n", [database name]];
-		if (![fileManager
-			  createFileAtPath:path
-			  contents:[string dataUsingEncoding:NSUTF8StringEncoding]
-			  attributes:nil]) {
-			AppError(@"Unable to create .topazini file at %@", path);
-		};
+	[Terminal doScript:@"" forDatabase:[self selectedDatabase]];
+}
+
+- (IBAction)openTopaz:(id)sender;
+{
+	NSInteger topazTocMB = [[topazTocController content] integerValue];
+	if (topazTocMB <= 0) {
+		topazTocMB = 50;
 	}
-	[self addOperation:terminal];
+	topazTocMB = topazTocMB * 1000;
+	NSString *script = [NSString stringWithFormat:@"topaz -l -T %li", (long)topazTocMB];
+	[Terminal doScript:script forDatabase:[self selectedDatabase]];
 }
 
 - (IBAction)removeDatabase:(id)sender;
@@ -763,6 +742,7 @@
 								initWithEntity:entity 
 								insertIntoManagedObjectContext:managedObjectContext];
 			[version setName:name];
+			[version setDate:[NSDate date]];
 			[versionListController addObject:version];
 		}
 		[self refreshInstalledVersionsList];

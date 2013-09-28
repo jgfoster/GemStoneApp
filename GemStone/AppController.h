@@ -21,7 +21,6 @@
 	IBOutlet NSTableView			*databaseTableView;
 	IBOutlet NSTextView				*infoPanelTextView;
 	IBOutlet NSArrayController		*logFileListController;
-	IBOutlet NSArrayController		*loginListController;
 	IBOutlet NSButton				*removeButton;
 	IBOutlet NSArrayController		*versionListController;
 	IBOutlet NSArrayController		*versionPopupController;
@@ -37,6 +36,7 @@
 	IBOutlet NSTabViewItem			*gsListTabViewItem;
 	IBOutlet NSTableView			*statmonTableView;
 	IBOutlet NSObjectController		*statmonFileSelectedController;
+	IBOutlet NSObjectController		*topazTocController;
 	IBOutlet NSButton				*repositoryConversionCheckbox;
 	IBOutlet NSButton				*upgradeSeasideCheckbox;
 
@@ -63,15 +63,16 @@
 - (IBAction)closeInfoPanel:(id)sender;
 - (void)databaseStartDone:(Database *)aDatabase;
 - (void)databaseStopDone:(Database *)aDatabase;
-- (IBAction)defaultLogin:(id)sender;
 - (IBAction)deleteStatmonFiles:(id)sender;
 - (IBAction)doUpgrade:(id)sender;
 - (void)ensureSharedMemoryMB:(NSNumber *)sizeMB;
+- (IBAction)gemToolsSession:(id)sender;
 - (IBAction)installHelperTool:(id)sender;
 - (NSString *)mostAdvancedVersion;
 - (NSNumber *)nextDatabaseIdentifier;
 - (IBAction)openStatmonFiles:(id)sender;
 - (IBAction)openTerminal:(id)sender;
+- (IBAction)openTopaz:(id)sender;
 - (IBAction)removeDatabase:(id)sender;
 - (IBAction)removeHelperTool:(id)sender;
 - (void)removeVersionDone;

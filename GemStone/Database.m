@@ -12,7 +12,6 @@
 #import "GSList.h"
 #import "Helper.h"
 #import "LogFile.h"
-#import "Login.h"
 #import "Utilities.h"
 #import "StartCacheWarmer.h"
 #import "StartNetLDI.h"
@@ -102,10 +101,8 @@
     if (result != NSOKButton) return;
 	
 	NSString *path = [[panel URL] path];
-	Login *login = [self defaultLogin];
-	Topaz *topaz = [Topaz login:login 
-					   toDatabase:self 
-							andDo: ^(Topaz *aTopaz){ [aTopaz fullBackupTo:path]; }];
+	Topaz *topaz = [Topaz database:self
+								do:^(Topaz *aTopaz){ [aTopaz fullBackupTo:path]; }];
 	[appController addOperation:topaz];
 }
 
@@ -121,7 +118,8 @@
 	[string appendString: @"STN_TRAN_LOG_SIZES = 100, 100;\n"];
 	[string appendString: @"KEYFILE = \"$GEMSTONE/seaside/etc/gemstone.key\";\n"];
 	[string appendFormat: @"SHR_PAGE_CACHE_SIZE_KB = %lu;\n", [self spc_kb]];
-	if (![fileManager 
+	[string appendString: @"#GEM_TEMPOBJ_CACHE_SIZE = 50000;\n"];
+	if (![fileManager
 			createFileAtPath:path 
 			contents:[string dataUsingEncoding:NSUTF8StringEncoding] 
 			attributes:nil]) {
@@ -198,6 +196,23 @@
 	AppError(@"unable to link %@ to %@ because %@", localLink, alternate, [error description]);
 }
 
+- (void)createTopazIniFile;
+{
+	NSString *directory = [self directory];
+	NSString *path = [NSString stringWithFormat:@"%@/.topazini", directory];
+	NSMutableString *string = [NSMutableString new];
+	[string appendString: @"! default initialization for Topaz session\n"];
+	[string appendString: @"set user DataCurator pass swordfish\n"];
+	[string appendFormat: @"set gems %@\n", [self name]];
+	[string appendString: @"login\n"];
+	if (![fileManager
+		  createFileAtPath:path
+		  contents:[string dataUsingEncoding:NSUTF8StringEncoding]
+		  attributes:nil]) {
+		AppError(@"Unable to create .topazini file at %@", path);
+	};
+}
+
 - (NSArray *)dataFiles;
 {
 	NSString *path = [NSString stringWithFormat:@"%@/data", [self directory]];
@@ -213,19 +228,6 @@
 		}
 	}
 	return list;
-}
-
-- (Login *)defaultLogin;
-{
-	NSManagedObjectContext *moc = [appController managedObjectContext];
-	NSManagedObjectModel *managedObjectModel = [[moc persistentStoreCoordinator] 
-												managedObjectModel];
-	NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Login"];
-	Login *login = [[Login alloc]
-					initWithEntity:entity
-					insertIntoManagedObjectContext:moc];
-	[login initializeForDatabase:self];
-	return login;
 }
 
 - (void)deleteAll;
@@ -522,11 +524,9 @@
 	
 	NSString	*path = [[[panel URLs] objectAtIndex:0] path];
 	[self startDatabaseWithArgs:[NSArray arrayWithObject:@"-R"]];	//	defines statmonitor, but does not add it as an operation
-	Login *login = [self defaultLogin];
-	Topaz *topaz = [Topaz login:login 
-					 toDatabase:self 
-						  andDo:^(Topaz *aTopaz) {
-							  [aTopaz restoreFromBackup:path]; }
+	Topaz *topaz = [Topaz database:self
+								do:^(Topaz *aTopaz) {
+									[aTopaz restoreFromBackup:path]; }
 					];
 	[topaz addDependency:statmonitor];
 	__block id me = self;
@@ -613,7 +613,7 @@
 	unsigned long sharedMemoryMB = [self spc_kb] / 1024;
 	[appController ensureSharedMemoryMB:[NSNumber numberWithUnsignedLong:sharedMemoryMB]];
 	[self createConfigFile];
-	[self archiveCurrentLogFiles];
+	[self createTopazIniFile];
 	statmonFiles = nil;
 
 	[appController taskStart:@"Starting NetLDI, Stone, and Statmonitor . . .\n\n"];
@@ -694,7 +694,8 @@
 
 - (void)stopIsDone;
 {
-	[self	performSelector:@selector(refreshStatmonFiles)	
+	[self archiveCurrentLogFiles];
+	[self	performSelector:@selector(refreshStatmonFiles)
 				 withObject:nil 
 				 afterDelay:0.4];
 	[appController performSelectorOnMainThread:@selector(databaseStopDone:) 

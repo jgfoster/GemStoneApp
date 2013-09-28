@@ -8,6 +8,12 @@
 
 #import "DatabaseTask.h"
 
-@interface Terminal : DatabaseTask
+@interface Terminal : DatabaseTask {
+	NSString *script;
+}
+
+@property(nonatomic, retain) NSString *script;
+
++ (void)doScript:(NSString *)script forDatabase:(Database *)aDatabase;
 
 @end

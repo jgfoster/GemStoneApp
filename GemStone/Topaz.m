@@ -11,13 +11,11 @@
 
 @implementation Topaz
 
-@synthesize login;
 @synthesize block;
 
-+ (id)login:(Login *)aLogin toDatabase:(Database *)aDatabase andDo:(block_t)aBlock;
++ (id)database:(Database *)aDatabase do:(block_t)aBlock;
 {
 	Topaz *instance = [super forDatabase:aDatabase];
-	[instance setLogin:aLogin];
 	[instance setBlock:aBlock];
 	return instance;
 }
@@ -168,10 +166,8 @@
 	[super startTask];
 	[self outputUpToPrompt];
 	NSString *inString = [NSString 
-						stringWithFormat:@"set user %@ password %@ gemstone %@\n", 
-						[login gsUser], 
-						[login gsPassword],
-						[login stoneName]];
+						stringWithFormat:@"set user DataCurator password swordfish gemstone %@\n",
+						[database name]];
 	NSString *outString = [self responseFrom:inString];
 	outString = [self responseFrom:@"login\n"];
 	if (session) {

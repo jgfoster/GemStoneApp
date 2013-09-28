@@ -8,10 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
-#import "Login.h"
 #import "Task.h"
-
-@class Login;
 
 @interface Database : NSManagedObject <NSTableViewDataSource, NSTableViewDelegate> {
 	// persistent
@@ -42,7 +39,6 @@
 - (void)archiveCurrentLogFiles;
 - (void)archiveCurrentTransactionLogs;
 - (NSArray *)dataFiles;
-- (Login *)defaultLogin;
 - (void)deleteAll;
 - (void)deleteOldLogFiles;
 - (void)deleteOldTranLogs;
