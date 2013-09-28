@@ -46,7 +46,6 @@
 		E5B984BA1767646E00831AB3 /* StartCacheWarmer.m in Sources */ = {isa = PBXBuildFile; fileRef = E5B984B91767646E00831AB3 /* StartCacheWarmer.m */; };
 		E5DDDEB3154202C7006F168D /* com.GemTalk.GemStone.Helper in CopyFiles */ = {isa = PBXBuildFile; fileRef = E554E9761541CFE200A08D05 /* com.GemTalk.GemStone.Helper */; };
 		E5E33C2815547ADF002B1E9F /* Version.m in Sources */ = {isa = PBXBuildFile; fileRef = E5E33C2515547ADF002B1E9F /* Version.m */; };
-		E5E33C7F1554ABD9002B1E9F /* Login.m in Sources */ = {isa = PBXBuildFile; fileRef = E5E33C7E1554ABD9002B1E9F /* Login.m */; };
 		E5F05E5315A39C3100D6FCC7 /* Task.m in Sources */ = {isa = PBXBuildFile; fileRef = E5F05E5215A39C3100D6FCC7 /* Task.m */; };
 		E5F05E5715A39EAB00D6FCC7 /* StartStone.m in Sources */ = {isa = PBXBuildFile; fileRef = E5F05E5615A39EAB00D6FCC7 /* StartStone.m */; };
 		E5FD0F041565ECA300045B4D /* Database.m in Sources */ = {isa = PBXBuildFile; fileRef = E5FD0F031565ECA300045B4D /* Database.m */; };
@@ -162,8 +161,6 @@
 		E5CA1EDF1628DF0200997041 /* buildDistribution.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = buildDistribution.sh; sourceTree = "<group>"; };
 		E5E33C2415547ADF002B1E9F /* Version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Version.h; sourceTree = "<group>"; };
 		E5E33C2515547ADF002B1E9F /* Version.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Version.m; sourceTree = "<group>"; };
-		E5E33C7D1554ABD9002B1E9F /* Login.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Login.h; sourceTree = "<group>"; };
-		E5E33C7E1554ABD9002B1E9F /* Login.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Login.m; sourceTree = "<group>"; };
 		E5F05E5115A39C3100D6FCC7 /* Task.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Task.h; sourceTree = "<group>"; };
 		E5F05E5215A39C3100D6FCC7 /* Task.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Task.m; sourceTree = "<group>"; };
 		E5F05E5515A39EAB00D6FCC7 /* StartStone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StartStone.h; sourceTree = "<group>"; };
@@ -314,8 +311,6 @@
 				E5FD0F031565ECA300045B4D /* Database.m */,
 				E5143A4015ADE28B00DDAD01 /* LogFile.h */,
 				E5143A4115ADE28B00DDAD01 /* LogFile.m */,
-				E5E33C7D1554ABD9002B1E9F /* Login.h */,
-				E5E33C7E1554ABD9002B1E9F /* Login.m */,
 				E554E98F1541D8E400A08D05 /* Helper.h */,
 				E554E9901541D8E400A08D05 /* Helper.m */,
 				E593417B15AB862800618792 /* Utilities.h */,
@@ -541,7 +536,6 @@
 				E554E9911541D8E400A08D05 /* Helper.m in Sources */,
 				E5E33C2815547ADF002B1E9F /* Version.m in Sources */,
 				E52678E517F26B17006CD274 /* Terminal.m in Sources */,
-				E5E33C7F1554ABD9002B1E9F /* Login.m in Sources */,
 				E570538815582FA8001686F1 /* DownloadVersionList.m in Sources */,
 				E5B50B09155B291B00BE1A65 /* DownloadVersion.m in Sources */,
 				E5FD0F041565ECA300045B4D /* Database.m in Sources */,
