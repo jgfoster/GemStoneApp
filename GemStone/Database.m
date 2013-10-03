@@ -118,7 +118,7 @@
 	[string appendString: @"STN_TRAN_LOG_SIZES = 100, 100;\n"];
 	[string appendString: @"KEYFILE = \"$GEMSTONE/seaside/etc/gemstone.key\";\n"];
 	[string appendFormat: @"SHR_PAGE_CACHE_SIZE_KB = %lu;\n", [self spc_kb]];
-	[string appendString: @"#GEM_TEMPOBJ_CACHE_SIZE = 50000;\n"];
+	[string appendString: @"GEM_TEMPOBJ_CACHE_SIZE = 100000;\n"];
 	if (![fileManager
 			createFileAtPath:path 
 			contents:[string dataUsingEncoding:NSUTF8StringEncoding] 
