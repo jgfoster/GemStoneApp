@@ -374,7 +374,7 @@
 		identifier = [appController nextDatabaseIdentifier];
 		[self createDirectories];
 		version = [appController mostAdvancedVersion];
-		[self installBaseExtent];
+		[self installGlassExtent];
 	}
 	return identifier;
 }

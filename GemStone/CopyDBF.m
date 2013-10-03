@@ -27,7 +27,7 @@
 
 - (void)dataString:(NSString *)aString;
 {
-//	useful output goes to stderr!
+	[errorOutput appendString:aString];		// 3.2 might send some data to stdout!
 }
 
 - (void)errorOutputString:(NSString *)aString;

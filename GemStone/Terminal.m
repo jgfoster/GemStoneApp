@@ -23,6 +23,8 @@
 - (NSArray *)arguments;
 {
 	NSMutableString *string = [NSMutableString new];
+	[string appendString:@"#!/bin/sh\n"];
+	[string appendString:@"# set environment variables for GemStone/S\n"];
 	[string appendFormat: @"cd %@\n", [database directory]];
 	NSDictionary *environment = [self environment];
 	for (NSString* key in [environment allKeys]) {
@@ -31,6 +33,7 @@
 		}
 	}
 	[string appendString:@"export PATH=\"$GEMSTONE/bin:$PATH\"\n"];
+	[string appendFormat:@"# rm %@\n", [self scriptPath]];
 	[string appendFormat:@"%@\n", script];
 	NSNumber *number = [NSNumber numberWithShort:0700];
 	NSDictionary *attributes = [NSDictionary dictionaryWithObject:number
@@ -60,13 +63,6 @@
 			nil];
 }
 
-- (void)done;
-{
-	[super done];
-	[fileManager removeItemAtPath:[self scriptPath]
-							error:nil];
-}
-
 - (NSMutableDictionary *)environment;
 {
 	NSMutableDictionary *environment = [super environment];
@@ -85,7 +81,7 @@
 
 - (NSString *)scriptPath;
 {
-	return [NSString stringWithFormat:@"%@/script.tmp", [database directory]];
+	return [NSString stringWithFormat:@"%@/setEnv.sh", [database directory]];
 }
 
 @end

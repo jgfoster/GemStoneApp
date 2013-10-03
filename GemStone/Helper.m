@@ -55,6 +55,8 @@
 	struct HelperMessage messageOut, messageIn;
 	unsigned long	shmmaxNeeded = [sizeMB unsignedLongValue];
 					shmmaxNeeded = shmmaxNeeded * 1024 * 1126;	//	add 10% for non-page data structures;
+	//	allow use of max available memory
+	shmmaxNeeded = [[NSProcessInfo processInfo] physicalMemory];
 	unsigned long	shmallNeeded = (shmmaxNeeded + 4095) / 4096;
 	unsigned long	shmallNow = 0;
 	unsigned long	shmmaxNow = 0;

@@ -402,6 +402,8 @@
 	}
 	[database deleteAll];
 	[databaseListController remove:sender];
+	[managedObjectContext deleteObject:database];
+	[self saveData];
 }
 
 - (IBAction)removeHelperTool:(id)sender;
@@ -447,10 +449,14 @@
 
 - (void)saveData;
 {
-	if (![managedObjectContext hasChanges]) return;
+	BOOL hasChanges = [managedObjectContext hasChanges];
+	if (!hasChanges) {
+		return;
+	}
 	
 	NSError *error = nil;
-	if (![managedObjectContext save:&error]) {
+	BOOL saveWasSuccessful = [managedObjectContext save:&error];
+	if (!saveWasSuccessful) {
 		NSString *myString = [error localizedDescription] != nil ? [error localizedDescription] : @"Unknown Error";
         AppError(@"Data save failed\n%@",myString);
 	}
