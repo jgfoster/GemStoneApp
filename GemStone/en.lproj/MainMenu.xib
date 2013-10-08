@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4510" systemVersion="12F37" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4510" systemVersion="12F45" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment defaultVersion="1070" identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4510"/>
@@ -1512,7 +1512,7 @@ Gw
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="8358" userLabel="SPC Cache Size">
+                                        <textField verticalHuggingPriority="750" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8358" userLabel="SPC Cache Size">
                                             <rect key="frame" x="521" y="243" width="56" height="22"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="right" placeholderString="128" drawsBackground="YES" id="8359">
@@ -1532,9 +1532,10 @@ Gw
                                                         <string key="NSValueTransformerName">NSNegateBoolean</string>
                                                     </dictionary>
                                                 </binding>
-                                                <binding destination="8210" name="value" keyPath="selection.spc_mb" id="9524">
+                                                <binding destination="8210" name="value" keyPath="selection.spc_mb" id="bgx-oP-XXg">
                                                     <dictionary key="options">
                                                         <real key="NSNullPlaceholder" value="128"/>
+                                                        <string key="NSNoSelectionPlaceholder">none</string>
                                                     </dictionary>
                                                 </binding>
                                                 <outlet property="nextKeyView" destination="10459" id="15376"/>
@@ -1614,18 +1615,18 @@ Gw
                                                 <binding destination="8210" name="enabled" keyPath="selection.isRunningCode" id="dCp-l4-QNO"/>
                                             </connections>
                                         </button>
-                                        <tabView translatesAutoresizingMaskIntoConstraints="NO" id="11787" userLabel="Database Tabs">
+                                        <tabView ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="11787" userLabel="Database Tabs">
                                             <rect key="frame" x="10" y="7" width="574" height="236"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <font key="font" metaFont="system"/>
                                             <tabViewItems>
                                                 <tabViewItem label="Login" identifier="" id="tbF-lE-aa9" userLabel="Login Tab">
-                                                    <view key="view" id="BwA-a2-4ud">
-                                                        <rect key="frame" x="10" y="33" width="0.0" height="0.0"/>
+                                                    <view key="view" ambiguous="YES" id="BwA-a2-4ud">
+                                                        <rect key="frame" x="10" y="33" width="0.0" height="190"/>
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>
                                                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0ij-H0-Ygi">
-                                                                <rect key="frame" x="279" y="-64" width="92" height="32"/>
+                                                                <rect key="frame" x="279" y="126" width="92" height="32"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <buttonCell key="cell" type="push" title="Terminal" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="UDp-Av-tZT">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1637,7 +1638,7 @@ Gw
                                                                 </connections>
                                                             </button>
                                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kBz-fK-AB6">
-                                                                <rect key="frame" x="19" y="-21" width="203" height="17"/>
+                                                                <rect key="frame" x="19" y="169" width="203" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Temporary Object Cache in MB:" id="c0R-Yo-IqY">
                                                                     <font key="font" metaFont="system"/>
@@ -1646,7 +1647,7 @@ Gw
                                                                 </textFieldCell>
                                                             </textField>
                                                             <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xni-hA-cSj">
-                                                                <rect key="frame" x="227" y="-25" width="50" height="22"/>
+                                                                <rect key="frame" x="227" y="165" width="50" height="22"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="right" placeholderString="50" drawsBackground="YES" id="KIQ-nK-xRT">
                                                                     <numberFormatter key="formatter" formatterBehavior="default10_4" positiveFormat="#,##0.###" negativeFormat="#,##0.###" numberStyle="decimal" minimumIntegerDigits="1" maximumIntegerDigits="309" minimumFractionDigits="0" maximumFractionDigits="3" id="451-HD-LWx">
@@ -1664,7 +1665,7 @@ Gw
                                                                 </textFieldCell>
                                                             </textField>
                                                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tli-fN-SsI">
-                                                                <rect key="frame" x="279" y="-31" width="92" height="32"/>
+                                                                <rect key="frame" x="279" y="159" width="92" height="32"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <buttonCell key="cell" type="push" title="Topaz" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="TFq-TH-h4j">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1676,7 +1677,7 @@ Gw
                                                                 </connections>
                                                             </button>
                                                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="x9g-G9-Ghm">
-                                                                <rect key="frame" x="279" y="-97" width="92" height="32"/>
+                                                                <rect key="frame" x="279" y="93" width="92" height="32"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <buttonCell key="cell" type="push" title="GemTools" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ARE-Jf-c5a">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
