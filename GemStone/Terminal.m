@@ -32,7 +32,15 @@
 			[string appendFormat:@"export %@=\'%@\'\n", key, [environment valueForKey:key]];
 		}
 	}
-	[string appendString:@"export PATH=\"$GEMSTONE/bin:$PATH\"\n"];
+	[string appendString:@"export PATH=\"$GEMSTONE/bin:$GEMSTONE/seaside/bin:$PATH\"\n"];
+	[string appendString:@"export DYLD_LIBRARY_PATH=\"$GEMSTONE/lib:$DYLD_LIBRARY_PATH\"\n"];
+	[string appendString:@"export MANPATH=\"$GEMSTONE/doc:$MANPATH\"\n"];
+	[string appendString:@"# from $GEMSTONE/seaside/etc/gemstone.conf\n"];
+	[string appendFormat:@"export GEMSTONE_USER=\"%@\"\n", NSUserName()];
+	[string appendFormat:@"export GEMSTONE_NAME=\"%@\"\n", [database name]];
+	[string appendFormat:@"export GEMSTONE_LOGDIR=\"%@/log\"\n", [database directory]];
+	[string appendFormat:@"export GEMSTONE_DATADIR=\"%@/data\"\n", [database directory]];
+	
 	[string appendFormat:@"# rm %@\n", [self scriptPath]];
 	[string appendFormat:@"%@\n", script];
 	NSNumber *number = [NSNumber numberWithShort:0700];
@@ -42,7 +50,7 @@
 		  createFileAtPath:[self scriptPath]
 		  contents:[string dataUsingEncoding:NSUTF8StringEncoding]
 		  attributes:attributes]) {
-		AppError(@"Unable to create .topazini file at %@", [self scriptPath]);
+		AppError(@"Unable to create file at %@", [self scriptPath]);
 	};
 	string = [NSString stringWithFormat:@"do script \"source \'%@\'\"", [self scriptPath]];
 	return [NSArray arrayWithObjects:

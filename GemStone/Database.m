@@ -112,13 +112,16 @@
 	NSString *path = [NSString stringWithFormat:@"%@/conf/system.conf", directory];
 	NSMutableString *string = [NSMutableString new];
 	[string appendFormat: @"DBF_EXTENT_NAMES = \"%@/data/extent0.dbf\";\n", directory];
+	[string appendFormat: @"DBF_SCRATCH_DIR = \"%@/data/\";\n", directory];
 	[string appendString: @"STN_TRAN_FULL_LOGGING = TRUE;\n"];
 	[string appendFormat: @"STN_TRAN_LOG_DIRECTORIES = \"%@/data/\", \n", directory];
 	[string appendFormat: @"	\"%@/data/\";\n", [self directory]];
 	[string appendString: @"STN_TRAN_LOG_SIZES = 100, 100;\n"];
 	[string appendString: @"KEYFILE = \"$GEMSTONE/seaside/etc/gemstone.key\";\n"];
 	[string appendFormat: @"SHR_PAGE_CACHE_SIZE_KB = %lu;\n", [self spc_kb]];
-	[string appendString: @"GEM_TEMPOBJ_CACHE_SIZE = 100000;\n"];
+	[string appendString: @"GEM_TEMPOBJ_CACHE_SIZE = 500000;\n"];
+	[string appendString: @"GEM_TEMPOBJ_POMGEN_PRUNE_ON_VOTE = 90;\n"];
+	
 	if (![fileManager
 			createFileAtPath:path 
 			contents:[string dataUsingEncoding:NSUTF8StringEncoding] 
@@ -549,7 +552,7 @@
 {
 	if (version == aString) return;
 	version = aString;
-	[self installBaseExtent];
+	[self installGlassExtent];
 }
 
 - (NSString *)sizeForDataFile:(NSString *)file;
