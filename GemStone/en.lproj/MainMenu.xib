@@ -41,7 +41,6 @@
                 <outlet property="taskProgressPanel" destination="1314" id="8265"/>
                 <outlet property="taskProgressText" destination="1389" id="8264"/>
                 <outlet property="topTabView" destination="1732" id="uhs-Kx-ibF"/>
-                <outlet property="topazTocController" destination="x5y-uB-Zwl" id="bCx-Xm-JcD"/>
                 <outlet property="upgradePopupController" destination="13203" id="13205"/>
                 <outlet property="upgradeSeasideCheckbox" destination="13216" id="13221"/>
                 <outlet property="versionListController" destination="6835" id="8017"/>
@@ -1562,9 +1561,9 @@ Gw
                                                                 </textFieldCell>
                                                             </textField>
                                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iFE-2n-tOf" userLabel="Edit Stone Config File">
-                                                                <rect key="frame" x="14" y="117" width="214" height="32"/>
+                                                                <rect key="frame" x="14" y="117" width="195" height="32"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                <buttonCell key="cell" type="push" title="Edit Stone Config File" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="TFp-ng-59m">
+                                                                <buttonCell key="cell" type="push" title="Open Stone Config File" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="TFp-ng-59m">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                                     <font key="font" metaFont="system"/>
                                                                 </buttonCell>
@@ -1574,9 +1573,9 @@ Gw
                                                                 </connections>
                                                             </button>
                                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="nsO-e0-UNR" userLabel="Edit Gem Config File">
-                                                                <rect key="frame" x="14" y="84" width="214" height="32"/>
+                                                                <rect key="frame" x="14" y="84" width="195" height="32"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                <buttonCell key="cell" type="push" title="Edit Gem/Topaz Config File" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="9WA-9B-A5e">
+                                                                <buttonCell key="cell" type="push" title="Open Gem Config File" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="9WA-9B-A5e">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                                     <font key="font" metaFont="system"/>
                                                                 </buttonCell>
@@ -1586,9 +1585,9 @@ Gw
                                                                 </connections>
                                                             </button>
                                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="7Yy-mv-mEW" userLabel="Edit System Config File">
-                                                                <rect key="frame" x="14" y="51" width="214" height="32"/>
+                                                                <rect key="frame" x="14" y="51" width="195" height="32"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                <buttonCell key="cell" type="push" title="Edit System Config File" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="X7M-pp-Ssu">
+                                                                <buttonCell key="cell" type="push" title="Open System Config File" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="X7M-pp-Ssu">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                                     <font key="font" metaFont="system"/>
                                                                 </buttonCell>
@@ -1604,6 +1603,18 @@ Gw
                                                                 <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                                                 <font key="titleFont" metaFont="system"/>
                                                             </box>
+                                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gbS-TK-9gG">
+                                                                <rect key="frame" x="14" y="18" width="195" height="32"/>
+                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                <buttonCell key="cell" type="push" title="Open Default Config FIle" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="aVo-ja-l3r">
+                                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                                    <font key="font" metaFont="system"/>
+                                                                </buttonCell>
+                                                                <connections>
+                                                                    <action selector="openDefaultConfigFile:" target="537" id="vir-c3-jEI"/>
+                                                                    <binding destination="8210" name="enabled" keyPath="selectedObjects.@count" id="qVb-k8-3nD"/>
+                                                                </connections>
+                                                            </button>
                                                         </subviews>
                                                         <constraints>
                                                             <constraint firstItem="iFE-2n-tOf" firstAttribute="width" secondItem="7Yy-mv-mEW" secondAttribute="width" id="2c2-iI-sxV"/>
@@ -1612,6 +1623,8 @@ Gw
                                                             <constraint firstItem="iFE-2n-tOf" firstAttribute="top" secondItem="tHr-B4-8An" secondAttribute="bottom" constant="20" symbolic="YES" id="Bhd-Nm-VaY"/>
                                                             <constraint firstAttribute="trailing" secondItem="tHr-B4-8An" secondAttribute="trailing" constant="20" symbolic="YES" id="CGp-bT-DZW"/>
                                                             <constraint firstItem="10459" firstAttribute="leading" secondItem="10455" secondAttribute="trailing" constant="8" symbolic="YES" id="DcE-0y-hlB"/>
+                                                            <constraint firstItem="gbS-TK-9gG" firstAttribute="top" secondItem="7Yy-mv-mEW" secondAttribute="bottom" constant="12" symbolic="YES" id="Fj1-oh-2vo"/>
+                                                            <constraint firstItem="gbS-TK-9gG" firstAttribute="leading" secondItem="7Yy-mv-mEW" secondAttribute="leading" id="G4B-LE-hm0"/>
                                                             <constraint firstItem="10455" firstAttribute="leading" secondItem="fVY-8f-S3M" secondAttribute="leading" constant="20" symbolic="YES" id="HSe-yq-jHh"/>
                                                             <constraint firstItem="10455" firstAttribute="baseline" secondItem="10459" secondAttribute="baseline" id="Km9-MP-KC9"/>
                                                             <constraint firstItem="KXZ-lo-3VI" firstAttribute="baseline" secondItem="10459" secondAttribute="baseline" id="Oe7-Di-hgf"/>
@@ -1620,6 +1633,7 @@ Gw
                                                             <constraint firstItem="iFE-2n-tOf" firstAttribute="leading" secondItem="fVY-8f-S3M" secondAttribute="leading" constant="20" symbolic="YES" id="SAy-jJ-ZSa"/>
                                                             <constraint firstItem="wQZ-dk-w3h" firstAttribute="leading" secondItem="10459" secondAttribute="trailing" constant="8" symbolic="YES" id="eAz-mQ-Z0g"/>
                                                             <constraint firstItem="nsO-e0-UNR" firstAttribute="top" secondItem="iFE-2n-tOf" secondAttribute="bottom" constant="12" symbolic="YES" id="kQJ-z5-9e0"/>
+                                                            <constraint firstItem="gbS-TK-9gG" firstAttribute="width" secondItem="7Yy-mv-mEW" secondAttribute="width" id="klb-Vq-IiH"/>
                                                             <constraint firstItem="tHr-B4-8An" firstAttribute="top" secondItem="KXZ-lo-3VI" secondAttribute="bottom" constant="8" symbolic="YES" id="msL-5B-oXD"/>
                                                             <constraint firstItem="tHr-B4-8An" firstAttribute="leading" secondItem="fVY-8f-S3M" secondAttribute="leading" constant="20" symbolic="YES" id="qwP-Dn-VWP"/>
                                                             <constraint firstItem="iFE-2n-tOf" firstAttribute="leading" secondItem="nsO-e0-UNR" secondAttribute="leading" id="rFb-8N-nzd"/>
@@ -2799,7 +2813,7 @@ Gw
                                                     </view>
                                                 </tabViewItem>
                                                 <tabViewItem label="Upgrade" identifier="" id="13161" userLabel="Upgrade Tab">
-                                                    <view key="view" id="13162">
+                                                    <view key="view" hidden="YES" id="13162">
                                                         <rect key="frame" x="10" y="33" width="548" height="216"/>
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>

@@ -548,6 +548,12 @@
 	[[NSWorkspace sharedWorkspace] openFile:[self directory]];
 }
 
+- (void)openDefaultConfigFile;
+{
+	NSString *path = [NSString stringWithFormat:@"%@/data/system.conf",[self gemstone]];
+	[[NSWorkspace sharedWorkspace] openFile:path];
+}
+
 - (void)openGemConfigFile;
 {
 	[[NSWorkspace sharedWorkspace] openFile:[self pathToGemConfigFile]];

@@ -71,6 +71,7 @@
 - (NSString *)mostAdvancedVersion;
 - (NSNumber *)nextDatabaseIdentifier;
 - (IBAction)openGemConfigFile:(id)sender;
+- (IBAction)openDefaultConfigFile:(id)sender;
 - (IBAction)openStatmonFiles:(id)sender;
 - (IBAction)openStoneConfigFile:(id)sender;
 - (IBAction)openSystemConfigFile:(id)sender;

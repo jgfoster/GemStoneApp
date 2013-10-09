@@ -56,6 +56,7 @@
 - (NSString *)isRunningString;
 - (NSArray *)logFiles;
 - (void)open;
+- (void)openDefaultConfigFile;
 - (void)openGemConfigFile;
 - (void)openStoneConfigFile;
 - (void)openSystemConfigFile;

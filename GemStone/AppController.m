@@ -378,29 +378,31 @@
 	NSLog(@"keyPath = %@; object = %@; change = %@; context = %@", keyPath, object, change, context);
 }
 
+- (IBAction)openDefaultConfigFile:(id)sender;
+{
+	[[self selectedDatabase] openDefaultConfigFile];
+
+}
+
 - (IBAction)openGemConfigFile:(id)sender;
 {
-	Database *database = [self selectedDatabase];
-	[database openGemConfigFile];
+	[[self selectedDatabase] openGemConfigFile];
 }
 
 - (IBAction)openStatmonFiles:(id)sender;
 {
-	Database *database = [self selectedDatabase];
 	NSIndexSet *indexes = [statmonTableView selectedRowIndexes];
-	[database openStatmonFilesAtIndexes:indexes];
+	[[self selectedDatabase] openStatmonFilesAtIndexes:indexes];
 }
 
 - (IBAction)openStoneConfigFile:(id)sender;
 {
-	Database *database = [self selectedDatabase];
-	[database openStoneConfigFile];
+	[[self selectedDatabase] openStoneConfigFile];
 }
 
 - (IBAction)openSystemConfigFile:(id)sender;
 {
-	Database *database = [self selectedDatabase];
-	[database openSystemConfigFile];
+	[[self selectedDatabase] openSystemConfigFile];
 }
 
 - (IBAction)openTerminal:(id)sender;
