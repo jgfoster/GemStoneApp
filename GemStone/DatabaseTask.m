@@ -32,7 +32,7 @@
 - (NSMutableDictionary *)environment;
 {
 	NSString *directory = [database directory];
-	NSString *config    = [NSString stringWithFormat:@"%@/conf/system.conf", directory];
+	NSString *config    = [NSString stringWithFormat:@"%@/conf", directory];
 	NSString *stoneLog  = [NSString stringWithFormat:@"%@/log/%@.log", directory, [database name]];
 	NSString *nrsString = [NSString stringWithFormat:@"#netldi:%@#dir:%@#log:%@/log/%%N_%%P.log", 
 						   [database netLDI], directory, directory];

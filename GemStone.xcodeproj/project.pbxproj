@@ -46,6 +46,9 @@
 		E5B984BA1767646E00831AB3 /* StartCacheWarmer.m in Sources */ = {isa = PBXBuildFile; fileRef = E5B984B91767646E00831AB3 /* StartCacheWarmer.m */; };
 		E5DDDEB3154202C7006F168D /* com.GemTalk.GemStone.Helper in CopyFiles */ = {isa = PBXBuildFile; fileRef = E554E9761541CFE200A08D05 /* com.GemTalk.GemStone.Helper */; };
 		E5E33C2815547ADF002B1E9F /* Version.m in Sources */ = {isa = PBXBuildFile; fileRef = E5E33C2515547ADF002B1E9F /* Version.m */; };
+		E5E381D01805B5FA007DDCF7 /* system.conf in Resources */ = {isa = PBXBuildFile; fileRef = E5E381CF1805B5FA007DDCF7 /* system.conf */; };
+		E5E381D41805B6F6007DDCF7 /* gem.conf in Resources */ = {isa = PBXBuildFile; fileRef = E5E381D31805B6F6007DDCF7 /* gem.conf */; };
+		E5E381D71805C55E007DDCF7 /* stone.conf in Resources */ = {isa = PBXBuildFile; fileRef = E5E381D61805C55E007DDCF7 /* stone.conf */; };
 		E5F05E5315A39C3100D6FCC7 /* Task.m in Sources */ = {isa = PBXBuildFile; fileRef = E5F05E5215A39C3100D6FCC7 /* Task.m */; };
 		E5F05E5715A39EAB00D6FCC7 /* StartStone.m in Sources */ = {isa = PBXBuildFile; fileRef = E5F05E5615A39EAB00D6FCC7 /* StartStone.m */; };
 		E5FD0F041565ECA300045B4D /* Database.m in Sources */ = {isa = PBXBuildFile; fileRef = E5FD0F031565ECA300045B4D /* Database.m */; };
@@ -161,6 +164,9 @@
 		E5CA1EDF1628DF0200997041 /* buildDistribution.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = buildDistribution.sh; sourceTree = "<group>"; };
 		E5E33C2415547ADF002B1E9F /* Version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Version.h; sourceTree = "<group>"; };
 		E5E33C2515547ADF002B1E9F /* Version.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Version.m; sourceTree = "<group>"; };
+		E5E381CF1805B5FA007DDCF7 /* system.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = system.conf; sourceTree = "<group>"; };
+		E5E381D31805B6F6007DDCF7 /* gem.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = gem.conf; sourceTree = "<group>"; };
+		E5E381D61805C55E007DDCF7 /* stone.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = stone.conf; sourceTree = "<group>"; };
 		E5F05E5115A39C3100D6FCC7 /* Task.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Task.h; sourceTree = "<group>"; };
 		E5F05E5215A39C3100D6FCC7 /* Task.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Task.m; sourceTree = "<group>"; };
 		E5F05E5515A39EAB00D6FCC7 /* StartStone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StartStone.h; sourceTree = "<group>"; };
@@ -302,6 +308,7 @@
 		E593F57F1540C1CA00CA44CE /* GemStone */ = {
 			isa = PBXGroup;
 			children = (
+				E5E381D51805B756007DDCF7 /* Templates */,
 				E5143A4415ADE29B00DDAD01 /* Tasks */,
 				E593F5911540C1CA00CA44CE /* MainMenu.xib */,
 				E52AA97116093CE900CE9A72 /* DataModel.xcdatamodeld */,
@@ -353,6 +360,16 @@
 				E593F5A51540C1CB00CA44CE /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E5E381D51805B756007DDCF7 /* Templates */ = {
+			isa = PBXGroup;
+			children = (
+				E5E381CF1805B5FA007DDCF7 /* system.conf */,
+				E5E381D31805B6F6007DDCF7 /* gem.conf */,
+				E5E381D61805C55E007DDCF7 /* stone.conf */,
+			);
+			name = Templates;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -470,10 +487,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E5E381D41805B6F6007DDCF7 /* gem.conf in Resources */,
 				E593F5841540C1CA00CA44CE /* InfoPlist.strings in Resources */,
 				E593F58A1540C1CA00CA44CE /* Credits.rtf in Resources */,
 				E593F5931540C1CA00CA44CE /* MainMenu.xib in Resources */,
+				E5E381D01805B5FA007DDCF7 /* system.conf in Resources */,
 				E593F5B41540C1E000CA44CE /* GemStone.icns in Resources */,
+				E5E381D71805C55E007DDCF7 /* stone.conf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

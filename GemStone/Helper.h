@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 @interface Helper : NSObject
-- (void)ensureSharedMemoryMB:(NSNumber *)sizeMB;
+- (void)ensureSharedMemory;
 - (void)install;
 - (BOOL)isCurrent;
 - (void)remove;

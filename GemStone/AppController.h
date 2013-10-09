@@ -36,7 +36,7 @@
 	IBOutlet NSTabViewItem			*gsListTabViewItem;
 	IBOutlet NSTableView			*statmonTableView;
 	IBOutlet NSObjectController		*statmonFileSelectedController;
-	IBOutlet NSObjectController		*topazTocController;
+	IBOutlet NSTabView				*topTabView;
 	IBOutlet NSButton				*repositoryConversionCheckbox;
 	IBOutlet NSButton				*upgradeSeasideCheckbox;
 
@@ -65,12 +65,15 @@
 - (void)databaseStopDone:(Database *)aDatabase;
 - (IBAction)deleteStatmonFiles:(id)sender;
 - (IBAction)doUpgrade:(id)sender;
-- (void)ensureSharedMemoryMB:(NSNumber *)sizeMB;
+- (void)ensureSharedMemory;
 - (IBAction)gemToolsSession:(id)sender;
 - (IBAction)installHelperTool:(id)sender;
 - (NSString *)mostAdvancedVersion;
 - (NSNumber *)nextDatabaseIdentifier;
+- (IBAction)openGemConfigFile:(id)sender;
 - (IBAction)openStatmonFiles:(id)sender;
+- (IBAction)openStoneConfigFile:(id)sender;
+- (IBAction)openSystemConfigFile:(id)sender;
 - (IBAction)openTerminal:(id)sender;
 - (IBAction)openTopaz:(id)sender;
 - (IBAction)removeDatabase:(id)sender;

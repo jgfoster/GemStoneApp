@@ -38,6 +38,7 @@
 
 - (void)archiveCurrentLogFiles;
 - (void)archiveCurrentTransactionLogs;
+- (void)createConfigFiles;
 - (NSArray *)dataFiles;
 - (void)deleteAll;
 - (void)deleteOldLogFiles;
@@ -51,12 +52,13 @@
 - (NSString *)gemToolsLogin;
 - (void)gsList:(NSArray *)list;
 - (NSString *)infoForDataFile:(NSString *)file;
-- (void)installBaseExtent;
-- (void)installGlassExtent;
 - (BOOL)isRunning;
 - (NSString *)isRunningString;
 - (NSArray *)logFiles;
 - (void)open;
+- (void)openGemConfigFile;
+- (void)openStoneConfigFile;
+- (void)openSystemConfigFile;
 - (void)openStatmonFilesAtIndexes:(NSIndexSet *)indexes;
 - (void)refreshStatmonFiles;
 - (void)restore;

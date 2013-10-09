@@ -106,27 +106,66 @@
 	[appController addOperation:topaz];
 }
 
-- (void)createConfigFile;
+- (void)createConfigFiles;
 {
-	NSString *directory = [self directory];
-	NSString *path = [NSString stringWithFormat:@"%@/conf/system.conf", directory];
-	NSMutableString *string = [NSMutableString new];
-	[string appendFormat: @"DBF_EXTENT_NAMES = \"%@/data/extent0.dbf\";\n", directory];
-	[string appendFormat: @"DBF_SCRATCH_DIR = \"%@/data/\";\n", directory];
-	[string appendString: @"STN_TRAN_FULL_LOGGING = TRUE;\n"];
-	[string appendFormat: @"STN_TRAN_LOG_DIRECTORIES = \"%@/data/\", \n", directory];
-	[string appendFormat: @"	\"%@/data/\";\n", [self directory]];
-	[string appendString: @"STN_TRAN_LOG_SIZES = 100, 100;\n"];
-	[string appendString: @"KEYFILE = \"$GEMSTONE/seaside/etc/gemstone.key\";\n"];
-	[string appendFormat: @"SHR_PAGE_CACHE_SIZE_KB = %lu;\n", [self spc_kb]];
-	[string appendString: @"GEM_TEMPOBJ_CACHE_SIZE = 500000;\n"];
-	[string appendString: @"GEM_TEMPOBJ_POMGEN_PRUNE_ON_VOTE = 90;\n"];
+	NSError *error = nil;
+	NSString *inPath;
+	NSString *inString;
+	NSString *outPath;
+	NSString *outString;
 	
+	// create template for stone executable config file
+	outPath = [self pathToStoneConfigFile];
+	if (![fileManager fileExistsAtPath:outPath]) {
+		inPath = [[NSBundle mainBundle] pathForResource:@"stone" ofType:@"conf"];
+		if(!inPath) { AppError(@"Unable to find template for stone.conf"); }
+		inString = [NSString stringWithContentsOfFile:inPath
+											 encoding:NSUTF8StringEncoding
+												error:&error];
+		if(!inString) { AppError(@"Unable to read template at %@", inPath); }
+		outString = inString;	// no substitutions needed now
+		if (![fileManager
+			  createFileAtPath:outPath
+			  contents:[outString dataUsingEncoding:NSUTF8StringEncoding]
+			  attributes:nil]) {
+			AppError(@"Unable to create config file at %@", outPath);
+		};
+	}
+
+	// if other config files exist, then done
+	outPath = [self pathToGemConfigFile];
+	if ([fileManager fileExistsAtPath:outPath]) { return; }
+	
+	// create template for gem executable config file
+	inPath = [[NSBundle mainBundle] pathForResource:@"gem" ofType:@"conf"];
+	if(!inPath) { AppError(@"Unable to find template for gem.conf"); }
+	inString = [NSString stringWithContentsOfFile:inPath
+										 encoding:NSUTF8StringEncoding
+											error:&error];
+	if(!inString) { AppError(@"Unable to read template at %@", inPath); }
+	outString = inString;	// no substitutions needed now
 	if (![fileManager
-			createFileAtPath:path 
-			contents:[string dataUsingEncoding:NSUTF8StringEncoding] 
+		  createFileAtPath:outPath
+		  contents:[outString dataUsingEncoding:NSUTF8StringEncoding]
+		  attributes:nil]) {
+		AppError(@"Unable to create config file at %@", outPath);
+	};
+
+	// create system config file
+	inPath = [[NSBundle mainBundle] pathForResource:@"system" ofType:@"conf"];
+	if(!inPath) { AppError(@"Unable to find template for system.conf"); }
+	inString = [NSString stringWithContentsOfFile:inPath
+										 encoding:NSUTF8StringEncoding
+											error:&error];
+	if(!inString) { AppError(@"Unable to read template at %@", inPath); }
+	outPath = [self pathToSystemConfigFile];
+	NSString *directory = [self directory];
+	outString = [NSString stringWithFormat:inString, directory, directory, directory, directory];
+	if (![fileManager
+			createFileAtPath:outPath
+			contents:[outString dataUsingEncoding:NSUTF8StringEncoding]
 			attributes:nil]) {
-		AppError(@"Unable to create config file at %@", path);
+		AppError(@"Unable to create config file at %@", outPath);
 	};
 }
 
@@ -378,6 +417,7 @@
 		[self createDirectories];
 		version = [appController mostAdvancedVersion];
 		[self installGlassExtent];
+		[self createConfigFiles];
 	}
 	return identifier;
 }
@@ -392,7 +432,7 @@
 	[self installExtent:@"extent0.dbf"];
 }
 
-- (void)installExtent: (NSString *) aString;
+- (void)installExtent:(NSString *)aString;
 {
 	NSError *error = nil;
 	NSString *target = [NSString stringWithFormat:@"%@/data/extent0.dbf", [self directory]];
@@ -413,6 +453,14 @@
 			AppError(@"unable to delete %@ because %@", target, [error description]);
 		}
 	}
+	[self performSelectorInBackground:@selector(installExtentA:)
+						   withObject:aString];
+}
+
+- (void)installExtentA:(NSString *)aString;
+{
+	NSError *error = nil;
+	NSString *target = [NSString stringWithFormat:@"%@/data/extent0.dbf", [self directory]];
 	[appController taskStart:[NSString stringWithFormat:@"Copying %@/bin/%@ . . .", [self gemstone], aString]];
 	[self archiveCurrentTransactionLogs];
 	NSString *source = [NSString stringWithFormat:@"%@/bin/%@", [self gemstone], aString];
@@ -500,6 +548,21 @@
 	[[NSWorkspace sharedWorkspace] openFile:[self directory]];
 }
 
+- (void)openGemConfigFile;
+{
+	[[NSWorkspace sharedWorkspace] openFile:[self pathToGemConfigFile]];
+}
+
+- (void)openStoneConfigFile;
+{
+	[[NSWorkspace sharedWorkspace] openFile:[self pathToStoneConfigFile]];
+}
+
+- (void)openSystemConfigFile;
+{
+	[[NSWorkspace sharedWorkspace] openFile:[self pathToSystemConfigFile]];
+}
+
 - (void)openStatmonFilesAtIndexes:(NSIndexSet *)indexes;
 {
 	[indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
@@ -507,6 +570,21 @@
 		NSString *path = [statmon objectForKey:@"path"];
 		[VSD openPath:path usingDatabase:self];
 	}];
+}
+
+- (NSString *)pathToGemConfigFile;
+{
+	return [NSString stringWithFormat:@"%@/conf/gem.conf", [self directory]];
+}
+
+- (NSString *)pathToStoneConfigFile;
+{
+	return [NSString stringWithFormat:@"%@/conf/%@.conf", [self directory], [self name]];
+}
+
+- (NSString *)pathToSystemConfigFile;
+{
+	return [NSString stringWithFormat:@"%@/conf/system.conf", [self directory]];
 }
 
 - (void)refreshStatmonFiles;
@@ -579,18 +657,6 @@
 	return [NSString stringWithFormat:@"%@ %@", formatted, units];
 }
 
-- (unsigned long)spc_kb;
-{
-	if (![spc_mb intValue]) return 131072;
-	return [[self spc_mb] unsignedLongValue] * 1024;
-}
-
-- (NSNumber *)spc_mb;
-{
-	if (![spc_mb intValue]) return nil;	// return nil so we know if we have a default
-	return spc_mb;
-}
-
 - (void)startDatabase;
 {
 	[self startDatabaseWithArgs:nil];
@@ -612,10 +678,8 @@
 		[alert runModal];
 		return;
 	}
-	// should  check kernel settings and call helper tool if necessary
-	unsigned long sharedMemoryMB = [self spc_kb] / 1024;
-	[appController ensureSharedMemoryMB:[NSNumber numberWithUnsignedLong:sharedMemoryMB]];
-	[self createConfigFile];
+	[appController ensureSharedMemory];
+	[self createConfigFiles];
 	[self createTopazIniFile];
 	statmonFiles = nil;
 

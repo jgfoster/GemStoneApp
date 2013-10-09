@@ -72,6 +72,7 @@
 	[self performSelector:@selector(refreshInstalledVersionsList)	withObject:nil afterDelay:0.05];
 	[self performSelector:@selector(refreshUpgradeVersionsList)		withObject:nil afterDelay:0.06];
 	[self performSelector:@selector(updateDatabaseState)			withObject:nil afterDelay:0.07];
+	[self performSelector:@selector(checkForSetupRequired)			withObject:nil afterDelay:0.10];
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender;
@@ -110,18 +111,34 @@
 	[self saveData];
 }
 
-- (IBAction)cancelTask:(id)sender
+- (IBAction)cancelTask:(id)sender;
 {
 	if (0 < [operations operationCount]) {
 		[operations cancelAllOperations];
+		[self taskFinishedAfterDelay];
 	} else {	//	Presumably this means that the title was changed to "Close"
 		[self taskFinished];
+	}
+}
+
+- (void)checkForSetupRequired;
+{
+	[self performSelectorOnMainThread:@selector(checkForSetupRequiredA)
+						   withObject:nil
+						waitUntilDone:YES];
+}
+
+- (void)checkForSetupRequiredA;
+{
+	if (0 == [[self versionList] count]) {
+		[topTabView selectFirstTabViewItem:nil];
 	}
 }
 
 - (IBAction)clickedDataFile:(id)sender;
 {
 	[dataFileInfo setString:@""];
+	[dataFileSizeText setStringValue:@""];
 	Database *database = [self selectedDatabase];
 	if (!database) return;
 	NSTableView *dataFileList = sender;
@@ -204,9 +221,9 @@
 	NSLog(@"doUpgrade: from %@ to %@ with %i and %i", oldVersion, newVersion, needsConversion, doSeasideUpgrade);
 }
 
-- (void)ensureSharedMemoryMB:(NSNumber *)sizeMB;
+- (void)ensureSharedMemory;
 {
-	[helper ensureSharedMemoryMB:sizeMB];
+	[helper ensureSharedMemory];
 }
 
 - (BOOL)exceptionHandler:(NSExceptionHandler *)sender shouldLogException:(NSException *)exception mask:(NSUInteger)aMask;
@@ -251,7 +268,7 @@
 												 initWithManagedObjectModel: model];
     [managedObjectContext setPersistentStoreCoordinator: coordinator];
 	NSURL *url = [NSURL 
-				  fileURLWithPath:[basePath stringByAppendingString:@"/data.binary"] 
+				  fileURLWithPath:[self pathToDataFile]
 				  isDirectory:NO];
     NSError *error = nil;
     NSPersistentStore *newStore = [coordinator addPersistentStoreWithType:NSBinaryStoreType
@@ -361,11 +378,29 @@
 	NSLog(@"keyPath = %@; object = %@; change = %@; context = %@", keyPath, object, change, context);
 }
 
+- (IBAction)openGemConfigFile:(id)sender;
+{
+	Database *database = [self selectedDatabase];
+	[database openGemConfigFile];
+}
+
 - (IBAction)openStatmonFiles:(id)sender;
 {
 	Database *database = [self selectedDatabase];
 	NSIndexSet *indexes = [statmonTableView selectedRowIndexes];
 	[database openStatmonFilesAtIndexes:indexes];
+}
+
+- (IBAction)openStoneConfigFile:(id)sender;
+{
+	Database *database = [self selectedDatabase];
+	[database openStoneConfigFile];
+}
+
+- (IBAction)openSystemConfigFile:(id)sender;
+{
+	Database *database = [self selectedDatabase];
+	[database openSystemConfigFile];
 }
 
 - (IBAction)openTerminal:(id)sender;
@@ -375,13 +410,12 @@
 
 - (IBAction)openTopaz:(id)sender;
 {
-	NSInteger topazTocMB = [[topazTocController content] integerValue];
-	if (topazTocMB <= 0) {
-		topazTocMB = 50;
-	}
-	topazTocMB = topazTocMB * 1000;
-	NSString *script = [NSString stringWithFormat:@"topaz -l -T %li", (long)topazTocMB];
-	[Terminal doScript:script forDatabase:[self selectedDatabase]];
+	[Terminal doScript:@"topaz -l" forDatabase:[self selectedDatabase]];
+}
+
+- (NSString *)pathToDataFile;
+{
+	return [basePath stringByAppendingString:@"/data.binary"];
 }
 
 - (IBAction)removeDatabase:(id)sender;
@@ -450,9 +484,7 @@
 - (void)saveData;
 {
 	BOOL hasChanges = [managedObjectContext hasChanges];
-	if (!hasChanges) {
-		return;
-	}
+	if (!hasChanges) { return; }
 	
 	NSError *error = nil;
 	BOOL saveWasSuccessful = [managedObjectContext save:&error];
@@ -483,6 +515,7 @@
 	[oldTranLogsText setStringValue:@""];
 	[dataFileInfo setString:@""];
 	if (aDatabase == nil) return;
+	[aDatabase createConfigFiles];
 	[aDatabase refreshStatmonFiles];
 	[logFileListController addObjects:[aDatabase logFiles]];
 	[oldLogFilesText setStringValue:[aDatabase descriptionOfOldLogFiles]];
@@ -590,7 +623,7 @@
 {
 	[self performSelectorOnMainThread:@selector(taskProgressA:)
 						   withObject:aString
-						waitUntilDone:NO];
+						waitUntilDone:YES];
 }
 
 - (void)taskProgressA:(NSString *)aString;
@@ -617,13 +650,14 @@
 		}
 		[taskProgressText insertText:nextLine];
 	}
+	
 }
 
 - (void)taskStart:(NSString *)aString;
 {
 	[self performSelectorOnMainThread:@selector(taskStartA:) 
 						   withObject:aString
-						waitUntilDone:NO];
+						waitUntilDone:YES];
 }
 
 - (void)taskStartA:(NSString *)aString;
@@ -670,6 +704,10 @@
 	[helperToolMessage setHidden:!isCurrent];
 	[authenticateButton setEnabled:!isCurrent];
 	[removeButton setEnabled:isCurrent];
+	if (!isCurrent) {
+		//	if it is our first time, then ensure that Setup tab is selected
+		[topTabView selectFirstTabViewItem:nil];
+	}
 }
 
 - (NSArray *)versionList;
