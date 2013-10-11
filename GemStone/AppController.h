@@ -70,6 +70,7 @@
 - (IBAction)installHelperTool:(id)sender;
 - (NSString *)mostAdvancedVersion;
 - (NSNumber *)nextDatabaseIdentifier;
+- (IBAction)openBrowserOnAvailableVersions:(id)sender;
 - (IBAction)openGemConfigFile:(id)sender;
 - (IBAction)openDefaultConfigFile:(id)sender;
 - (IBAction)openStatmonFiles:(id)sender;

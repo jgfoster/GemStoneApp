@@ -1133,15 +1133,6 @@ Gw
                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                         </textFieldCell>
                                                     </textField>
-                                                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8028">
-                                                        <rect key="frame" x="15" y="288" width="261" height="26"/>
-                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="center" title="http://seaside.gemtalksystems.com/downloads/ contains some GemStone/S 64 Bit products." id="8029">
-                                                            <font key="font" size="10" name="LucidaGrande-Bold"/>
-                                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                        </textFieldCell>
-                                                    </textField>
                                                     <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8656">
                                                         <rect key="frame" x="156" y="223" width="108" height="24"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -1152,10 +1143,23 @@ Gw
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                         </textFieldCell>
                                                     </textField>
+                                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="shK-HA-70H">
+                                                        <rect key="frame" x="12" y="279" width="254" height="32"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <buttonCell key="cell" type="push" title="Browse available product versions" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="bW0-k1-P9i">
+                                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                            <font key="font" metaFont="system"/>
+                                                        </buttonCell>
+                                                        <connections>
+                                                            <action selector="openBrowserOnAvailableVersions:" target="537" id="MsW-ZU-dsC"/>
+                                                        </connections>
+                                                    </button>
                                                 </subviews>
                                             </view>
                                             <constraints>
+                                                <constraint firstItem="shK-HA-70H" firstAttribute="leading" secondItem="2027" secondAttribute="leading" constant="16" id="AYX-52-300"/>
                                                 <constraint firstAttribute="trailing" secondItem="843" secondAttribute="trailing" constant="16" id="FJR-mf-YZX"/>
+                                                <constraint firstItem="shK-HA-70H" firstAttribute="top" secondItem="2027" secondAttribute="top" constant="32" id="dLr-xC-5ra"/>
                                                 <constraint firstItem="843" firstAttribute="top" secondItem="2027" secondAttribute="top" constant="32" id="tZt-cr-tiI"/>
                                                 <constraint firstAttribute="bottom" secondItem="843" secondAttribute="bottom" constant="16" id="xjQ-Hl-KMl"/>
                                             </constraints>
@@ -1358,12 +1362,12 @@ Gw
                                         <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="11606" userLabel="Open Directory Button">
                                             <rect key="frame" x="540" y="300" width="40" height="32"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="push" bezelStyle="rounded" image="NSFolderSmart" imagePosition="only" alignment="center" alternateImage="GemStone" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="11607">
+                                            <buttonCell key="cell" type="push" bezelStyle="rounded" image="NSFolderSmart" imagePosition="overlaps" alignment="center" alternateImage="GemStone" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="11607">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
                                             <connections>
-                                                <binding destination="8210" name="enabled" keyPath="selectedObjects.@count" id="7x9-Qj-9uj"/>
+                                                <binding destination="8210" name="enabled" keyPath="selectedObjects.@count" id="8Zq-VB-ECZ"/>
                                                 <binding destination="8210" name="target" keyPath="selection" id="11688">
                                                     <dictionary key="options">
                                                         <string key="NSSelectorName">open</string>

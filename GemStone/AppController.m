@@ -378,6 +378,12 @@
 	NSLog(@"keyPath = %@; object = %@; change = %@; context = %@", keyPath, object, change, context);
 }
 
+- (IBAction)openBrowserOnAvailableVersions:(id)sender;
+{
+	NSURL *url = [NSURL URLWithString:@"http://seaside.gemtalksystems.com/downloads/i386.Darwin/"];
+	[[NSWorkspace sharedWorkspace] openURL:url];
+}
+
 - (IBAction)openDefaultConfigFile:(id)sender;
 {
 	[[self selectedDatabase] openDefaultConfigFile];
