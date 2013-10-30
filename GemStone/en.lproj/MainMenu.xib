@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4510" systemVersion="12F45" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment defaultVersion="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4510"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication"/>
@@ -740,17 +740,17 @@
                             </subviews>
                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         </clipView>
-                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" id="13273">
+                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="13273">
                             <rect key="frame" x="-100" y="-100" width="87" height="18"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
-                        <scroller key="verticalScroller" verticalHuggingPriority="750" id="13274">
+                        <scroller key="verticalScroller" verticalHuggingPriority="750" horizontal="NO" id="13274">
                             <rect key="frame" x="493" y="1" width="16" height="317"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                     </scrollView>
                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="13303">
-                        <rect key="frame" x="461" y="13" width="75" height="32"/>
+                        <rect key="frame" x="462" y="13" width="74" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="push" title="Close" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="13304">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -821,11 +821,11 @@ Gw
                             </subviews>
                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         </clipView>
-                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" id="1390">
+                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="1390">
                             <rect key="frame" x="-100" y="-100" width="87" height="18"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
-                        <scroller key="verticalScroller" verticalHuggingPriority="750" id="1391">
+                        <scroller key="verticalScroller" verticalHuggingPriority="750" horizontal="NO" id="1391">
                             <rect key="frame" x="493" y="1" width="16" height="235"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
@@ -897,7 +897,7 @@ Gw
                                                         </connections>
                                                     </button>
                                                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="629" userLabel="Helper Installed Message">
-                                                        <rect key="frame" x="76" y="11" width="248" height="20"/>
+                                                        <rect key="frame" x="77" y="11" width="246" height="20"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="20" id="14832"/>
@@ -1062,11 +1062,11 @@ Gw
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="256" id="GlI-ra-Kjh"/>
                                                         </constraints>
-                                                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" id="845">
+                                                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="845">
                                                             <rect key="frame" x="1" y="1" width="0.0" height="16"/>
                                                             <autoresizingMask key="autoresizingMask"/>
                                                         </scroller>
-                                                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" id="847">
+                                                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="847">
                                                             <rect key="frame" x="239" y="17" width="16" height="0.0"/>
                                                             <autoresizingMask key="autoresizingMask"/>
                                                         </scroller>
@@ -1144,7 +1144,7 @@ Gw
                                                         </textFieldCell>
                                                     </textField>
                                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="shK-HA-70H">
-                                                        <rect key="frame" x="12" y="279" width="254" height="32"/>
+                                                        <rect key="frame" x="12" y="279" width="252" height="32"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <buttonCell key="cell" type="push" title="Browse available product versions" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="bW0-k1-P9i">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1248,7 +1248,7 @@ Gw
                                                                     <binding destination="8210" name="value" keyPath="arrangedObjects.name" id="9952"/>
                                                                 </connections>
                                                             </tableColumn>
-                                                            <tableColumn editable="NO" width="126" minWidth="10" maxWidth="3.4028234663852886e+38" id="9936">
+                                                            <tableColumn editable="NO" width="140" minWidth="10" maxWidth="3.4028234663852886e+38" id="9936">
                                                                 <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Last Start Date">
                                                                     <font key="font" metaFont="smallSystem"/>
                                                                     <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1312,11 +1312,11 @@ Gw
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="94" id="2PE-V6-7lN"/>
                                             </constraints>
-                                            <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" id="8163">
+                                            <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="8163">
                                                 <rect key="frame" x="1" y="77" width="516" height="16"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                             </scroller>
-                                            <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" id="8165">
+                                            <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="8165">
                                                 <rect key="frame" x="501" y="17" width="16" height="0.0"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                             </scroller>
@@ -1377,7 +1377,7 @@ Gw
                                             </connections>
                                         </button>
                                         <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="8354">
-                                            <rect key="frame" x="17" y="280" width="56" height="17"/>
+                                            <rect key="frame" x="18" y="280" width="54" height="17"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="50" id="RT8-to-ccs"/>
@@ -1421,11 +1421,8 @@ Gw
                                             </connections>
                                         </popUpButton>
                                         <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="8266">
-                                            <rect key="frame" x="203" y="279" width="86" height="17"/>
+                                            <rect key="frame" x="204" y="279" width="83" height="17"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <constraints>
-                                                <constraint firstAttribute="width" constant="80" id="YkP-u9-vYf"/>
-                                            </constraints>
                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Stone name:" id="8267">
                                                 <font key="font" metaFont="system"/>
                                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1433,7 +1430,7 @@ Gw
                                             </textFieldCell>
                                         </textField>
                                         <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="8270" userLabel="Stone Name">
-                                            <rect key="frame" x="294" y="277" width="120" height="22"/>
+                                            <rect key="frame" x="293" y="277" width="120" height="22"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="120" id="V7U-hB-V6n"/>
@@ -1507,7 +1504,7 @@ Gw
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>
                                                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="10455" userLabel="Name label">
-                                                                <rect key="frame" x="17" y="176" width="89" height="17"/>
+                                                                <rect key="frame" x="18" y="176" width="89" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="NetLDI name:" id="10456">
                                                                     <font key="font" metaFont="system"/>
@@ -1516,7 +1513,7 @@ Gw
                                                                 </textFieldCell>
                                                             </textField>
                                                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="10459" userLabel="NetLDI">
-                                                                <rect key="frame" x="111" y="174" width="111" height="22"/>
+                                                                <rect key="frame" x="113" y="174" width="111" height="22"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" constant="111" id="5Ec-BS-gNM"/>
@@ -1541,7 +1538,7 @@ Gw
                                                                 </connections>
                                                             </textField>
                                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wQZ-dk-w3h" userLabel="Port label">
-                                                                <rect key="frame" x="227" y="176" width="80" height="17"/>
+                                                                <rect key="frame" x="230" y="176" width="80" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="74" id="cUX-MO-GQq"/>
@@ -1553,7 +1550,7 @@ Gw
                                                                 </textFieldCell>
                                                             </textField>
                                                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="KXZ-lo-3VI" userLabel="NetLDI Port">
-                                                                <rect key="frame" x="312" y="174" width="64" height="22"/>
+                                                                <rect key="frame" x="316" y="174" width="64" height="22"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" constant="64" id="s9W-mS-Ziq"/>
@@ -1662,8 +1659,12 @@ Gw
                                                                     <font key="font" metaFont="system"/>
                                                                 </buttonCell>
                                                                 <connections>
-                                                                    <action selector="openTerminal:" target="537" id="Kdp-Yf-aWM"/>
                                                                     <binding destination="8210" name="enabled" keyPath="selectedObjects.@count" id="rmC-Yx-gBN"/>
+                                                                    <binding destination="8210" name="target" keyPath="selection" id="DQw-FD-iF7">
+                                                                        <dictionary key="options">
+                                                                            <string key="NSSelectorName">openTerminal:</string>
+                                                                        </dictionary>
+                                                                    </binding>
                                                                 </connections>
                                                             </button>
                                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Tli-fN-SsI" userLabel="Topaz Button">
@@ -1674,12 +1675,16 @@ Gw
                                                                     <font key="font" metaFont="system"/>
                                                                 </buttonCell>
                                                                 <connections>
-                                                                    <action selector="openTopaz:" target="537" id="FIo-e0-dZs"/>
                                                                     <binding destination="8210" name="enabled" keyPath="selection.isRunningCode" id="KgH-eD-RjN"/>
+                                                                    <binding destination="8210" name="target" keyPath="selection" id="8s6-na-jjW">
+                                                                        <dictionary key="options">
+                                                                            <string key="NSSelectorName">openTopaz:</string>
+                                                                        </dictionary>
+                                                                    </binding>
                                                                 </connections>
                                                             </button>
                                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="x9g-G9-Ghm" userLabel="GemTools Button">
-                                                                <rect key="frame" x="14" y="102" width="104" height="32"/>
+                                                                <rect key="frame" x="14" y="69" width="104" height="32"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <buttonCell key="cell" type="push" title="GemTools" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ARE-Jf-c5a">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1690,15 +1695,36 @@ Gw
                                                                     <binding destination="8210" name="enabled" keyPath="selectedObjects.@count" id="hdW-hX-vVY"/>
                                                                 </connections>
                                                             </button>
+                                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="qZ8-Px-PbH" userLabel="WebTools">
+                                                                <rect key="frame" x="14" y="102" width="104" height="32"/>
+                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                <buttonCell key="cell" type="push" title="WebTools" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Li6-IG-vhm">
+                                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                                    <font key="font" metaFont="system"/>
+                                                                </buttonCell>
+                                                                <connections>
+                                                                    <binding destination="8210" name="enabled" keyPath="selection.isRunningCode" id="Rkv-Bm-6ku"/>
+                                                                    <binding destination="8210" name="target" keyPath="selection" id="HqC-Lp-0GV">
+                                                                        <dictionary key="options">
+                                                                            <string key="NSSelectorName">openWebTools:</string>
+                                                                        </dictionary>
+                                                                    </binding>
+                                                                </connections>
+                                                            </button>
                                                         </subviews>
                                                         <constraints>
+                                                            <constraint firstItem="qZ8-Px-PbH" firstAttribute="leading" secondItem="0ij-H0-Ygi" secondAttribute="leading" id="4eM-UY-rcg"/>
                                                             <constraint firstItem="0ij-H0-Ygi" firstAttribute="centerX" secondItem="Tli-fN-SsI" secondAttribute="centerX" id="4uc-OZ-qIr"/>
                                                             <constraint firstItem="Tli-fN-SsI" firstAttribute="leading" secondItem="BwA-a2-4ud" secondAttribute="leading" constant="20" symbolic="YES" id="9Ar-hR-eei"/>
+                                                            <constraint firstItem="x9g-G9-Ghm" firstAttribute="leading" secondItem="qZ8-Px-PbH" secondAttribute="leading" id="K6U-nv-2Px"/>
                                                             <constraint firstItem="0ij-H0-Ygi" firstAttribute="width" secondItem="Tli-fN-SsI" secondAttribute="width" id="KcO-9R-SQC"/>
                                                             <constraint firstItem="Tli-fN-SsI" firstAttribute="top" secondItem="BwA-a2-4ud" secondAttribute="top" constant="20" symbolic="YES" id="LOH-OR-a9w"/>
-                                                            <constraint firstItem="x9g-G9-Ghm" firstAttribute="top" secondItem="0ij-H0-Ygi" secondAttribute="bottom" constant="12" symbolic="YES" id="WL9-h5-3qb"/>
+                                                            <constraint firstItem="qZ8-Px-PbH" firstAttribute="top" secondItem="0ij-H0-Ygi" secondAttribute="bottom" constant="12" id="aAb-1O-4kl"/>
                                                             <constraint firstItem="0ij-H0-Ygi" firstAttribute="width" secondItem="x9g-G9-Ghm" secondAttribute="width" id="aBT-Zi-Uca"/>
                                                             <constraint firstItem="0ij-H0-Ygi" firstAttribute="centerX" secondItem="x9g-G9-Ghm" secondAttribute="centerX" id="aez-1x-d3G"/>
+                                                            <constraint firstItem="x9g-G9-Ghm" firstAttribute="width" secondItem="qZ8-Px-PbH" secondAttribute="width" id="muc-K8-xcY"/>
+                                                            <constraint firstItem="x9g-G9-Ghm" firstAttribute="top" secondItem="qZ8-Px-PbH" secondAttribute="bottom" constant="12" id="qk4-95-XNP"/>
+                                                            <constraint firstItem="qZ8-Px-PbH" firstAttribute="width" secondItem="0ij-H0-Ygi" secondAttribute="width" id="v69-gW-nD1"/>
                                                             <constraint firstItem="0ij-H0-Ygi" firstAttribute="top" secondItem="Tli-fN-SsI" secondAttribute="bottom" constant="12" symbolic="YES" id="xHt-uu-Ded"/>
                                                         </constraints>
                                                     </view>
@@ -1755,17 +1781,17 @@ Gw
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" constant="120" id="hgF-e6-QrS"/>
                                                                 </constraints>
-                                                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" id="12412">
+                                                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="12412">
                                                                     <rect key="frame" x="1" y="112" width="42" height="16"/>
                                                                     <autoresizingMask key="autoresizingMask"/>
                                                                 </scroller>
-                                                                <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" id="12414">
+                                                                <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="12414">
                                                                     <rect key="frame" x="-15" y="1" width="16" height="0.0"/>
                                                                     <autoresizingMask key="autoresizingMask"/>
                                                                 </scroller>
                                                             </scrollView>
                                                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="12743" userLabel="Size Label">
-                                                                <rect key="frame" x="17" y="22" width="34" height="17"/>
+                                                                <rect key="frame" x="18" y="22" width="32" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" constant="28" id="T2Y-fP-c2p"/>
@@ -2242,11 +2268,11 @@ Gw
                                                                     </subviews>
                                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                                 </clipView>
-                                                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" id="12102">
+                                                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="12102">
                                                                     <rect key="frame" x="-100" y="-100" width="87" height="18"/>
                                                                     <autoresizingMask key="autoresizingMask"/>
                                                                 </scroller>
-                                                                <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" id="12103">
+                                                                <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="12103">
                                                                     <rect key="frame" x="363" y="1" width="16" height="174"/>
                                                                     <autoresizingMask key="autoresizingMask"/>
                                                                 </scroller>
@@ -2350,7 +2376,7 @@ Gw
                                                                 </connections>
                                                             </button>
                                                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="15249">
-                                                                <rect key="frame" x="220" y="153" width="326" height="17"/>
+                                                                <rect key="frame" x="221" y="153" width="323" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="A database containing only base GemStone classes" id="15250">
                                                                     <font key="font" metaFont="system"/>
@@ -2359,7 +2385,7 @@ Gw
                                                                 </textFieldCell>
                                                             </textField>
                                                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="15253">
-                                                                <rect key="frame" x="220" y="120" width="319" height="17"/>
+                                                                <rect key="frame" x="221" y="120" width="316" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="A database suitable for loading Seaside (&amp; others)" id="15254">
                                                                     <font key="font" metaFont="system"/>
@@ -2368,7 +2394,7 @@ Gw
                                                                 </textFieldCell>
                                                             </textField>
                                                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="15261">
-                                                                <rect key="frame" x="220" y="87" width="329" height="17"/>
+                                                                <rect key="frame" x="221" y="87" width="327" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Use a file open dialog to restore a database backup" id="15262">
                                                                     <font key="font" metaFont="system"/>
@@ -2377,7 +2403,7 @@ Gw
                                                                 </textFieldCell>
                                                             </textField>
                                                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="15291">
-                                                                <rect key="frame" x="17" y="179" width="334" height="17"/>
+                                                                <rect key="frame" x="18" y="179" width="332" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="When the selected database is not running you may:" id="15292">
                                                                     <font key="font" metaFont="system"/>
@@ -2386,7 +2412,7 @@ Gw
                                                                 </textFieldCell>
                                                             </textField>
                                                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="15304">
-                                                                <rect key="frame" x="17" y="59" width="309" height="17"/>
+                                                                <rect key="frame" x="18" y="59" width="307" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="When the selected database is running you may:" id="15305">
                                                                     <font key="font" metaFont="system"/>
@@ -2395,7 +2421,7 @@ Gw
                                                                 </textFieldCell>
                                                             </textField>
                                                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="15310">
-                                                                <rect key="frame" x="220" y="33" width="319" height="17"/>
+                                                                <rect key="frame" x="221" y="33" width="317" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Use a file save dialog to create a database backup" id="15311">
                                                                     <font key="font" metaFont="system"/>
@@ -2533,11 +2559,11 @@ Gw
                                                                     </subviews>
                                                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                 </clipView>
-                                                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" id="9996">
+                                                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="9996">
                                                                     <rect key="frame" x="1" y="117" width="448" height="15"/>
                                                                     <autoresizingMask key="autoresizingMask"/>
                                                                 </scroller>
-                                                                <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" id="9998">
+                                                                <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="9998">
                                                                     <rect key="frame" x="224" y="17" width="15" height="102"/>
                                                                     <autoresizingMask key="autoresizingMask"/>
                                                                 </scroller>
@@ -2582,7 +2608,7 @@ Gw
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>
                                                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="11077">
-                                                                <rect key="frame" x="17" y="176" width="116" height="17"/>
+                                                                <rect key="frame" x="18" y="176" width="114" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Process Log Files:" id="11078">
                                                                     <font key="font" metaFont="system"/>
@@ -2622,7 +2648,7 @@ Gw
                                                                 </connections>
                                                             </button>
                                                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="11084">
-                                                                <rect key="frame" x="17" y="144" width="116" height="17"/>
+                                                                <rect key="frame" x="18" y="144" width="114" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Old Transactions:" id="11085">
                                                                     <font key="font" metaFont="system"/>
@@ -2681,14 +2707,14 @@ Gw
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>
                                                             <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="12966">
-                                                                <rect key="frame" x="20" y="20" width="420" height="176"/>
+                                                                <rect key="frame" x="20" y="20" width="418" height="176"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <clipView key="contentView" id="llJ-p2-BqW">
-                                                                    <rect key="frame" x="1" y="17" width="418" height="158"/>
+                                                                    <rect key="frame" x="1" y="17" width="416" height="158"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" autosaveColumns="NO" headerView="12969" id="12967" userLabel="Statmon Files">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="418" height="158"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="416" height="158"/>
                                                                             <autoresizingMask key="autoresizingMask"/>
                                                                             <size key="intercellSpacing" width="3" height="2"/>
                                                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -2753,21 +2779,21 @@ Gw
                                                                     </subviews>
                                                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                 </clipView>
-                                                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" id="12968">
+                                                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="12968">
                                                                     <rect key="frame" x="1" y="166" width="0.0" height="16"/>
                                                                     <autoresizingMask key="autoresizingMask"/>
                                                                 </scroller>
-                                                                <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" id="12970">
+                                                                <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="12970">
                                                                     <rect key="frame" x="-15" y="17" width="16" height="0.0"/>
                                                                     <autoresizingMask key="autoresizingMask"/>
                                                                 </scroller>
                                                                 <tableHeaderView key="headerView" id="12969">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="418" height="17"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="416" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask"/>
                                                                 </tableHeaderView>
                                                             </scrollView>
                                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="12979">
-                                                                <rect key="frame" x="454" y="13" width="80" height="32"/>
+                                                                <rect key="frame" x="453" y="13" width="81" height="32"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <buttonCell key="cell" type="push" title="Open" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="12980">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2779,7 +2805,7 @@ Gw
                                                                 </connections>
                                                             </button>
                                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="12983">
-                                                                <rect key="frame" x="454" y="46" width="80" height="32"/>
+                                                                <rect key="frame" x="453" y="46" width="81" height="32"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <buttonCell key="cell" type="push" title="Delete" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="12984">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2791,7 +2817,7 @@ Gw
                                                                 </connections>
                                                             </button>
                                                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="12997">
-                                                                <rect key="frame" x="445" y="94" width="86" height="102"/>
+                                                                <rect key="frame" x="444" y="111" width="86" height="85"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Statistics can be viewed with VSD on versions 3.0 and later." id="12998">
                                                                     <font key="font" metaFont="system"/>
@@ -2848,7 +2874,7 @@ Gw
                                                                 </connections>
                                                             </popUpButton>
                                                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="13172">
-                                                                <rect key="frame" x="17" y="178" width="89" height="17"/>
+                                                                <rect key="frame" x="18" y="178" width="87" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" constant="83" id="YlL-MR-DGu"/>
@@ -2893,7 +2919,7 @@ Gw
                                                                 </connections>
                                                             </button>
                                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="13222">
-                                                                <rect key="frame" x="419" y="13" width="115" height="32"/>
+                                                                <rect key="frame" x="418" y="13" width="116" height="32"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <buttonCell key="cell" type="push" title="Do Upgrade" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="13223">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -3146,11 +3172,11 @@ Gw
                                                 </subviews>
                                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </clipView>
-                                            <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" id="12780">
+                                            <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="12780">
                                                 <rect key="frame" x="1" y="382" width="558" height="15"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                             </scroller>
-                                            <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" id="12782">
+                                            <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="12782">
                                                 <rect key="frame" x="224" y="17" width="15" height="102"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                             </scroller>

@@ -19,7 +19,6 @@
 #import "Statmonitor.h"
 #import "StopNetLDI.h"
 #import "StopStone.h"
-#import "Terminal.h"
 #import "Topaz.h"
 #import "Utilities.h"
 #import "Version.h"
@@ -409,16 +408,6 @@
 - (IBAction)openSystemConfigFile:(id)sender;
 {
 	[[self selectedDatabase] openSystemConfigFile];
-}
-
-- (IBAction)openTerminal:(id)sender;
-{
-	[Terminal doScript:@"" forDatabase:[self selectedDatabase]];
-}
-
-- (IBAction)openTopaz:(id)sender;
-{
-	[Terminal doScript:@"topaz -l" forDatabase:[self selectedDatabase]];
 }
 
 - (NSString *)pathToDataFile;

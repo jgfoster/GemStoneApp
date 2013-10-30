@@ -52,7 +52,7 @@
 		  attributes:attributes]) {
 		AppError(@"Unable to create file at %@", [self scriptPath]);
 	};
-	string = [NSString stringWithFormat:@"do script \"source \'%@\'\"", [self scriptPath]];
+	string = [NSMutableString stringWithFormat:@"do script \"source \'%@\'\"", [self scriptPath]];
 	return [NSArray arrayWithObjects:
 			@"-e",
 			@"tell application \"Terminal\"",

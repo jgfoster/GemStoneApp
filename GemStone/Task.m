@@ -48,7 +48,7 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 - (void)doneWithError:(int)statusCode;
 {
 	if (![errorOutput length]) {
-		errorOutput = [NSString stringWithFormat:@"Task returned status code %i", statusCode];
+		errorOutput = [NSMutableString stringWithFormat:@"Task returned status code %i", statusCode];
 	}
 	[appController taskError:errorOutput];
 }

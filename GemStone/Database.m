@@ -19,6 +19,7 @@
 #import "Statmonitor.h"
 #import "StopNetLDI.h"
 #import "StopStone.h"
+#import "Terminal.h"
 #import "Topaz.h"
 #import "Utilities.h"
 #import "Version.h"
@@ -576,6 +577,21 @@
 		NSString *path = [statmon objectForKey:@"path"];
 		[VSD openPath:path usingDatabase:self];
 	}];
+}
+
+- (IBAction)openTerminal:(id)sender;
+{
+	[Terminal doScript:@"" forDatabase:self];
+}
+
+- (IBAction)openTopaz:(id)sender;
+{
+	[Terminal doScript:@"topaz -l" forDatabase:self];
+}
+
+- (IBAction)openWebTools:(id)sender;
+{
+	[Terminal doScript:@"(cd ../webtools; ./start)" forDatabase:self];
 }
 
 - (NSString *)pathToGemConfigFile;

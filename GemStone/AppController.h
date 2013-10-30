@@ -76,8 +76,6 @@
 - (IBAction)openStatmonFiles:(id)sender;
 - (IBAction)openStoneConfigFile:(id)sender;
 - (IBAction)openSystemConfigFile:(id)sender;
-- (IBAction)openTerminal:(id)sender;
-- (IBAction)openTopaz:(id)sender;
 - (IBAction)removeDatabase:(id)sender;
 - (IBAction)removeHelperTool:(id)sender;
 - (void)removeVersionDone;
