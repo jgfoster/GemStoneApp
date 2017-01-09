@@ -19,7 +19,6 @@
 #import "Statmonitor.h"
 #import "StopNetLDI.h"
 #import "StopStone.h"
-#import "Topaz.h"
 #import "Utilities.h"
 #import "Version.h"
 
@@ -158,7 +157,7 @@
 - (void)criticalAlert:(NSString *)textString details:(NSString *)detailsString;
 {
 	NSArray *args = [NSArray arrayWithObjects:textString, detailsString, nil];
-	[self performSelectorOnMainThread:@selector(criticalAlertA:) withObject:args waitUntilDone:false];
+	[self performSelectorOnMainThread:@selector(criticalAlertA:) withObject:args waitUntilDone:NO];
 }
 
 - (void)criticalAlertA:(NSArray *)args;
@@ -173,14 +172,14 @@
 	[alert runModal];
 }
 
-- (void)databaseStartRestoreDone:(NSNotification *)notification;
+- (Boolean)databaseExistsForVersion:(Version *)version;
 {
-/*
-	Topaz *myTask = [Topaz database:database];
-	[myTask restoreFromBackup];
-	[notificationCenter removeObserver:self name:nil object:taskX];
-	[self taskFinishedAfterDelay];
- */
+	for (Database *eachDatabase in [databaseListController arrangedObjects]) {
+		if ([[eachDatabase version] isEqualToString:[version name]]) {
+			return YES;
+		}
+	}
+	return false;
 }
 
 - (void)databaseStartDone:(Database *)aDatabase;
@@ -580,14 +579,17 @@
 
 - (void)taskErrorA:(NSString *)aString;
 {
-	[operations cancelAllOperations];
-	[self criticalAlert:@"Task Failed" details:aString];
+//	[operations cancelAllOperations];
+	[self criticalAlert:@"Task Failed"
+				details:aString];
 	[self taskFinishedAfterDelay];
 }
 
 - (void)taskFinished;
 {
-	[self performSelectorOnMainThread:@selector(taskFinishedA) withObject:nil waitUntilDone:NO];
+	[self performSelectorOnMainThread:@selector(taskFinishedA)
+						   withObject:nil
+						waitUntilDone:NO];
 }
 
 - (void)taskFinishedA;
@@ -599,14 +601,18 @@
 
 - (void)taskFinishedAfterDelay;
 {
-	[self performSelectorOnMainThread:@selector(taskFinishedAfterDelayA) withObject:nil waitUntilDone:NO];
+	[self performSelectorOnMainThread:@selector(taskFinishedAfterDelayA)
+						   withObject:nil
+						waitUntilDone:NO];
 }
 
 - (void)taskFinishedAfterDelayA;
 {
 	[taskProgressIndicator stopAnimation:self];
 	[taskCancelButton setTitle:@"Close"];
-	[self performSelector:@selector(taskFinishedAfterDelayB) withObject:nil afterDelay:1.0];
+	[self performSelector:@selector(taskFinishedAfterDelayB)
+			   withObject:nil
+			   afterDelay:1.0];
 }
 
 - (void)taskFinishedAfterDelayB;
@@ -618,9 +624,16 @@
 
 - (void)taskProgress:(NSString *)aString;
 {
-	[self performSelectorOnMainThread:@selector(taskProgressA:)
-						   withObject:aString
-						waitUntilDone:YES];
+	Boolean isVisible = [taskProgressPanel isVisible];
+    NSUInteger length =[aString length];
+	Boolean hasLength = 0 < length;
+	if (isVisible && hasLength) {
+		[self performSelectorOnMainThread:@selector(taskProgressA:)
+							   withObject:aString
+							waitUntilDone:YES];
+	} else {
+		NSLog(@"taskProgress: - %i %lu '%@'", isVisible, (unsigned long)length, aString);
+	}
 }
 
 - (void)taskProgressA:(NSString *)aString;
@@ -647,7 +660,7 @@
 		}
 		[taskProgressText insertText:nextLine];
 	}
-	
+	[self doRunLoopFor:0.01];	//	ensure that it happens
 }
 
 - (void)taskStart:(NSString *)aString;
@@ -671,6 +684,7 @@
 		[taskCloseWhenDoneButton setState:[[mySetup taskCloseWhenDoneCode] integerValue]];
 	}
 	[self taskProgressA:aString];
+	[self doRunLoopFor:0.01];	//	ensure that it happens
 }
 
 - (void)updateDatabaseList:(id)sender;
@@ -718,11 +732,11 @@
 		NSManagedObjectModel *managedObjectModel = [[managedObjectContext persistentStoreCoordinator] managedObjectModel];
 		NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Version"];
 		
-		NSArray *oldVersions = [versionListController arrangedObjects];
+		NSMutableArray *oldVersions = [NSMutableArray arrayWithArray:[versionListController arrangedObjects]];
 		for (NSDictionary *dict in [download versions]) {
 			Version *oldVersion = nil;
 			for (Version *each in oldVersions) {
-				if (!oldVersion && [[each name] compare:[dict objectForKey:@"name"]] == NSOrderedSame) {
+				if (!oldVersion && [[each name] isEqualToString:[dict objectForKey:@"name"]]) {
 					oldVersion = each;
 				}
 			}
@@ -730,6 +744,7 @@
 				if (![oldVersion.date isEqualToDate:[dict objectForKey:@"date"]]) {
 					oldVersion.date = [dict objectForKey:@"date"];
 				}
+				[oldVersions removeObject:oldVersion];
 			} else {
 				Version *version = [[Version alloc]
 									initWithEntity:entity 
@@ -737,6 +752,15 @@
 				[version setName:[dict objectForKey:@"name"]];
 				[version setDate:[dict objectForKey:@"date"]];
 				[versionListController addObject:version];
+			}
+		}
+		//	remove versions that no longer exist
+		for (Version *eachVersion in oldVersions) {
+			if (![eachVersion isInstalled]) {
+				if (![self databaseExistsForVersion:eachVersion]) {
+					[versionListController removeObject:eachVersion];
+					[managedObjectContext deleteObject:eachVersion];
+				}
 			}
 		}
 		[mySetup setVersionsDownloadDate:[NSDate date]];

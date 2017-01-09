@@ -6,8 +6,8 @@
 //  Copyright (c) 2012-2013 GemTalk Systems LLC. All rights reserved.
 //
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 
-@interface GemStoneTests : SenTestCase
+@interface GemStoneTests : XCTestCase
 
 @end

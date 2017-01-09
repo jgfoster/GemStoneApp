@@ -33,9 +33,9 @@
 	size = [aDictionary valueForKey:NSFileSize];
 	NSString *stone = [aDictionary valueForKey:@"stone"];
 	if ([name length] <= [stone length]) return;
-	if (NSOrderedSame != [[name substringToIndex:[stone length]] compare:stone]) return;
+	if (![[name substringToIndex:[stone length]] isEqualToString:stone]) return;
 	NSRange range = {[stone length], 1};
-	if (NSOrderedSame != [@"_" compare:[name substringWithRange:range]]) return;
+	if (![@"_" isEqualToString:[name substringWithRange:range]]) return;
 	type = [name substringFromIndex:range.location + 1];
 	NSInteger index = -1;
 	for (NSUInteger i = 0; i < [type length] && index + 1 == i; ++i) {

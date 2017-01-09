@@ -9,11 +9,9 @@
 #import "DatabaseTask.h"
 
 @interface WaitStone : DatabaseTask {
-	NSString	*name;
 	BOOL		isReady;
 }
 
-@property (nonatomic, retain)	NSString	*name;
 @property (readonly)			BOOL		isReady;
 
 + (BOOL)isStoneRunningForDatabase:(Database *)database;

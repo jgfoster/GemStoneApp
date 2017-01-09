@@ -16,5 +16,6 @@
 @property (nonatomic, retain) Database *database;
 
 + (id)forDatabase:(Database *)aDatabase;
+- (NSString *)binName;
 
 @end

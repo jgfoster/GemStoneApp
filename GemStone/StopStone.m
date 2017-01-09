@@ -21,17 +21,17 @@
 			nil];
 }
 
+- (NSString *)binName;
+{
+	return @"stopstone";
+}
+
 - (void)done;
 {
 	[database setIsRunning:NO];
 	[database archiveCurrentLogFiles];
 	[database archiveCurrentTransactionLogs];
 	[super done];
-}
-
-- (NSString *)launchPath;
-{ 
-	return [NSString stringWithFormat:@"%@/bin/stopstone", [database gemstone]];
 }
 
 - (void)main;

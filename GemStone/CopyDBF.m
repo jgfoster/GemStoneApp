@@ -25,26 +25,21 @@
 			nil];
 }
 
-- (void)dataString:(NSString *)aString;
-{
-	[errorOutput appendString:aString];		// 3.2 might send some data to stdout!
-}
-
-- (void)errorOutputString:(NSString *)aString;
-{
-	[errorOutput appendString:aString];
-}
-
 - (NSString *)infoForPath:(NSString *)aString;
 {
 	path = aString;
 	[self main];
-	return errorOutput;
+	return allOutput;
 }
 
-- (NSString *)launchPath;
+- (NSString *)binName;
 { 
-	return [NSString stringWithFormat:@"%@/bin/copydbf", [database gemstone]];
+	return @"copydbf";
+}
+
+- (void)progress:(NSString *)aString;
+{
+	//	override to prevent reporting
 }
 
 @end

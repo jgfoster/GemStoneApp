@@ -25,6 +25,11 @@
 			nil];
 }
 
+- (NSString *)binName;
+{
+	return @"%vsd";
+}
+
 - (void)dataString:(NSString *)aString;
 {
 	NSLog(@"VSD>>dataString:%@", aString);
@@ -33,11 +38,6 @@
 - (void)errorOutputString:(NSString *)message;
 {
 	NSLog(@"VSD>>errorOutputString:%@", message);
-}
-
-- (NSString *)launchPath;
-{ 
-	return [NSString stringWithFormat:@"%@/bin/vsd", [database gemstone]];
 }
 
 - (void)openPath:(NSString *)aString;

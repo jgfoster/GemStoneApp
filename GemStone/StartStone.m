@@ -22,16 +22,17 @@
 	return list;
 }
 
+- (NSString *)binName;
+{
+	return @"startstone";
+}
+
 - (void)done;
 {
 	[database setIsRunning:YES];
+//	[self delayFor:2.0];	//	give time for output so it isn't intermixed with other output
 	[super done];
-}
-
-- (NSString *)launchPath;
-{ 
-	return [NSString stringWithFormat:@"%@/bin/startstone", [database gemstone]];
-}
+ }
 
 - (void)main;
 {

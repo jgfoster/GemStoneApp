@@ -8,23 +8,27 @@
 
 #import <Foundation/Foundation.h>
 
+#define mustOverride() 	[NSException raise:NSInternalInconsistencyException \
+format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
+
 @interface Task : NSOperation {
 	NSTask			*task;
 	BOOL			 didLaunch;
 	int				 doneCount;
+	NSMutableString	*allOutput;
 	NSMutableString *errorOutput;
 	NSMutableString *standardOutput;
 }
 
 - (NSString *)currentDirectoryPath;
 - (void)dataString:(NSString *)aString;
+- (void)delayFor:(NSTimeInterval)seconds;
 - (void)done;
 - (void)doneWithError:(int)statusCode;
-- (void)doRunLoopFor:(double)seconds;
 - (NSMutableDictionary *)environment;
 - (void)errorOutputString:(NSString *)message;
 - (void)progress:(NSString *)aString;
+- (void)removeReadCompletionNotifications;
 - (void)startTask;
-- (void)terminateTask;
 
 @end

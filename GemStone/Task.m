@@ -6,21 +6,24 @@
 //  Copyright (c) 2012-2013 GemTalk Systems LLC. All rights reserved.
 //
 
-#define mustOverride() 	[NSException raise:NSInternalInconsistencyException \
-format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
-
 #import "Task.h"
 #import "Utilities.h"
 
 @implementation Task
 
-- (NSString *)launchPath	{ mustOverride(); return nil; }
-- (NSArray *)arguments		{ return [NSMutableArray new]; }
+- (NSArray *)arguments {
+	return [NSMutableArray new];
+}
 
 //	override NSOperation to do our own stuff
 - (void)cancel;
 {
-	[self terminateTask];
+	[self removeReadCompletionNotifications];
+	if (task) {
+		NSTask *myTask = task;
+		task = nil;
+		[myTask terminate];
+	}
 	[super cancel];
 }
 
@@ -36,26 +39,33 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 }
 
 - (void)dataString:(NSString *)aString;
-{ 
+{
+	[self progress:aString];
+	[allOutput appendString:aString];
 	[standardOutput appendString:aString];
+}
+
+- (void)delayFor:(NSTimeInterval)seconds;
+{
+	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:seconds]];
 }
 
 - (void)done;
 {
-//	method is here to allow for override; default is to do nothing
+	[self removeReadCompletionNotifications];
 }
 
 - (void)doneWithError:(int)statusCode;
 {
-	if (![errorOutput length]) {
-		errorOutput = [NSMutableString stringWithFormat:@"Task returned status code %i", statusCode];
+	if (statusCode) {
+		if (![errorOutput length]) {
+			errorOutput = [NSMutableString stringWithFormat:@"Task returned status code %i", statusCode];
+		}
+		[appController taskError:errorOutput];
 	}
-	[appController taskError:errorOutput];
-}
-
-- (void)doRunLoopFor:(double)seconds;
-{
-	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:seconds]];
+	if (![self isCancelled]) {
+		[self cancel];
+	}
 }
 
 - (NSMutableDictionary *)environment;
@@ -84,6 +94,8 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 
 - (void)errorOutputString:(NSString *)aString;
 {
+	[self progress:aString];
+	[allOutput appendString:aString];
 	[errorOutput appendString:aString];
 }
 
@@ -92,16 +104,49 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	return [task isRunning];
 }
 
+- (NSString *)launchPath {
+	mustOverride();
+	return nil;
+}
+
+//	override NSOperation to do our work; do not return until done!
+- (void)main;
+{
+	for (NSOperation *priorTask in [self dependencies]) {
+		if ([priorTask isCancelled]) {
+			return;
+		}
+	}
+	didLaunch = NO;
+	@try {
+		[self startTask];
+		[task waitUntilExit];
+		// give a bit of time for output notifications
+		for (NSUInteger i = 1; doneCount < 2 && i <= 20; ++i) {
+			[self delayFor:0.01 * i];
+		}
+	}
+	@catch (NSException *exception) {
+		NSLog(@"Exception in task: %@", exception);
+		if (didLaunch) {
+			[self cancel];
+		}
+	}
+	@finally {
+		// force things to finish without all the output
+		while (doneCount < 2) {
+			[self mightBeDone];
+		}
+	}
+}
+
 - (void)mightBeDone;
 {
 	if (++doneCount < 2) return;	//	look for stderr and stdout notifications
-	[notificationCenter
-	 removeObserver:self 
-	 name:NSFileHandleReadCompletionNotification 
-	 object:nil];
+	[self removeReadCompletionNotifications];
 	if (!task) return;				//	terminated by user, so no need to report error
 	for (NSUInteger i = 0; i < 100 && [task isRunning]; ++i) {
-		[self doRunLoopFor:0.001 * i];
+		[self delayFor:0.001 * i];
 	}
 	int status;
 	if (didLaunch) {
@@ -122,30 +167,12 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	[appController taskProgress:aString];
 }
 
-//	override NSOperation to do our work; do not return until done!
-- (void)main;
+- (void)removeReadCompletionNotifications;
 {
-	didLaunch = NO;
-	@try {
-		[self startTask];
-		[task waitUntilExit];
-		// give a bit of time for output notifications
-		for (NSUInteger i = 1; doneCount < 2 && i <= 100; ++i) {
-			[self doRunLoopFor:0.001 * i];
-		}
-	}
-	@catch (NSException *exception) {
-		NSLog(@"Exception in task: %@", exception);
-		if (didLaunch) {
-			[task terminate];
-		}
-	}
-	@finally {
-		// force things to finish without all the output
-		while (doneCount < 2) {
-			[self mightBeDone];
-		}
-	}
+	[notificationCenter
+	 removeObserver:self
+	 name:NSFileHandleReadCompletionNotification
+	 object:nil];
 }
 
 - (void)standardOutput:(NSNotification *)inNotification;
@@ -186,21 +213,13 @@ format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 	 name:NSFileHandleReadCompletionNotification
 	 object:taskOut];
 	[taskOut readInBackgroundAndNotify];
+	
 	doneCount = 0;
+	allOutput = [NSMutableString new];
 	errorOutput = [NSMutableString new];
 	standardOutput = [NSMutableString new];
 	[task launch];
 	didLaunch = YES;
-}
-
-- (void)terminateTask;
-{
-	if (task) {
-		NSTask *myTask = task;
-		task = nil;
-		[myTask terminate];
-	}
-	
 }
 
 @end

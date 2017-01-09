@@ -61,6 +61,7 @@
 - (IBAction)cancelTask:(id)sender;
 - (IBAction)clickedDataFile:(id)sender;
 - (IBAction)closeInfoPanel:(id)sender;
+- (Boolean)databaseExistsForVersion:(Version *)version;
 - (void)databaseStartDone:(Database *)aDatabase;
 - (void)databaseStopDone:(Database *)aDatabase;
 - (IBAction)deleteStatmonFiles:(id)sender;

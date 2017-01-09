@@ -84,8 +84,16 @@
 
 - (void)remove;
 {
-	[appController taskStart:@"Removing GemStone/S 64 Bit product tree . . .\n"];
-	[Version removeVersionAtPath:[self productPath]];
+	if ([appController databaseExistsForVersion:self]) {
+		NSAlert *alert = [[NSAlert alloc] init];
+		[alert setMessageText:@"Database(s) exist for Version!"];
+		[alert setInformativeText:@"Please delete databases for this version first!"];
+		[alert addButtonWithTitle:@"Dismiss"];
+		[alert runModal];
+	} else {
+		[appController taskStart:@"Removing GemStone/S 64 Bit product tree . . .\n"];
+		[Version removeVersionAtPath:[self productPath]];		
+	}
 	[appController removeVersionDone];
 }
 

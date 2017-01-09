@@ -22,9 +22,9 @@
 			nil];
 }
 
-- (NSString *)launchPath;
+- (NSString *)binName;
 {
-	return [NSString stringWithFormat:@"%@/bin/startcachewarmer", [database gemstone]];
+	return @"startcachewarmer";
 }
 
 @end

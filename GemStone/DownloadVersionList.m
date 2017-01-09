@@ -22,6 +22,11 @@
 			nil];
 }
 
+- (void)dataString:(NSString *)aString;
+{
+	[standardOutput appendString:aString];
+}
+
 - (void)done;
 {
 	NSString *string = standardOutput;

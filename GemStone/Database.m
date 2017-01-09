@@ -51,7 +51,7 @@
 		NSArray *thisList = [file componentsSeparatedByString:@"_"];
 		int j = -1;
 		for (int i = 0; i == j + 1 && i < [thisList count] && i < baseListCount; ++i) {
-			if (NSOrderedSame == [[baseList objectAtIndex:i] compare:[thisList objectAtIndex:i]]) {
+			if ([[baseList objectAtIndex:i] isEqualToString:[thisList objectAtIndex:i]]) {
 				j = i;
 			}
 		}
@@ -266,7 +266,7 @@
 	}
 	NSMutableArray *list = [NSMutableArray arrayWithCapacity:[fullList count]];
 	for (NSString *each in fullList) {
-		if ([each compare:@"archive"] != NSOrderedSame) {
+		if (![each isEqualToString:@"archive"]) {
 			[list addObject:each];
 		}
 	}
@@ -393,15 +393,15 @@
 	isRunningCode = [NSNumber numberWithBool:NO];
 	for (NSDictionary *process in list) {
 		NSString *string = [process valueForKey:@"version"];
-		if ([string compare:version] == NSOrderedSame) {
+		if ([string isEqualToString:version]) {
 			string = [process valueForKey:@"GEMSTONE"];
-			if ([string compare:[self gemstone]] == NSOrderedSame) {
+			if ([string isEqualToString:[self gemstone]]) {
 				string = [process valueForKey:@"logfile"];
 				NSString *directory = [self directory];
 				NSRange range = [string rangeOfString:directory];
 				if (range.location == 0) {
 					string = [process valueForKey:@"type"];
-					if ([string compare:@"Stone"] == NSOrderedSame) {
+					if ([string isEqualToString:@"Stone"]) {
 						isRunningCode = [NSNumber numberWithBool:YES];
 						return;
 					}
@@ -507,7 +507,7 @@
 			[dirEnum skipDescendents];
 			continue;
 		}
-		if ((4 < [file length]) && (NSOrderedSame == [@".log" compare:[file substringFromIndex:[file length]-4]])) {
+		if ((4 < [file length]) && ([@".log" isEqualToString:[file substringFromIndex:[file length]-4]])) {
 			NSError *error = nil;
 			NSString *fullPath = [NSString stringWithFormat:@"%@/%@", path, file];
 			NSDictionary *dict = [fileManager attributesOfItemAtPath:fullPath error:&error];
@@ -625,17 +625,14 @@
 	NSInteger result = [panel runModal];
     if (result != NSOKButton) return;
 	
-	NSString	*path = [[[panel URLs] objectAtIndex:0] path];
-	[self startDatabaseWithArgs:[NSArray arrayWithObject:@"-R"]];	//	defines statmonitor, but does not add it as an operation
+	NSString *path = [[[panel URLs] objectAtIndex:0] path];
+	//	defines statmonitor, but does not add it as an operation
+	[self startDatabaseWithArgs:[NSArray arrayWithObject:@"-R"]];
 	Topaz *topaz = [Topaz database:self
-								do:^(Topaz *aTopaz) {
-									[aTopaz restoreFromBackup:path]; }
-					];
+								do:^(Topaz *aTopaz) { [aTopaz restoreFromBackup:path]; } ];
 	[topaz addDependency:statmonitor];
 	__block id me = self;
-	[topaz setCompletionBlock:^(){
-		[me startIsDone];
-	}];
+	[topaz setCompletionBlock:^(){ [me startIsDone]; }];
 	[appController addOperation:statmonitor];
 	[appController addOperation:topaz];
 }
@@ -683,7 +680,10 @@
 {
 	[self startDatabaseWithArgs:nil];
 	__block id me = self;
-	[statmonitor setCompletionBlock:^(){ [me startIsDone]; }];
+	StartCacheWarmer *cacheWarmer = [StartCacheWarmer forDatabase:self];
+	[cacheWarmer setCompletionBlock:^(){ [me startIsDone]; }];
+	[cacheWarmer addDependency:statmonitor];
+	[appController addOperation:cacheWarmer];
 	[appController addOperation:statmonitor];
 }
 
@@ -692,7 +692,7 @@
 - (void)startDatabaseWithArgs:(NSArray *)args;
 {
 	if ([WaitStone isStoneRunningForDatabase: self]) {
-		isRunningCode = [NSNumber numberWithBool:true];
+		isRunningCode = [NSNumber numberWithBool:YES];
 		NSAlert *alert = [[NSAlert alloc] init];
 		[alert setMessageText:@"Database is already running!"];
 		[alert setInformativeText:@"No need to start it again!"];
@@ -719,8 +719,6 @@
 
 - (void)startIsDone;
 {
-	StartCacheWarmer *startCacheWarmer = [StartCacheWarmer forDatabase:self];
-	[appController addOperation:startCacheWarmer];
 	[self performSelector:@selector(refreshStatmonFiles)
 			   withObject:nil
 			   afterDelay:0.4];
@@ -772,7 +770,7 @@
 	StopNetLDI *stopNetLdi = [StopNetLDI forDatabase:self];
 	StopStone *stopStone = [StopStone forDatabase:self];
 	[stopStone addDependency:stopNetLdi];
-	[statmonitor terminateTask];
+	[statmonitor cancel];
 	statmonitor = nil;
 	__block id me = self;
 	[stopStone setCompletionBlock:^(){ [me stopIsDone]; }];
@@ -797,13 +795,13 @@
 	if ([appController statmonTableView] == aTableView) {
 		NSDictionary *row = [[self statmonFiles] objectAtIndex:rowIndex];
 		NSString *key = [aTableColumn identifier];
-		if ([key compare:@"start"] == NSOrderedSame) {
+		if ([key isEqualToString:@"start"]) {
 			return [row valueForKey:NSFileCreationDate];
 		}
-		if ([key compare:@"end"] == NSOrderedSame) {
+		if ([key isEqualToString:@"end"]) {
 			return [row valueForKey:NSFileModificationDate];
 		}
-		if ([key compare:@"duration"] == NSOrderedSame) {
+		if ([key isEqualToString:@"duration"]) {
 			NSTimeInterval seconds = [[row valueForKey:NSFileModificationDate] timeIntervalSinceDate:[row valueForKey:NSFileCreationDate]];	// double
 			NSUInteger number = seconds;
 			if (number < 120) {
@@ -819,7 +817,7 @@
 			}
 			return [NSString stringWithFormat:@"%lu days", number / 24];
 		}
-		if ([key compare:@"size"] == NSOrderedSame) {
+		if ([key isEqualToString:@"size"]) {
 			NSNumber *number = [row valueForKey:NSFileSize];
 			NSUInteger size = [number unsignedIntegerValue];
 			if (size < 2048) {

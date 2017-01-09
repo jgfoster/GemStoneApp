@@ -10,7 +10,6 @@
 
 @implementation WaitStone
 
-@synthesize name;
 @synthesize isReady;
 
 + (BOOL)isStoneRunningForDatabase:(Database *)database;
@@ -31,29 +30,35 @@
 - (NSArray *)arguments;
 { 
 	return [NSArray arrayWithObjects: 
-			name,
+			[database name],
 			@"-1",
 			nil];
+}
+
+- (NSString *)binName;
+{
+	return @"waitstone";
 }
 
 - (void)done;
 {
 	isReady = YES;
+	[super done];
 }
 
 - (void)doneWithError:(int)statusCode;
 {
 	isReady = NO;
+	[super doneWithError:0];
 }
 
-- (NSString *)launchPath;
-{ 
-	return [NSString stringWithFormat:@"%@/bin/waitstone", [database gemstone]];
+- (void)progress:(NSString *)aString;
+{
+	//	override to prevent reporting
 }
 
 - (void)setDatabase:(Database *)aDatabase;
 {
-	[self setName:[aDatabase name]];
 	[super setDatabase:aDatabase];
 }
 

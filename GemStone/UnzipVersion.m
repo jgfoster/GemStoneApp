@@ -56,9 +56,7 @@
 
 - (void)done;
 {
-	NSRange range;
-	range = [zipFilePath rangeOfString:basePath];
-	if (0 == range.location) {
+	if ([zipFilePath hasPrefix:basePath]) {
 		[fileManager removeItemAtPath:zipFilePath error:nil];
 	}
 	[super done];

@@ -14,7 +14,7 @@
 - (NSArray *)arguments;
 { 
 	NSDateFormatter *formatter = [NSDateFormatter new];
-	[formatter setDateFormat:@"yyyy-MM-dd-HH-mm"];
+	[formatter setDateFormat:@"yyyy-MM-dd-HH-mm-ss"];
 	NSString *dateString = [formatter stringFromDate:[NSDate date]];
 	NSString *path = [NSString stringWithFormat:@"%@/stat/statmon_%@",[database directory], dateString];
 	return [NSArray arrayWithObjects: 
@@ -28,9 +28,9 @@
 			nil];
 }
 
-- (NSString *)launchPath;
+- (NSString *)binName;
 { 
-	return [NSString stringWithFormat:@"%@/bin/statmonitor", [database gemstone]];
+	return @"statmonitor";
 }
 
 //	override to leave task running
@@ -39,14 +39,14 @@
 	@try {
 		[appController taskProgress:@"\nStarting Statmonitor . . .\n"];	
 		[self startTask];
-		[self doRunLoopFor:1.0];
+		[self delayFor:1.0];	//	give time for output so it isn't intermixed with other output
 		[appController taskProgress:@"\nStatmonitor started!\n"];	
 	}
 	@catch (NSException *exception) {
 		NSLog(@"Exception in task: %@", exception);
 	}
 	@finally {
-		//		<#statements#>
+		//
 	}
 }
 

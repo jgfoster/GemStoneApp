@@ -27,9 +27,9 @@
 			nil];
 }
 
-- (NSString *)launchPath;
+- (NSString *)binName;
 { 
-	return [NSString stringWithFormat:@"%@/bin/startnetldi", [database gemstone]];
+	return @"startnetldi";
 }
 
 @end

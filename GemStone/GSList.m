@@ -26,13 +26,14 @@
 			nil];
 }
 
-- (void)dataString:(NSString *)aString;
+- (NSString *)binName;
 {
-	[standardOutput appendString:aString];
+	return @"gslist";
 }
 
 - (void)done;
 {
+	[super done];
 	if ([standardOutput length]) return;
 	NSLog(@"done with no output!?");
 }
@@ -40,11 +41,7 @@
 - (void)doneWithError:(int)statusCode;
 {
 	foundNoProcesses = YES;
-}
-
-- (NSString *)launchPath;
-{ 
-	return [NSString stringWithFormat:@"%@/bin/gslist", [database gemstone]];
+	[super doneWithError:0];	//	Not really an error to have no processes
 }
 
 - (NSArray *)processList;
@@ -79,6 +76,11 @@
 		NSLog(@"no process!?");
 	}
 	return list;
+}
+
+- (void)progress:(NSString *)aString;
+{
+	//	override to prevent reporting
 }
 
 @end

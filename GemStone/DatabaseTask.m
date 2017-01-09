@@ -20,13 +20,15 @@
 	return instance;
 }
 
+- (NSString *)binName;
+{
+	mustOverride();
+	return @"";
+}
+
 - (NSString *)currentDirectoryPath;
 {
 	return [database directory];
-}
-
-- (void)dataString:(NSString *)aString { 
-	[self progress:aString];
 }
 
 - (NSMutableDictionary *)environment;
@@ -48,9 +50,9 @@
 	return environment;
 }
 
-- (void)errorOutputString:(NSString *)aString { 
-	[self progress:aString];
-	[super errorOutputString:aString];
+- (NSString *)launchPath;
+{
+	return [NSString stringWithFormat:@"%@/bin/%@", [database gemstone], [self binName]];
 }
 
 @end
