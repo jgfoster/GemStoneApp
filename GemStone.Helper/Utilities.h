@@ -3,7 +3,7 @@
 //  GemStone
 //
 //  Created by James Foster on 4/18/12.
-//  Copyright (c) 2012-2013 GemTalks Systems LLC. All rights reserved.
+//  Copyright (c) 2012-2013 GemTalk Systems LLC. All rights reserved.
 //
 
 #ifndef GemStone_Utilities_h

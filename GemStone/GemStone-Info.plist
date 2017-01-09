@@ -27,7 +27,7 @@
 	<key>LSMinimumSystemVersion</key>
 	<string>${MACOSX_DEPLOYMENT_TARGET}</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2012-2013 GemTalk Systems LLC. All rights reserved.</string>
+	<string>Copyright © 2012-2017 GemTalk Systems LLC. All rights reserved.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
@@ -35,7 +35,7 @@
 	<key>SMPrivilegedExecutables</key>
 	<dict>
 		<key>com.GemTalk.GemStone.Helper</key>
-		<string>identifier com.GemTalk.GemStone.Helper and certificate leaf[subject.CN] = "Developer ID Application: GemTalk Systems LLC (72G58AHU7P)"</string>
+		<string>identifier com.GemTalk.GemStone.Helper and certificate leaf[subject.CN] = &quot;Developer ID Application: GemTalk Systems LLC (72G58AHU7P)&quot;</string>
 	</dict>
 </dict>
 </plist>
