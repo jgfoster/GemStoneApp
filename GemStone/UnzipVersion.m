@@ -85,6 +85,7 @@
 	if (!directoryContents) {
 		AppError(@"Unable to obtain contents of %@", basePath);
 	}
+    [appController taskStart:@"Starting import of zip file . . .\n"];
 	[super main];
 }
 
@@ -105,21 +106,30 @@
 
 - (void)unzip;
 {
-	NSOpenPanel *op = [NSOpenPanel openPanel];		//	get path to zip file
-	[op setDelegate:self];
-	NSInteger result = [op runModal];
-	[op setDelegate:nil];
-    if (result != NSOKButton) return;
-	[appController taskStart:@"Starting import of zip file . . .\n"];
-	
-	__block id me = self;
-	zipFilePath = [[[op URLs] objectAtIndex:0] path];
-	[self setCompletionBlock:^(){
-		[appController performSelectorOnMainThread:@selector(versionUnzipDone:) 
-										withObject:me
-									 waitUntilDone:NO];
-	}];
-	[appController addOperation:self];
+	NSOpenPanel *op = [NSOpenPanel openPanel];
+    [op setCanChooseFiles:YES];
+    [op setCanChooseDirectories:NO];
+    [op setResolvesAliases:YES];
+    [op setAllowsMultipleSelection:NO];
+    [op setTitle:@"Add New Version"];
+    [op setPrompt:@"Unzip"];
+    [op setMessage:@"Select GemStone/S product:"];
+    [op setCanSelectHiddenExtension:YES];
+    [op setAllowedFileTypes:[NSArray arrayWithObjects:@"zip",@"ZIP", nil]];
+    [op setAllowsMultipleSelection:NO];
+    [op setTreatsFilePackagesAsDirectories:NO];
+    [op beginSheetModalForWindow:[NSApp mainWindow]
+               completionHandler:^(NSInteger result) {
+                   if (result != NSFileHandlingPanelOKButton) return;
+                   __block id me = self;
+                   zipFilePath = [[[op URLs] objectAtIndex:0] path];
+                   [self setCompletionBlock:^(){
+                       [appController performSelectorOnMainThread:@selector(versionUnzipDone:)
+                                                       withObject:me
+                                                    waitUntilDone:NO];
+                   }];
+                   [appController addOperation:self];
+               }];
 }
 
 @end

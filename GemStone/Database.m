@@ -92,19 +92,22 @@
 {
 	//	get path to backup
 	NSSavePanel *panel = [NSSavePanel savePanel];
-	[panel setAllowedFileTypes:[NSArray arrayWithObjects:@"bak",@"gz", nil]];
+	[panel setAllowedFileTypes:[NSArray arrayWithObjects:@"bak",@"BAK",@"gz",@"GZ", nil]];
 	[panel setTitle:@"Create From a Full Backup"];
+    [panel setPrompt:@"Backup"];
 	[panel setMessage:@"Name of on-line backup:"];
+    [panel setCanSelectHiddenExtension:YES];
 	[panel setNameFieldStringValue:[NSString stringWithFormat:@"%@.bak.gz",[self name]]];
 	[panel setExtensionHidden:NO];
-	[panel setPrompt:@"Backup"];
-	NSInteger result = [panel runModal];
-    if (result != NSOKButton) return;
-	
-	NSString *path = [[panel URL] path];
-	Topaz *topaz = [Topaz database:self
-								do:^(Topaz *aTopaz){ [aTopaz fullBackupTo:path]; }];
-	[appController addOperation:topaz];
+    [panel setTreatsFilePackagesAsDirectories:NO];
+    [panel beginSheetModalForWindow:[NSApp mainWindow]
+                  completionHandler:^(NSInteger result) {
+                      if (result != NSFileHandlingPanelOKButton) return;
+                      NSString *path = [[panel URL] path];
+                      Topaz *topaz = [Topaz database:self
+                                      do:^(Topaz *aTopaz){ [aTopaz fullBackupTo:path]; }];
+                      [appController addOperation:topaz];
+                  }];
 }
 
 - (void)createConfigFiles;
@@ -618,24 +621,32 @@
 {
 	//	get path to backup
 	NSOpenPanel *panel = [NSOpenPanel openPanel];
-	[panel setAllowedFileTypes:[NSArray arrayWithObjects:@"bak",@"gz", nil]];
-	[panel setTitle:@"Restore From a Full Backup"];
-	[panel setMessage:@"Select an on-line backup:"];
-	[panel setPrompt:@"Restore"];
-	NSInteger result = [panel runModal];
-    if (result != NSOKButton) return;
-	
-	NSString *path = [[[panel URLs] objectAtIndex:0] path];
-	//	defines statmonitor, but does not add it as an operation
-	[self startDatabaseWithArgs:[NSArray arrayWithObject:@"-R"]];
-	Topaz *topaz = [Topaz database:self
-								do:^(Topaz *aTopaz) { [aTopaz restoreFromBackup:path]; } ];
-	[topaz addDependency:statmonitor];
-	__block id me = self;
-	[topaz setCompletionBlock:^(){ [me startIsDone]; }];
-	[appController addOperation:statmonitor];
-	[appController addOperation:topaz];
-}
+    [panel setCanChooseFiles:YES];
+    [panel setCanChooseDirectories:NO];
+    [panel setResolvesAliases:YES];
+    [panel setAllowsMultipleSelection:NO];
+    [panel setTitle:@"Restore From a Full Backup"];
+    [panel setPrompt:@"Restore"];
+    [panel setMessage:@"Select an on-line backup:"];
+    [panel setCanSelectHiddenExtension:YES];
+    [panel setAllowedFileTypes:[NSArray arrayWithObjects:@"bak",@"BAK",@"gz",@"GZ", nil]];
+    [panel setAllowsMultipleSelection:NO];
+    [panel setTreatsFilePackagesAsDirectories:NO];
+    [panel beginSheetModalForWindow:[NSApp mainWindow]
+               completionHandler:^(NSInteger result) {
+                   if (result != NSFileHandlingPanelOKButton) return;
+                   __block id me = self;
+                   NSString *path = [[[panel URLs] objectAtIndex:0] path];
+                   //	defines statmonitor, but does not add it as an operation
+                   [self startDatabaseWithArgs:[NSArray arrayWithObject:@"-R"]];
+                   Topaz *topaz = [Topaz database:self
+                                   do:^(Topaz *aTopaz) { [aTopaz restoreFromBackup:path]; } ];
+                   [topaz addDependency:statmonitor];
+                   [topaz setCompletionBlock:^(){ [me startIsDone]; }];
+                   [appController addOperation:statmonitor];
+                   [appController addOperation:topaz];
+               }];
+ }
 
 - (void)setIsRunning:(BOOL)aBool;
 {

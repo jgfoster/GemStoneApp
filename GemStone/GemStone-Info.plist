@@ -21,7 +21,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>218</string>
+	<string>21E</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.developer-tools</string>
 	<key>LSMinimumSystemVersion</key>
@@ -35,7 +35,7 @@
 	<key>SMPrivilegedExecutables</key>
 	<dict>
 		<key>com.GemTalk.GemStone.Helper</key>
-		<string>identifier com.GemTalk.GemStone.Helper and certificate leaf[subject.CN] = &quot;Developer ID Application: GemTalk Systems LLC (72G58AHU7P)&quot;</string>
+		<string>identifier com.GemTalk.GemStone.Helper and certificate leaf[subject.CN] = "Developer ID Application: GemTalk Systems LLC (72G58AHU7P)"</string>
 	</dict>
 </dict>
 </plist>
