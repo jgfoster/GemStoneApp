@@ -20,6 +20,11 @@
 		E554E9911541D8E400A08D05 /* Helper.m in Sources */ = {isa = PBXBuildFile; fileRef = E554E9901541D8E400A08D05 /* Helper.m */; };
 		E554E9991541FC5300A08D05 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E554E9981541FC5300A08D05 /* ServiceManagement.framework */; };
 		E554E99B1541FC6600A08D05 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E554E99A1541FC6600A08D05 /* Security.framework */; };
+		E565CC2B1E2C704F00C4073A /* GemStone_HelperXPC.m in Sources */ = {isa = PBXBuildFile; fileRef = E565CC2A1E2C704F00C4073A /* GemStone_HelperXPC.m */; };
+		E565CC2D1E2C704F00C4073A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E565CC2C1E2C704F00C4073A /* main.m */; };
+		E565CC311E2C704F00C4073A /* com.GemTalk.GemStone.HelperXPC.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = E565CC261E2C704F00C4073A /* com.GemTalk.GemStone.HelperXPC.xpc */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E565CC371E2C719600C4073A /* Launchd.plist in Resources */ = {isa = PBXBuildFile; fileRef = E565CC361E2C719600C4073A /* Launchd.plist */; };
+		E565CC3A1E2C73D600C4073A /* HelperXPC.m in Sources */ = {isa = PBXBuildFile; fileRef = E565CC391E2C73D600C4073A /* HelperXPC.m */; };
 		E567210115B4A8A2000E93C5 /* Topaz.m in Sources */ = {isa = PBXBuildFile; fileRef = E567210015B4A8A2000E93C5 /* Topaz.m */; };
 		E567E94D160A43480024905D /* UnzipVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = E567E94C160A43470024905D /* UnzipVersion.m */; };
 		E5697C5315AC8D510000BE4D /* GSList.m in Sources */ = {isa = PBXBuildFile; fileRef = E5697C5215AC8D510000BE4D /* GSList.m */; };
@@ -61,6 +66,13 @@
 			remoteGlobalIDString = E554E9751541CFE200A08D05;
 			remoteInfo = com.VMware.GemStone.Helper;
 		};
+		E565CC2F1E2C704F00C4073A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E593F56C1540C1CA00CA44CE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E565CC251E2C704F00C4073A;
+			remoteInfo = GemStone.HelperXPC;
+		};
 		E593F5A01540C1CB00CA44CE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E593F56C1540C1CA00CA44CE /* Project object */;
@@ -78,6 +90,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		E565CC351E2C704F00C4073A /* Embed XPC Services */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Library/LaunchServices;
+			dstSubfolderSpec = 1;
+			files = (
+				E565CC311E2C704F00C4073A /* com.GemTalk.GemStone.HelperXPC.xpc in Embed XPC Services */,
+			);
+			name = "Embed XPC Services";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E5DDDEB1154202A7006F168D /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -115,6 +138,15 @@
 		E554E9901541D8E400A08D05 /* Helper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Helper.m; sourceTree = "<group>"; };
 		E554E9981541FC5300A08D05 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
 		E554E99A1541FC6600A08D05 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		E565CC261E2C704F00C4073A /* com.GemTalk.GemStone.HelperXPC.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = com.GemTalk.GemStone.HelperXPC.xpc; sourceTree = BUILT_PRODUCTS_DIR; };
+		E565CC281E2C704F00C4073A /* GemStone_HelperXPCProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GemStone_HelperXPCProtocol.h; sourceTree = "<group>"; };
+		E565CC291E2C704F00C4073A /* GemStone_HelperXPC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GemStone_HelperXPC.h; sourceTree = "<group>"; };
+		E565CC2A1E2C704F00C4073A /* GemStone_HelperXPC.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GemStone_HelperXPC.m; sourceTree = "<group>"; };
+		E565CC2C1E2C704F00C4073A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		E565CC2E1E2C704F00C4073A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E565CC361E2C719600C4073A /* Launchd.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Launchd.plist; sourceTree = "<group>"; };
+		E565CC381E2C73C600C4073A /* HelperXPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelperXPC.h; sourceTree = "<group>"; };
+		E565CC391E2C73D600C4073A /* HelperXPC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HelperXPC.m; sourceTree = "<group>"; };
 		E56720FF15B4A8A2000E93C5 /* Topaz.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Topaz.h; sourceTree = "<group>"; };
 		E567210015B4A8A2000E93C5 /* Topaz.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Topaz.m; sourceTree = "<group>"; };
 		E567E94B160A43470024905D /* UnzipVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnzipVersion.h; sourceTree = "<group>"; };
@@ -175,6 +207,13 @@
 
 /* Begin PBXFrameworksBuildPhase section */
 		E554E9731541CFE200A08D05 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E565CC231E2C704F00C4073A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -246,7 +285,7 @@
 			name = Tasks;
 			sourceTree = "<group>";
 		};
-		E554E9781541CFE200A08D05 /* GemStone.Helper */ = {
+		E554E9781541CFE200A08D05 /* Helper */ = {
 			isa = PBXGroup;
 			children = (
 				E554E9841541D23A00A08D05 /* Utilities.h */,
@@ -255,15 +294,31 @@
 				E554E9811541D22D00A08D05 /* Launchd.plist */,
 				E554E9821541D22D00A08D05 /* main.c */,
 			);
+			name = Helper;
 			path = GemStone.Helper;
 			sourceTree = SOURCE_ROOT;
+		};
+		E565CC271E2C704F00C4073A /* HelperXPC */ = {
+			isa = PBXGroup;
+			children = (
+				E565CC361E2C719600C4073A /* Launchd.plist */,
+				E565CC281E2C704F00C4073A /* GemStone_HelperXPCProtocol.h */,
+				E565CC291E2C704F00C4073A /* GemStone_HelperXPC.h */,
+				E565CC2A1E2C704F00C4073A /* GemStone_HelperXPC.m */,
+				E565CC2C1E2C704F00C4073A /* main.m */,
+				E565CC2E1E2C704F00C4073A /* Info.plist */,
+			);
+			name = HelperXPC;
+			path = GemStone.HelperXPC;
+			sourceTree = "<group>";
 		};
 		E593F56A1540C1CA00CA44CE = {
 			isa = PBXGroup;
 			children = (
 				E593F57F1540C1CA00CA44CE /* GemStone */,
-				E554E9781541CFE200A08D05 /* GemStone.Helper */,
-				E593F5A21540C1CB00CA44CE /* GemStoneTests */,
+				E554E9781541CFE200A08D05 /* Helper */,
+				E565CC271E2C704F00C4073A /* HelperXPC */,
+				E593F5A21540C1CB00CA44CE /* Tests */,
 				E593F5781540C1CA00CA44CE /* Frameworks */,
 				E593F5761540C1CA00CA44CE /* Products */,
 			);
@@ -275,6 +330,7 @@
 				E593F5751540C1CA00CA44CE /* GemStone.app */,
 				E593F59C1540C1CB00CA44CE /* GemStoneTests.xctest */,
 				E554E9761541CFE200A08D05 /* com.GemTalk.GemStone.Helper */,
+				E565CC261E2C704F00C4073A /* com.GemTalk.GemStone.HelperXPC.xpc */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -316,6 +372,8 @@
 				E5143A4115ADE28B00DDAD01 /* LogFile.m */,
 				E554E98F1541D8E400A08D05 /* Helper.h */,
 				E554E9901541D8E400A08D05 /* Helper.m */,
+				E565CC381E2C73C600C4073A /* HelperXPC.h */,
+				E565CC391E2C73D600C4073A /* HelperXPC.m */,
 				E593417B15AB862800618792 /* Utilities.h */,
 				E593417C15AB862800618792 /* Utilities.m */,
 				E5E33C2415547ADF002B1E9F /* Version.h */,
@@ -339,13 +397,14 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		E593F5A21540C1CB00CA44CE /* GemStoneTests */ = {
+		E593F5A21540C1CB00CA44CE /* Tests */ = {
 			isa = PBXGroup;
 			children = (
 				E593F5A81540C1CB00CA44CE /* GemStoneTests.h */,
 				E593F5A91540C1CB00CA44CE /* GemStoneTests.m */,
 				E593F5A31540C1CB00CA44CE /* Supporting Files */,
 			);
+			name = Tests;
 			path = GemStoneTests;
 			sourceTree = "<group>";
 		};
@@ -405,6 +464,23 @@
 			productReference = E554E9761541CFE200A08D05 /* com.GemTalk.GemStone.Helper */;
 			productType = "com.apple.product-type.tool";
 		};
+		E565CC251E2C704F00C4073A /* com.GemTalk.GemStone.HelperXPC */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E565CC341E2C704F00C4073A /* Build configuration list for PBXNativeTarget "com.GemTalk.GemStone.HelperXPC" */;
+			buildPhases = (
+				E565CC221E2C704F00C4073A /* Sources */,
+				E565CC231E2C704F00C4073A /* Frameworks */,
+				E565CC241E2C704F00C4073A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = com.GemTalk.GemStone.HelperXPC;
+			productName = GemStone.HelperXPC;
+			productReference = E565CC261E2C704F00C4073A /* com.GemTalk.GemStone.HelperXPC.xpc */;
+			productType = "com.apple.product-type.xpc-service";
+		};
 		E593F5741540C1CA00CA44CE /* GemStone */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E593F5AD1540C1CB00CA44CE /* Build configuration list for PBXNativeTarget "GemStone" */;
@@ -414,11 +490,13 @@
 				E593F5721540C1CA00CA44CE /* Frameworks */,
 				E593F5731540C1CA00CA44CE /* Resources */,
 				E5DDDEB1154202A7006F168D /* CopyFiles */,
+				E565CC351E2C704F00C4073A /* Embed XPC Services */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				E554E9891541D6E800A08D05 /* PBXTargetDependency */,
+				E565CC301E2C704F00C4073A /* PBXTargetDependency */,
 			);
 			name = GemStone;
 			productName = GemStone;
@@ -457,6 +535,10 @@
 					E554E9751541CFE200A08D05 = {
 						DevelopmentTeam = 72G58AHU7P;
 					};
+					E565CC251E2C704F00C4073A = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+					};
 					E593F5741540C1CA00CA44CE = {
 						DevelopmentTeam = 72G58AHU7P;
 					};
@@ -475,14 +557,23 @@
 			projectRoot = "";
 			targets = (
 				E593F5741540C1CA00CA44CE /* GemStone */,
-				E593F59B1540C1CA00CA44CE /* GemStoneTests */,
 				E554E9751541CFE200A08D05 /* com.GemTalk.GemStone.Helper */,
+				E565CC251E2C704F00C4073A /* com.GemTalk.GemStone.HelperXPC */,
 				E5CA1ED81628DD3400997041 /* Distribution */,
+				E593F59B1540C1CA00CA44CE /* GemStoneTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		E565CC241E2C704F00C4073A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E565CC371E2C719600C4073A /* Launchd.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E593F5731540C1CA00CA44CE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -546,6 +637,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E565CC221E2C704F00C4073A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E565CC2D1E2C704F00C4073A /* main.m in Sources */,
+				E565CC2B1E2C704F00C4073A /* GemStone_HelperXPC.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E593F5711540C1CA00CA44CE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -559,6 +659,7 @@
 				E570538815582FA8001686F1 /* DownloadVersionList.m in Sources */,
 				E5B50B09155B291B00BE1A65 /* DownloadVersion.m in Sources */,
 				E5FD0F041565ECA300045B4D /* Database.m in Sources */,
+				E565CC3A1E2C73D600C4073A /* HelperXPC.m in Sources */,
 				E5F05E5315A39C3100D6FCC7 /* Task.m in Sources */,
 				E5F05E5715A39EAB00D6FCC7 /* StartStone.m in Sources */,
 				E5A9D66815A78EFA006D51D1 /* Download.m in Sources */,
@@ -595,6 +696,11 @@
 			isa = PBXTargetDependency;
 			target = E554E9751541CFE200A08D05 /* com.GemTalk.GemStone.Helper */;
 			targetProxy = E554E9881541D6E800A08D05 /* PBXContainerItemProxy */;
+		};
+		E565CC301E2C704F00C4073A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E565CC251E2C704F00C4073A /* com.GemTalk.GemStone.HelperXPC */;
+			targetProxy = E565CC2F1E2C704F00C4073A /* PBXContainerItemProxy */;
 		};
 		E593F5A11540C1CB00CA44CE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -686,6 +792,56 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.GemTalk.GemStone.Helper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+			};
+			name = Release;
+		};
+		E565CC321E2C704F00C4073A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				"CODE_SIGN_IDENTITY[sdk=*]" = "Mac Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				INFOPLIST_FILE = GemStone.HelperXPC/Info.plist;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.GemTalk.GemStone.HelperXPC;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		E565CC331E2C704F00C4073A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				INFOPLIST_FILE = GemStone.HelperXPC/Info.plist;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.GemTalk.GemStone.HelperXPC;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 			};
 			name = Release;
 		};
@@ -782,7 +938,6 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GemStone/GemStone-Prefix.pch";
 				INFOPLIST_FILE = "GemStone/GemStone-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.GemTalk.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -800,7 +955,6 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GemStone/GemStone-Prefix.pch";
 				INFOPLIST_FILE = "GemStone/GemStone-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.GemTalk.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -872,6 +1026,15 @@
 			buildConfigurations = (
 				E554E97E1541CFE200A08D05 /* Debug */,
 				E554E97F1541CFE200A08D05 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E565CC341E2C704F00C4073A /* Build configuration list for PBXNativeTarget "com.GemTalk.GemStone.HelperXPC" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E565CC321E2C704F00C4073A /* Debug */,
+				E565CC331E2C704F00C4073A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

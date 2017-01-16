@@ -20,105 +20,6 @@
 
 @implementation Helper
 
-- (BOOL)blessHelperWithLabel:(NSString *)label error:(NSError **)error;
-{
-	BOOL result = NO;
-    
-	AuthorizationItem authItem		= { kSMRightBlessPrivilegedHelper, 0, NULL, 0 };
-	AuthorizationRef authRef		= NULL;
-	AuthorizationRights authRights	= { 1, &authItem };
-	AuthorizationFlags flags		=	
-		kAuthorizationFlagDefaults				| 
-		kAuthorizationFlagInteractionAllowed	|
-		kAuthorizationFlagPreAuthorize			|
-		kAuthorizationFlagExtendRights;
-	CFErrorRef cfError;
-	
-	/* Obtain the right to install privileged helper tools (kSMRightBlessPrivilegedHelper). */
-	OSStatus status = AuthorizationCreate(&authRights, kAuthorizationEmptyEnvironment, flags, &authRef);
-	if (status != errAuthorizationSuccess) {
-		AppError(@"Failed to create AuthorizationRef, return code %i", status);
-	}
-	
-	/* This does all the work of verifying the helper tool against the application
-	 * and vice-versa. Once verification has passed, the embedded launchd.plist
-	 * is extracted and placed in /Library/LaunchDaemons and then loaded. The
-	 * executable is placed in /Library/PrivilegedHelperTools.
-	 */
-	result = SMJobBless(kSMDomainSystemLaunchd, (__bridge CFStringRef)label, authRef, &cfError);
-	*error = (__bridge NSError*) cfError;
-	return result;
-}
-
-//	allow use of max available memory
-- (void)ensureSharedMemory;
-{
-	struct HelperMessage messageOut, messageIn;
-	unsigned long	shmmaxNeeded = [[NSProcessInfo processInfo] physicalMemory];
-	unsigned long	shmallNeeded = (shmmaxNeeded + 4095) / 4096;
-	unsigned long	shmallNow = 0;
-	unsigned long	shmmaxNow = 0;
-	size_t			mySize = sizeof(NSUInteger);
-	int				result;
-	result = sysctlbyname("kern.sysv.shmall", &shmallNow, &mySize, NULL, 0);
-	if (shmallNow < shmallNeeded ) {
-		if (![self isCurrent]) {
-			[self install];
-			[appController updateHelperToolStatus];
-		}
-		initMessage(messageOut, Helper_shmall);
-		messageOut.data.ul = shmallNeeded;
-		messageOut.dataSize = sizeof(messageOut.data.ul);
-		if (sendMessage(&messageOut, &messageIn)) {
-			NSLog(@"Error sending message to set shmall");
-		}
-		if (messageIn.data.i) {
-			NSLog(@"sysctlbyname() returned errno %i", messageIn.data.i);
-		}
-	}
-	result = sysctlbyname("kern.sysv.shmmax", &shmmaxNow, &mySize, NULL, 0);
-	if (shmmaxNow < shmmaxNeeded) {
-		if (![self isCurrent]) {
-			[self install];
-			[appController updateHelperToolStatus];
-		}
-		initMessage(messageOut, Helper_shmmax);
-		messageOut.data.ul = shmmaxNeeded;
-		messageOut.dataSize = sizeof(messageOut.data.ul);
-		if (sendMessage(&messageOut, &messageIn)) {
-			NSLog(@"Error sending message to set shmmax");
-		}
-		if (messageIn.data.i) {
-			NSLog(@"sysctlbyname() returned errno %i", messageIn.data.i);
-		}
-	}
-}
-
-- (void)install;
-{
-	NSError *error = nil;
-	if (![self blessHelperWithLabel:@kHelperIdentifier error:&error]) {
-		AppError(@"Helper tool installation failed: %@", [error localizedDescription]);
-	}
-}
-
-- (BOOL)isCurrent;
-{
-    if (![fileManager fileExistsAtPath:@kSocketPath])		return NO;
-    if (![fileManager fileExistsAtPath:@kHelperPlistPath])	return NO;
-    if (![fileManager fileExistsAtPath:@kHelperToolPath])	return NO;
-
-	struct HelperMessage messageOut, messageIn;
-    initMessage(messageOut, Helper_Version)
-    if (sendMessage(&messageOut, &messageIn)) {
-		return NO;
-	}
-    return messageIn.command == kHelperMessageVersion
-		&&  messageIn.data.bytes[0] == kVersionPart1
-		&&  messageIn.data.bytes[1] == kVersionPart2
-		&&  messageIn.data.bytes[2] == kVersionPart3;
-}
-
 // returns 0 for success, 1 for error
 int sendMessage(const struct HelperMessage * messageOut, struct HelperMessage * messageIn)
 {
@@ -153,6 +54,23 @@ int sendMessage(const struct HelperMessage * messageOut, struct HelperMessage * 
     }
     close(socket_fd);
     return 0;
+}
+
+- (BOOL)isCurrent;
+{
+    if (![fileManager fileExistsAtPath:@kSocketPath])		return NO;
+    if (![fileManager fileExistsAtPath:@kHelperPlistPath])	return NO;
+    if (![fileManager fileExistsAtPath:@kHelperToolPath])	return NO;
+    
+    struct HelperMessage messageOut, messageIn;
+    initMessage(messageOut, Helper_Version)
+    if (sendMessage(&messageOut, &messageIn)) {
+        return NO;
+    }
+    return messageIn.command == kHelperMessageVersion
+    &&  messageIn.data.bytes[0] == kVersionPart1
+    &&  messageIn.data.bytes[1] == kVersionPart2
+    &&  messageIn.data.bytes[2] == kVersionPart3;
 }
 
 - (void)remove;

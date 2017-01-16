@@ -9,8 +9,6 @@
 #import <Foundation/Foundation.h>
 
 @interface Helper : NSObject
-- (void)ensureSharedMemory;
-- (void)install;
 - (BOOL)isCurrent;
 - (void)remove;
 @end
