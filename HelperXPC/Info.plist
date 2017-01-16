@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2017 GemTalk Systems LLC. All rights reserved.</string>
+	<key>SMAuthorizedClients</key>
+	<array>
+		<string>identifier com.GemTalk.GemStone and certificate leaf[subject.CN] = "Developer ID Application: GemTalk Systems LLC (72G58AHU7P)"</string>
+	</array>
+</dict>
+</plist>
