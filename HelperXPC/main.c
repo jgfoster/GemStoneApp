@@ -11,7 +11,7 @@
 #include <syslog.h>
 #include <xpc/xpc.h>
 
-#import "Utilities.h"
+// #import "Utilities.h"
 
 /*
 int respondToRequests() {
@@ -121,26 +121,23 @@ static void __XPC_Connection_Handler(xpc_connection_t connection)  {
 }
 
 int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        syslog(
-               LOG_NOTICE,
-               "GemStoneHelper: uid = %d, euid = %d, pid = %d\n",
-               getuid(), geteuid(), getpid());
-        xpc_connection_t service = xpc_connection_create_mach_service(
-                                                                      "com.GemTalk.GemStone.Helper",
-                                                                      dispatch_get_main_queue(),
-                                                                      XPC_CONNECTION_MACH_SERVICE_LISTENER);
-        if (!service) {
-            syslog(LOG_NOTICE, "Failed to create service.");
-            exit(EXIT_FAILURE);
-        }
-        syslog(LOG_NOTICE, "Configuring connection event handler for helper");
-        xpc_connection_set_event_handler(
-                                         service,
-                                         ^(xpc_object_t connection) {__XPC_Connection_Handler(connection);}
-                                         );
-        xpc_connection_resume(service);
-        dispatch_main();        // never returns!
+    syslog(
+           LOG_NOTICE,
+           "GemStoneHelper: uid = %d, euid = %d, pid = %d\n",
+           getuid(), geteuid(), getpid());
+    xpc_connection_t service = xpc_connection_create_mach_service(
+                                                                  "com.GemTalk.GemStone.Helper",
+                                                                  dispatch_get_main_queue(),
+                                                                  XPC_CONNECTION_MACH_SERVICE_LISTENER);
+    if (!service) {
+        syslog(LOG_NOTICE, "Failed to create service.");
+        exit(EXIT_FAILURE);
     }
-    return 0;
+    syslog(LOG_NOTICE, "Configuring connection event handler for helper");
+    xpc_connection_set_event_handler(
+                                     service,
+                                     ^(xpc_object_t connection) {__XPC_Connection_Handler(connection);}
+                                     );
+    xpc_connection_resume(service);
+    dispatch_main();        // never returns!
 }

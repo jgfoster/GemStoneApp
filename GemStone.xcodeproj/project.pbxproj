@@ -11,6 +11,7 @@
 		E51317D615AF8F44007ADCFF /* CopyDBF.m in Sources */ = {isa = PBXBuildFile; fileRef = E51317D515AF8F44007ADCFF /* CopyDBF.m */; };
 		E5143A4215ADE28B00DDAD01 /* LogFile.m in Sources */ = {isa = PBXBuildFile; fileRef = E5143A4115ADE28B00DDAD01 /* LogFile.m */; };
 		E51C7D181E2D455200C37ACC /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = E51C7D171E2D455200C37ACC /* main.c */; };
+		E51C7D1B1E2D651C00C37ACC /* com.GemTalk.GemStone.HelperXPC in CopyFiles */ = {isa = PBXBuildFile; fileRef = E51C7D0E1E2D437A00C37ACC /* com.GemTalk.GemStone.HelperXPC */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		E52678E517F26B17006CD274 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = E52678E417F26B17006CD274 /* Terminal.m */; };
 		E52AA97416093CE900CE9A72 /* DataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E52AA97116093CE900CE9A72 /* DataModel.xcdatamodeld */; };
 		E54DFBE115B734130086920B /* VSD.m in Sources */ = {isa = PBXBuildFile; fileRef = E54DFBE015B734130086920B /* VSD.m */; };
@@ -56,6 +57,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		E51C7D191E2D647700C37ACC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E593F56C1540C1CA00CA44CE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E51C7D0D1E2D437A00C37ACC;
+			remoteInfo = com.GemTalk.GemStone.HelperXPC;
+		};
 		E554E9881541D6E800A08D05 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E593F56C1540C1CA00CA44CE /* Project object */;
@@ -80,21 +88,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		E51C7D0C1E2D437A00C37ACC /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-		};
 		E5DDDEB1154202A7006F168D /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = Contents/Library/LaunchServices;
 			dstSubfolderSpec = 1;
 			files = (
+				E51C7D1B1E2D651C00C37ACC /* com.GemTalk.GemStone.HelperXPC in CopyFiles */,
 				E5DDDEB3154202C7006F168D /* com.GemTalk.GemStone.Helper in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -435,7 +435,6 @@
 			buildPhases = (
 				E51C7D0A1E2D437A00C37ACC /* Sources */,
 				E51C7D0B1E2D437A00C37ACC /* Frameworks */,
-				E51C7D0C1E2D437A00C37ACC /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -475,6 +474,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				E51C7D1A1E2D647700C37ACC /* PBXTargetDependency */,
 				E554E9891541D6E800A08D05 /* PBXTargetDependency */,
 			);
 			name = GemStone;
@@ -514,12 +514,6 @@
 					E51C7D0D1E2D437A00C37ACC = {
 						CreatedOnToolsVersion = 8.2.1;
 						ProvisioningStyle = Automatic;
-					};
-					E554E9751541CFE200A08D05 = {
-						DevelopmentTeam = 72G58AHU7P;
-					};
-					E593F5741540C1CA00CA44CE = {
-						DevelopmentTeam = 72G58AHU7P;
 					};
 				};
 			};
@@ -662,6 +656,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		E51C7D1A1E2D647700C37ACC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E51C7D0D1E2D437A00C37ACC /* com.GemTalk.GemStone.HelperXPC */;
+			targetProxy = E51C7D191E2D647700C37ACC /* PBXContainerItemProxy */;
+		};
 		E554E9891541D6E800A08D05 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E554E9751541CFE200A08D05 /* com.GemTalk.GemStone.Helper */;
@@ -727,7 +726,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 72G58AHU7P;
+				DEVELOPMENT_TEAM = 5F44AE7NS9;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = "$(SRCROOT)/HelperXPC/Info.plist";
@@ -749,7 +748,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
-				DEVELOPMENT_TEAM = 72G58AHU7P;
+				DEVELOPMENT_TEAM = 5F44AE7NS9;
 				ENABLE_NS_ASSERTIONS = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
@@ -765,6 +764,7 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				DEVELOPMENT_TEAM = 5F44AE7NS9;
 				INFOPLIST_FILE = Gemstone.Helper/Info.plist;
 				OTHER_LDFLAGS = (
 					"-sectcreate",
@@ -788,6 +788,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
+				DEVELOPMENT_TEAM = 5F44AE7NS9;
 				INFOPLIST_FILE = Gemstone.Helper/Info.plist;
 				OTHER_LDFLAGS = (
 					"-sectcreate",
@@ -891,10 +892,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "Mac Developer";
-				"CODE_SIGN_IDENTITY[sdk=*]" = "Developer ID Application: GemTalk Systems LLC (72G58AHU7P)";
+				"CODE_SIGN_IDENTITY[sdk=*]" = "Mac Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 5F44AE7NS9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GemStone/GemStone-Prefix.pch";
 				INFOPLIST_FILE = "GemStone/GemStone-Info.plist";
@@ -912,6 +914,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 5F44AE7NS9;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GemStone/GemStone-Prefix.pch";
 				INFOPLIST_FILE = "GemStone/GemStone-Info.plist";
@@ -988,6 +991,7 @@
 				E51C7D141E2D437A00C37ACC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		E554E97D1541CFE200A08D05 /* Build configuration list for PBXNativeTarget "com.GemTalk.GemStone.Helper" */ = {
 			isa = XCConfigurationList;

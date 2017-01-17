@@ -3,18 +3,18 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<string>com.GemTalk.GemStone.HelperXPC</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
+	<string>HelperXPC</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2017 GemTalk Systems LLC. All rights reserved.</string>
 	<key>SMAuthorizedClients</key>
 	<array>
-		<string>identifier com.GemTalk.GemStone and certificate leaf[subject.CN] = "Developer ID Application: GemTalk Systems LLC (72G58AHU7P)"</string>
+		<string>identifier com.GemTalk.GemStone and certificate leaf[subject.CN] = &quot;Developer ID Application: GemTalk Systems LLC (72G58AHU7P)&quot;</string>
 	</array>
 </dict>
 </plist>
