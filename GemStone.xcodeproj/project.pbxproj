@@ -652,6 +652,16 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = /Users/jfoster/Xcode/GemStone/HelperXPC/Info.plist;
 				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_LDFLAGS = (
+					"-sectcreate",
+					__TEXT,
+					__info_plist,
+					HelperXPC/Info.plist,
+					"-sectcreate",
+					__TEXT,
+					__launchd_plist,
+					HelperXPC/Launchd.plist,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.GemTalk.GemStoneHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -675,6 +685,16 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = /Users/jfoster/Xcode/GemStone/HelperXPC/Info.plist;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = (
+					"-sectcreate",
+					__TEXT,
+					__info_plist,
+					HelperXPC/Info.plist,
+					"-sectcreate",
+					__TEXT,
+					__launchd_plist,
+					HelperXPC/Launchd.plist,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.GemTalk.GemStoneHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

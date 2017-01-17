@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>GemStoneHelper</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>1.0</string>
 	<key>SMAuthorizedClients</key>
 	<array>
 		<string>identifier &quot;com.GemTalk.GemStoneApp&quot; and anchor apple generic and certificate leaf[subject.CN] = &quot;Mac Developer: James Foster (5HVEZ5GM35)&quot; and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
