@@ -12,9 +12,9 @@
 
 #import "Utilities.h"
 
-#define kHelperPlistPath  "/Library/LaunchDaemons/com.GemTalk.GemStone.HelperXPC.plist"
-#define kHelperToolPath   "/Library/PrivilegedHelperTools/com.GemTalk.GemStone.HelperXPC"
-#define kHelperIdentifier "com.GemTalk.GemStone.HelperXPC"
+#define kHelperPlistPath  "/Library/LaunchDaemons/com.GemTalk.GemStoneHelper.plist"
+#define kHelperToolPath   "/Library/PrivilegedHelperTools/com.GemTalk.GemStoneHelper"
+#define kHelperIdentifier "com.GemTalk.GemStoneHelper"
 
 @implementation HelperXPC
 
@@ -104,12 +104,13 @@
 
 - (BOOL)isCurrent;
 {
+    if (![fileManager fileExistsAtPath:@kHelperPlistPath])
+        return NO;
+    if (![fileManager fileExistsAtPath:@kHelperToolPath])
+        return NO;
+
     if (TRUE) return false;
 /*
-    if (![fileManager fileExistsAtPath:@kSocketPath])		return NO;
-    if (![fileManager fileExistsAtPath:@kHelperPlistPath])	return NO;
-    if (![fileManager fileExistsAtPath:@kHelperToolPath])	return NO;
-
 	struct HelperMessage messageOut, messageIn;
     initMessage(messageOut, Helper_Version)
     if (sendMessageXPC(&messageOut, &messageIn)) {

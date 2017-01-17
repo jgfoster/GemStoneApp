@@ -712,7 +712,7 @@
 	[authenticateButton setEnabled:!isCurrent];
 	[removeButton setEnabled:isCurrent];
 	if (!isCurrent) {
-		//	if it is our first time, then ensure that Setup tab is selected
+		//	if helper tool needs to be installed, then ensure that Setup tab is selected
 		[topTabView selectFirstTabViewItem:nil];
 	}
 }

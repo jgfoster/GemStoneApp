@@ -134,7 +134,7 @@ int main(int argc, const char * argv[]) {
 
     
     xpc_connection_t service = xpc_connection_create_mach_service(
-                                                                  "com.GemTalk.GemStone.Helper",
+                                                                  "com.GemTalk.GemStoneHelper",
                                                                   dispatch_get_main_queue(),
                                                                   XPC_CONNECTION_MACH_SERVICE_LISTENER);
     if (!service) {
