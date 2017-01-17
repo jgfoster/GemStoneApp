@@ -3,10 +3,10 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>com.GemTalk.GemStone.HelperXPC</string>
+	<string>com.GemTalk.GemStoneHelper</string>
 	<key>MachServices</key>
 	<dict>
-		<key>com.GemTalk.GemStone.HelperXPC</key>
+		<key>com.GemTalk.GemStoneHelper</key>
 		<true/>
 	</dict>
 </dict>

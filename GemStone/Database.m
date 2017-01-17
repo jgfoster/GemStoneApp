@@ -10,7 +10,7 @@
 #import "CopyDBF.h"
 #import "Database.h"
 #import "GSList.h"
-#import "Helper.h"
+#import "HelperXPC.h"
 #import "LogFile.h"
 #import "Utilities.h"
 #import "StartCacheWarmer.h"

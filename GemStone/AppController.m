@@ -13,7 +13,7 @@
 #import "DownloadVersion.h"
 #import "DownloadVersionList.h"
 #import "GSList.h"
-#import "Helper.h"
+#import "HelperXPC.h"
 #import "LogFile.h"
 #import "StartNetLDI.h"
 #import "StartStone.h"
@@ -706,11 +706,6 @@
 
 - (void)updateHelperToolStatus;
 {
-    Helper *oldHelper = [Helper new];
-    if ([oldHelper isCurrent]) {
-        [oldHelper remove];
-    }
-    
 	BOOL isCurrent = [helperXPC isCurrent];
     
 	[helperToolMessage setHidden:!isCurrent];

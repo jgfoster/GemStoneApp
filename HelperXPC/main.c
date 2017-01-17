@@ -14,6 +14,8 @@
 // #import "Utilities.h"
 
 /*
+ 
+ 
 int respondToRequests() {
     int listener_fd = get_listener_fd();
     if (listener_fd == -1) return 1;
@@ -125,6 +127,12 @@ int main(int argc, const char * argv[]) {
            LOG_NOTICE,
            "GemStoneHelper: uid = %d, euid = %d, pid = %d\n",
            getuid(), geteuid(), getpid());
+
+    
+    unlink("/Library/LaunchDaemons/com.GemTalk.GemStone.Helper.plist");
+    unlink("/Library/PrivilegedHelperTools/com.GemTalk.GemStone.Helper");
+
+    
     xpc_connection_t service = xpc_connection_create_mach_service(
                                                                   "com.GemTalk.GemStone.Helper",
                                                                   dispatch_get_main_queue(),

@@ -3,18 +3,16 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>com.GemTalk.GemStone.HelperXPC</string>
+	<string>com.GemTalk.GemStoneHelper</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>HelperXPC</string>
+	<string>GemStoneHelper</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
-	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2017 GemTalk Systems LLC. All rights reserved.</string>
 	<key>SMAuthorizedClients</key>
 	<array>
-		<string>identifier com.GemTalk.GemStone and certificate leaf[subject.CN] = &quot;Developer ID Application: GemTalk Systems LLC (72G58AHU7P)&quot;</string>
+		<string>identifier &quot;com.GemTalk.GemStoneApp&quot; and anchor apple generic and certificate leaf[subject.CN] = &quot;Mac Developer: James Foster (5HVEZ5GM35)&quot; and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 	</array>
 </dict>
 </plist>

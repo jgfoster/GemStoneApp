@@ -21,7 +21,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>249</string>
+	<string>265</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.developer-tools</string>
 	<key>LSMinimumSystemVersion</key>
@@ -34,10 +34,8 @@
 	<string>NSApplication</string>
 	<key>SMPrivilegedExecutables</key>
 	<dict>
-		<key>com.GemTalk.GemStone.Helper</key>
-		<string>identifier com.GemTalk.GemStone.Helper and certificate leaf[subject.CN] = &quot;Developer ID Application: GemTalk Systems LLC (72G58AHU7P)&quot;</string>
-		<key>com.GemTalk.GemStone.HelperXPC</key>
-		<string>identifier com.GemTalk.GemStone.HelperXPC and certificate leaf[subject.CN] = &quot;Developer ID Application: GemTalk Systems LLC (72G58AHU7P)&quot;</string>
+		<key>com.GemTalk.GemStoneHelper</key>
+		<string>identifier "com.GemTalk" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: James Foster (5HVEZ5GM35)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 	</dict>
 </dict>
 </plist>
