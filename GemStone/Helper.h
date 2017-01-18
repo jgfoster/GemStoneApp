@@ -1,5 +1,5 @@
 //
-//  HelperXPC.h
+//  Helper.h
 //  GemStone
 //
 //  Created by James Foster on 15-Jan-2017.
@@ -8,9 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
-@interface HelperXPC : NSObject
+@interface Helper : NSObject {
+    xpc_connection_t connection;
+}
 - (void)ensureSharedMemory;
 - (void)install;
 - (BOOL)isCurrent;
 - (void)remove;
+- (void)terminate;
 @end

@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "Database.h"
-#import "HelperXPC.h"
+#import "Helper.h"
 #import "Task.h"
 #import "UnzipVersion.h"
 #import "Version.h"
@@ -47,7 +47,7 @@
 	IBOutlet NSButton				*taskCloseWhenDoneButton;
 	IBOutlet NSButton				*taskCancelButton;
 
-    HelperXPC               *helperXPC;
+    Helper                  *helper;
 	NSManagedObjectContext	*managedObjectContext;
 	NSManagedObject			*mySetup;	//	'setup' is too common for searches!
 	NSMutableDictionary		*statmonitors;

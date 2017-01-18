@@ -13,7 +13,7 @@
 #import "DownloadVersion.h"
 #import "DownloadVersionList.h"
 #import "GSList.h"
-#import "HelperXPC.h"
+#import "Helper.h"
 #import "LogFile.h"
 #import "StartNetLDI.h"
 #import "StartStone.h"
@@ -54,7 +54,7 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
 {
-    helperXPC = [HelperXPC new];
+    helper = [Helper new];
 	[self updateHelperToolStatus];
 	[taskProgressText setFont:[NSFont fontWithName:@"Monaco" size:9]];
 	[statmonFileSelectedController setContent:[NSNumber numberWithBool:NO]];
@@ -108,6 +108,7 @@
 	}
 
 	[self saveData];
+    [helper terminate];
 }
 
 - (IBAction)cancelTask:(id)sender;
@@ -222,7 +223,7 @@
 
 - (void)ensureSharedMemory;
 {
-	[helperXPC ensureSharedMemory];
+	[helper ensureSharedMemory];
 }
 
 - (BOOL)exceptionHandler:(NSExceptionHandler *)sender shouldLogException:(NSException *)exception mask:(NSUInteger)aMask;
@@ -280,8 +281,7 @@
 
 - (IBAction)installHelperTool:(id)sender
 {
-	[helperXPC install];
-	[self updateHelperToolStatus];
+	[helper install];
 }
 
 - (void)loadRequestForDatabase;
@@ -436,7 +436,7 @@
 
 - (IBAction)removeHelperTool:(id)sender;
 {
-	[helperXPC remove];
+	[helper remove];
 	[self updateHelperToolStatus];
 }
 
@@ -706,7 +706,7 @@
 
 - (void)updateHelperToolStatus;
 {
-	BOOL isCurrent = [helperXPC isCurrent];
+	BOOL isCurrent = [helper isCurrent];
     
 	[helperToolMessage setHidden:!isCurrent];
 	[authenticateButton setEnabled:!isCurrent];

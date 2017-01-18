@@ -11,7 +11,7 @@
 #include <syslog.h>
 #include <xpc/xpc.h>
 
-// #import "Utilities.h"
+#import "HelperTool.h"
 
 /*
  
@@ -39,7 +39,7 @@ int respondToRequests() {
                 break;
             }
 			case Helper_Remove: {
-				int error = unlink(kHelperPlistPath);
+				int error = unlink(kHelperPlistPath); 
 				if (0 == error) {
 					error = unlink(kHelperToolPath);
 				}
@@ -86,66 +86,70 @@ int respondToRequests() {
 }
  */
 
-static void __XPC_Peer_Event_Handler(xpc_connection_t connection, xpc_object_t event) {
-    syslog(LOG_NOTICE, "Received event in helper.");
+static void xpcEventDictionary(xpc_connection_t connection, xpc_object_t dictionary) {
+    syslog(LOG_NOTICE, "Received dictionary (%lu) for connection (%lu)", (unsigned long) dictionary, (unsigned long) connection);
+
+    enum gs_helper request = (int) xpc_dictionary_get_uint64(dictionary, "request");
+    syslog(LOG_NOTICE, "request = %d", request);
     
-    xpc_type_t type = xpc_get_type(event);
-    
-    if (type == XPC_TYPE_ERROR) {
-        if (event == XPC_ERROR_CONNECTION_INVALID) {
-            // The client process on the other end of the connection has either
-            // crashed or cancelled the connection. After receiving this error,
-            // the connection is in an invalid state, and you do not need to
-            // call xpc_connection_cancel(). Just tear down any associated state
-            // here.
-            
-        } else if (event == XPC_ERROR_TERMINATION_IMMINENT) {
-            // Handle per-connection termination cleanup.
-        }
+    xpc_object_t reply = xpc_dictionary_create_reply(dictionary);
+    xpc_dictionary_set_uint64(reply, "pid", (unsigned long) getpid());
+    xpc_dictionary_set_string(reply, "version", kShortVersionString);
+
+    const char *version = xpc_dictionary_get_string(reply, "version");
+    unsigned long pid = xpc_dictionary_get_uint64(reply, "pid");
+    syslog(LOG_NOTICE, "helper pid = %lu, version = %s", pid, version);
+
+    xpc_connection_send_message(connection, reply);
+    xpc_release(reply);
+}
+
+static void xpcEventError(xpc_connection_t connection, xpc_object_t error) {
+    syslog(LOG_NOTICE, "Received error (%lu) for connection (%lu)", (unsigned long) error, (unsigned long) connection);
+
+    if (error == XPC_ERROR_CONNECTION_INVALID) {
+        // The client process on the other end of the connection has either
+        // crashed or cancelled the connection. After receiving this error,
+        // the connection is in an invalid state, and you do not need to
+        // call xpc_connection_cancel(). Just tear down any associated state
+        // here.
         
-    } else {
-        xpc_connection_t remote = xpc_dictionary_get_remote_connection(event);
-        
-        xpc_object_t reply = xpc_dictionary_create_reply(event);
-        xpc_dictionary_set_string(reply, "reply", "Hi there, host application!");
-        xpc_connection_send_message(remote, reply);
-        xpc_release(reply);
+    } else if (error == XPC_ERROR_TERMINATION_IMMINENT) {
+        // Handle per-connection termination cleanup.
     }
 }
 
-static void __XPC_Connection_Handler(xpc_connection_t connection)  {
-    syslog(LOG_NOTICE, "Configuring message event handler for helper.");
-    xpc_connection_set_event_handler(
-                                     connection,
-                                     ^(xpc_object_t event) {__XPC_Peer_Event_Handler(connection, event);}
-                                    );
+static void xpcEvent(xpc_connection_t connection, xpc_object_t event) {
+    
+    xpc_type_t type = xpc_get_type(event);
+    
+    if (type == XPC_TYPE_ERROR) return xpcEventError(connection, event);
+    if (type == XPC_TYPE_DICTIONARY) return xpcEventDictionary(connection, event);
+    syslog(LOG_NOTICE,
+           "Received unknown event (%lu) type (%lu) for connection (%lu)",
+           (unsigned long) event, (unsigned long) type, (unsigned long) connection);
+}
+
+static void xpcConnection(xpc_connection_t connection)  {
+    syslog(LOG_NOTICE, "Configuring event handler for connection (%lu)", (unsigned long)connection);
+    xpc_connection_set_event_handler(connection,
+                                     ^(xpc_object_t event) {xpcEvent(connection, event);} );
     xpc_connection_resume(connection);
 }
 
 int main(int argc, const char * argv[]) {
-    syslog(
-           LOG_NOTICE,
-           "GemStoneHelper: uid = %d, euid = %d, pid = %d\n",
-           getuid(), geteuid(), getpid());
+    syslog(LOG_NOTICE, "main(): uid = %d, euid = %d, pid = %d", getuid(), geteuid(), getpid());
 
-    
-    unlink("/Library/LaunchDaemons/com.GemTalk.GemStone.Helper.plist");
-    unlink("/Library/PrivilegedHelperTools/com.GemTalk.GemStone.Helper");
-
-    
-    xpc_connection_t service = xpc_connection_create_mach_service(
-                                                                  "com.GemTalk.GemStoneHelper",
+    xpc_connection_t service = xpc_connection_create_mach_service(kHelperIdentifier,
                                                                   dispatch_get_main_queue(),
                                                                   XPC_CONNECTION_MACH_SERVICE_LISTENER);
     if (!service) {
         syslog(LOG_NOTICE, "Failed to create service.");
         exit(EXIT_FAILURE);
     }
-    syslog(LOG_NOTICE, "Configuring connection event handler for helper");
-    xpc_connection_set_event_handler(
-                                     service,
-                                     ^(xpc_object_t connection) {__XPC_Connection_Handler(connection);}
-                                     );
+    syslog(LOG_NOTICE, "Configuring event handler for service (%lu)", (unsigned long)service);
+    xpc_connection_set_event_handler(service,
+                                     ^(xpc_object_t connection) {xpcConnection(connection);} );
     xpc_connection_resume(service);
     dispatch_main();        // never returns!
 }
