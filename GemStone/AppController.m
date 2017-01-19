@@ -73,19 +73,8 @@
 	[self performSelector:@selector(checkForSetupRequired)			withObject:nil afterDelay:0.10];
 }
 
-- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender;
-{
-	for (id database in [databaseListController arrangedObjects]) {
-		if ([database isRunning]) {
-			NSAlert *alert = [[NSAlert alloc] init];
-			[alert setMessageText:@"Database(s) are running!"];
-			[alert setInformativeText:@"Please stop all databases before quitting application!"];
-			[alert addButtonWithTitle:@"Dismiss"];
-			[alert runModal];
-			return NSTerminateCancel;
-		}
-	}
-	return NSTerminateNow;
+- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication {
+    return YES;
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification;
@@ -813,6 +802,48 @@
 - (IBAction)versionUnzipRequest:(id)sender;
 {
 	[[UnzipVersion new] unzip];
+}
+
+- (BOOL)windowShouldClose:(NSWindow *)window;
+{
+    BOOL shouldWait = NO;
+    for (id database in [databaseListController arrangedObjects]) {
+        if ([database isRunning]) {
+            NSAlert *alert = [[NSAlert alloc] init];
+            [alert addButtonWithTitle:@"Yes"];
+            [alert addButtonWithTitle:@"No"];
+            [alert addButtonWithTitle:@"Cancel"];
+            [alert setMessageText:[NSString stringWithFormat:@"Stop %@?", [database name]]];
+            [alert setInformativeText:@"Databases can continue to run without GemStone.app."];
+            switch ( [alert runModal] ) {
+                case NSAlertFirstButtonReturn:  // YES
+                    [database stopDatabase];
+                    shouldWait = YES;
+                    break;
+                    
+                case NSAlertThirdButtonReturn:  // Cancel
+                    return NO;
+                    break;
+                    
+                default:
+                    break;
+            };
+        }
+    }
+    if (shouldWait) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^(void){
+            //Background Thread
+            while (0 < [operations operationCount]) {
+                [NSThread sleepForTimeInterval:0.1f];
+            }
+            [NSThread sleepForTimeInterval:2.0f];
+            dispatch_async(dispatch_get_main_queue(), ^(void){
+                [window close];
+            });
+        });
+        return NO;
+    }
+    return YES;
 }
 
 @end

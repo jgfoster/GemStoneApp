@@ -716,7 +716,7 @@
             <windowStyleMask key="styleMask" titled="YES" utility="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="139" y="81" width="550" height="400"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="800"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
             <view key="contentView" id="13269">
                 <rect key="frame" x="0.0" y="0.0" width="550" height="400"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -773,7 +773,7 @@
             <windowStyleMask key="styleMask" documentModal="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="139" y="81" width="550" height="300"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="800"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
             <view key="contentView" id="1315">
                 <rect key="frame" x="0.0" y="0.0" width="550" height="300"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -850,9 +850,9 @@ Gw
             </view>
         </window>
         <window title="GemStone/S 64 Bit " allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" showsToolbarButton="NO" animationBehavior="default" id="534" userLabel="Main Window">
-            <windowStyleMask key="styleMask" titled="YES" miniaturizable="YES"/>
+            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
             <rect key="contentRect" x="163" y="199" width="640" height="483"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="800"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
             <view key="contentView" id="535">
                 <rect key="frame" x="0.0" y="0.0" width="640" height="483"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -3114,6 +3114,9 @@ Gw
                     <constraint firstAttribute="trailing" secondItem="1732" secondAttribute="trailing" constant="20" symbolic="YES" id="mOG-tE-frg"/>
                 </constraints>
             </view>
+            <connections>
+                <outlet property="delegate" destination="537" id="m3b-ar-xJo"/>
+            </connections>
         </window>
         <userDefaultsController representsSharedInstance="YES" id="1500"/>
     </objects>

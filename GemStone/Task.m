@@ -53,6 +53,7 @@
 - (void)done;
 {
 	[self removeReadCompletionNotifications];
+    NSLog(@"done %@", NSStringFromClass([self class]));
 }
 
 - (void)doneWithError:(int)statusCode;
@@ -189,6 +190,7 @@
 
 - (void)startTask;
 {
+    NSLog(@"starting %@", NSStringFromClass([self class]));
 	task = [NSTask new];
 	[task setCurrentDirectoryPath:[self currentDirectoryPath]];
 	[task setLaunchPath:[self launchPath]];
