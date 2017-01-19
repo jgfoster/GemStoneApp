@@ -55,7 +55,6 @@
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
 {
     helper = [Helper new];
-	[self updateHelperToolStatus];
 	[taskProgressText setFont:[NSFont fontWithName:@"Monaco" size:9]];
 	[statmonFileSelectedController setContent:[NSNumber numberWithBool:NO]];
 	[repositoryConversionCheckbox setState:NSOffState];
@@ -437,7 +436,6 @@
 - (IBAction)removeHelperTool:(id)sender;
 {
 	[helper remove];
-	[self updateHelperToolStatus];
 }
 
 - (void)removeVersionDone;
@@ -539,7 +537,7 @@
 
 - (IBAction)showHelperToolInfo:(id)sender;
 {
-	NSString *string = @"Each running GemStone/S 64 Bit database requires a local \"Shared Page Cache (SPC)\" that can be accessed by related processes.\n\nIn order to allocate this shared memory, certain kernel settings need be be adjusted. This can be done manually in a Terminal as follows:\n$ sudo sysctl -w kern.sysv.shmall=614400\n$ sudo sysctl -w kern.sysv.shmmax=2516582400\nAlternatively, we can install a \"helper tool\" that is managed by launchd and updates the kernel settings (if necessary) when starting a local database.\n\nIf you click the \"Authenticate\" button and provide authentication as an administrative user then we will use the SMJobBless() function to install\n\t'/Library/LaunchDaemons/com.GemTalk.GemStone.plist'\nand the tool as\n\t'/Library/PrivilegedHelperTools/com.GemTalk.GemStone.Helper'.\n\nIf you have manually configured the kernel settings (as above) then this should not be necessary. Also, if your only use of this application is to access databases running on another host, then you don't need to install the helper tool.\n\nIn any case, you may skip this step for now and we will ask for permission if the tool is needed.";
+	NSString *string = @"Each running GemStone/S 64 Bit database requires a local \"Shared Page Cache (SPC)\" that can be accessed by related processes.\n\nIn order to allocate this shared memory, certain kernel settings need be be adjusted. This can be done manually in a Terminal as follows:\n$ sudo sysctl -w kern.sysv.shmall=614400\n$ sudo sysctl -w kern.sysv.shmmax=2516582400\nAlternatively, we can install a \"helper tool\" that is managed by launchd and updates the kernel settings (if necessary) when starting a local database.\n\nIf you click the \"Authenticate\" button and provide authentication as an administrative user then we will use the SMJobBless() function to install\n\t'/Library/LaunchDaemons/com.GemTalk.GemStone.Helper.plist'\nand the tool as\n\t'/Library/PrivilegedHelperTools/com.GemTalk.GemStone.Helper'.\n\nIf you have manually configured the kernel settings (as above) then this should not be necessary. Also, if your only use of this application is to access databases running on another host, then you don't need to install the helper tool.\n\nIn any case, you may skip this step for now and we will ask for permission if the tool is needed.";
 	[infoPanelTextView setString:string];
     [[NSApp mainWindow]beginSheet:infoPanel completionHandler:^(NSModalResponse returnCode) {
         return;
@@ -706,12 +704,11 @@
 
 - (void)updateHelperToolStatus;
 {
-	BOOL isCurrent = [helper isCurrent];
-    
-	[helperToolMessage setHidden:!isCurrent];
-	[authenticateButton setEnabled:!isCurrent];
-	[removeButton setEnabled:isCurrent];
-	if (!isCurrent) {
+	BOOL isAvailable = [helper isAvailable];
+	[helperToolMessage setHidden:!isAvailable];
+	[authenticateButton setEnabled:!isAvailable];
+	[removeButton setEnabled:isAvailable];
+	if (!isAvailable) {
 		//	if helper tool needs to be installed, then ensure that Setup tab is selected
 		[topTabView selectFirstTabViewItem:nil];
 	}

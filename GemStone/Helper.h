@@ -9,11 +9,13 @@
 #import <Foundation/Foundation.h>
 
 @interface Helper : NSObject {
-    xpc_connection_t connection;
+    xpc_connection_t    connection;
 }
+
+@property (readonly)	BOOL	isAvailable;
+
 - (void)ensureSharedMemory;
 - (void)install;
-- (BOOL)isCurrent;
 - (void)remove;
 - (void)terminate;
 @end

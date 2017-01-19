@@ -13,11 +13,12 @@
 #define kHelperToolPath   "/Library/PrivilegedHelperTools/com.GemTalk.GemStone.Helper"
 #define kHelperIdentifier "com.GemTalk.GemStone.Helper"
 
-#define kShortVersionString "1.3.3.10"
+#define kShortVersionString "1.3.3.20"
 
-enum gs_helper {
+typedef enum {
     GS_HELPER_STATUS = 0,
+    GS_HELPER_REMOVE,
     
-};
+} gs_helper_t;
 
 #endif /* HelperTool_h */

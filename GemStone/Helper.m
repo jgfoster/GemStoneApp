@@ -15,6 +15,7 @@
 
 @implementation Helper
 
+
 //	allow use of max available memory
 - (void)ensureSharedMemory;
 {
@@ -30,7 +31,7 @@
 	if (shmallNow < shmallNeeded ) {
 		if (![self isCurrent]) {
 			[self install];
-			[appController updateHelperToolStatus];
+			[self updateHelperToolStatus];
 		}
 		initMessage(messageOut, Helper_shmall);
 		messageOut.data.ul = shmallNeeded;
@@ -46,7 +47,7 @@
 	if (shmmaxNow < shmmaxNeeded) {
 		if (![self isCurrent]) {
 			[self install];
-			[appController updateHelperToolStatus];
+			[self updateHelperToolStatus];
 		}
 		initMessage(messageOut, Helper_shmmax);
 		messageOut.data.ul = shmmaxNeeded;
@@ -64,8 +65,9 @@
 - (id)init;
 {
     if (self = [super init]) {
-        [self xpcInit];
         [self verifyVersionString];
+        _isAvailable = NO;
+        [self xpcInit];
     }
     return self;
 }
@@ -100,47 +102,10 @@
     }
 }
 
-- (BOOL)isCurrent;
-{
-    
-
-    if (TRUE) return false;
-/*
-	struct HelperMessage messageOut, messageIn;
-    initMessage(messageOut, Helper_Version)
-    if (sendMessageXPC(&messageOut, &messageIn)) {
-		return NO;
-	}
-    return messageIn.command == kHelperMessageVersion
-		&&  messageIn.data.bytes[0] == kVersionPart1
-		&&  messageIn.data.bytes[1] == kVersionPart2
-		&&  messageIn.data.bytes[2] == kVersionPart3;
- */
-}
-
-// returns 0 for success, 1 for error
-/*
-int sendMessageXPC(const struct HelperMessage * messageOut, struct HelperMessage * messageIn)
-{
-    AppError(@"Not yet implemented!");
-    return 0;
-}
- */
-
 - (void)remove;
 {
-/*
-	struct HelperMessage messageOut, messageIn;
-    initMessage(messageOut, Helper_Remove)
-    if (sendMessageXPC(&messageOut, &messageIn)) {
-		AppError(@"Error sending message to remove helper!");
-	}
-	if (messageIn.data.i) {
-		// see usr/include/sys/errno.h for errors, such as
-		// ENOENT		2		// No such file or directory
-		AppError(@"Helper remove attempt got errno = %i", messageIn.data.i);
-	}
- */
+    _isAvailable = NO;
+    [self xpcRequest:GS_HELPER_REMOVE];
 }
 
 - (void)terminate;
@@ -148,6 +113,11 @@ int sendMessageXPC(const struct HelperMessage * messageOut, struct HelperMessage
     xpc_connection_cancel(connection);
     connection = nil;
     
+}
+
+- (void)updateHelperToolStatus;
+{
+	[appController performSelectorOnMainThread:@selector(updateHelperToolStatus) withObject:nil waitUntilDone:NO];
 }
 
 - (void)verifyVersionString;
@@ -160,56 +130,65 @@ int sendMessageXPC(const struct HelperMessage * messageOut, struct HelperMessage
 
 - (void)xpcEvent:(xpc_object_t)event;
 {
-    if (!connection) return;
     xpc_type_t type = xpc_get_type(event);
     
-    if (type == XPC_TYPE_ERROR) return [self xpcEventError:event];
-    if (type == XPC_TYPE_DICTIONARY) return [self xpcEventDictionary:event];
+	if (type == XPC_TYPE_ERROR) {
+		return [self xpcEventError:event];
+	}
+	if (type == XPC_TYPE_DICTIONARY) {
+		return [self xpcEventDictionary:event];
+	}
     NSLog(@"Unexpected XPC event.");
 }
 
 - (void)xpcEventDictionary:(xpc_object_t)dictionary;
 {
-    const char *version = xpc_dictionary_get_string(dictionary, "version");
-    unsigned long pid = xpc_dictionary_get_uint64(dictionary, "pid");
-    NSLog(@"helper pid = %lu, version = %s", pid, version);
+//	NSLog(@"Got XPC dictionary (%lu) on connection (%lu).", (unsigned long)dictionary, (unsigned long) connection);
+    NSString *bundleVersionString = NSBundle.mainBundle.infoDictionary[@"CFBundleShortVersionString"];
+    const char *helperVersionString = xpc_dictionary_get_string(dictionary, "version");
+    _isAvailable = helperVersionString && [bundleVersionString isEqualToString:@(helperVersionString)];
+    [self updateHelperToolStatus];
 }
 
 - (void)xpcEventError:(xpc_object_t)error;
 {
-    
     if (error == XPC_ERROR_CONNECTION_INTERRUPTED) {
-        NSLog(@"XPC connection interupted.");
-        
-    } else if (error == XPC_ERROR_CONNECTION_INVALID) {
-        NSLog(@"XPC connection invalid, releasing.");
-        connection = nil;
-        [appController updateHelperToolStatus];
-        
-    } else {
-        NSLog(@"Unexpected XPC error.");
-    }
+//      NSLog(@"XPC connection interupted.");
+		
+	} else if (error == XPC_ERROR_CONNECTION_INVALID) {
+//		NSLog(@"XPC connection invalid, releasing.");
+		connection = nil;
+		_isAvailable = NO;
+		[self updateHelperToolStatus];
+		
+	} else {
+		NSLog(@"Unexpected XPC error (%lu).", (unsigned long) error);
+	}
 }
 
 - (void)xpcInit;
 {
-    xpc_connection_t myConnection;
-    myConnection = xpc_connection_create_mach_service(
-                                                    kHelperIdentifier,
+    connection = xpc_connection_create_mach_service(kHelperIdentifier,
                                                     NULL,
                                                     XPC_CONNECTION_MACH_SERVICE_PRIVILEGED);
-    if (!myConnection) {
+    if (!connection) {
         AppError(@"Failed to create XPC connection.");
     }
-    connection = myConnection;
-    xpc_connection_set_event_handler(myConnection, ^(xpc_object_t event) { [self xpcEvent:event]; });
-    xpc_connection_resume(myConnection);
+    xpc_connection_set_event_handler(connection, ^(xpc_object_t event) { [self xpcEvent:event]; });
+    xpc_connection_resume(connection);
+    [self xpcRequest:GS_HELPER_STATUS];
+	[self updateHelperToolStatus];		// if no helper tool, then we don't get a response to the request!
+}
+
+- (void)xpcRequest:(gs_helper_t) request;
+{
     xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
-    xpc_dictionary_set_uint64(message, "request", GS_HELPER_STATUS);
-    xpc_connection_send_message_with_reply(myConnection,
+    xpc_dictionary_set_uint64(message, "request", request);
+    xpc_connection_send_message_with_reply(connection,
                                            message,
                                            dispatch_get_main_queue(),
                                            ^(xpc_object_t event) { [self xpcEvent:event]; });
+//	NSLog(@"Sent XPC request (%i) on connection (%lu).", request, (unsigned long) connection);
 }
 
 @end
