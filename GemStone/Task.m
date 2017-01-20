@@ -58,6 +58,7 @@
 
 - (void)doneWithError:(int)statusCode;
 {
+	NSLog(@"done %@ with error (%i)", NSStringFromClass([self class]), statusCode);
 	if (statusCode) {
 		if (![errorOutput length]) {
 			errorOutput = [NSMutableString stringWithFormat:@"Task returned status code %i", statusCode];
