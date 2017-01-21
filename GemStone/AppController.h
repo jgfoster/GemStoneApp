@@ -14,9 +14,15 @@
 #import "Version.h"
 
 @interface AppController : NSObject <NSTabViewDelegate> {
+	//	Setup Tab
+	IBOutlet NSTabViewItem			*setupTabViewItem;
 	IBOutlet NSTextField			*helperToolMessage;
 	IBOutlet NSButton				*authenticateButton;
+	IBOutlet NSTextField			*currentShmall;
+	IBOutlet NSTextField			*currentShmmax;
+	//	Versions Tab
 	IBOutlet NSTextField			*lastUpdateDateField;
+	//	Databases Tab
 	IBOutlet NSArrayController		*databaseListController;
 	IBOutlet NSTableView			*databaseTableView;
 	IBOutlet NSTextView				*infoPanelTextView;
@@ -89,7 +95,7 @@
 - (void)taskFinishedAfterDelay;
 - (void)taskProgress:(NSString *)aString;
 - (void)updateDatabaseList:(id)sender;
-- (void)updateHelperToolStatus;
+- (void)updateSetupState;
 - (NSArray *)versionList;
 - (IBAction)versionListDownloadRequest:(id)sender;
 - (void)versionUnzipDone:(UnzipVersion *)unzipTask;

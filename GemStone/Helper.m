@@ -19,47 +19,18 @@
 //	allow use of max available memory
 - (void)ensureSharedMemory;
 {
-/*
-    struct HelperMessage messageOut, messageIn;
-	unsigned long	shmmaxNeeded = [[NSProcessInfo processInfo] physicalMemory];
-	unsigned long	shmallNeeded = (shmmaxNeeded + 4095) / 4096;
-	unsigned long	shmallNow = 0;
-	unsigned long	shmmaxNow = 0;
-	size_t			mySize = sizeof(NSUInteger);
-	int				result;
-	result = sysctlbyname("kern.sysv.shmall", &shmallNow, &mySize, NULL, 0);
-	if (shmallNow < shmallNeeded ) {
-		if (![self isCurrent]) {
-			[self install];
-			[self updateHelperToolStatus];
-		}
-		initMessage(messageOut, Helper_shmall);
-		messageOut.data.ul = shmallNeeded;
-		messageOut.dataSize = sizeof(messageOut.data.ul);
-		if (sendMessageXPC(&messageOut, &messageIn)) {
-			NSLog(@"Error sending message to set shmall");
-		}
-		if (messageIn.data.i) {
-			NSLog(@"sysctlbyname() returned errno %i", messageIn.data.i);
-		}
-	}
-	result = sysctlbyname("kern.sysv.shmmax", &shmmaxNow, &mySize, NULL, 0);
-	if (shmmaxNow < shmmaxNeeded) {
-		if (![self isCurrent]) {
-			[self install];
-			[self updateHelperToolStatus];
-		}
-		initMessage(messageOut, Helper_shmmax);
-		messageOut.data.ul = shmmaxNeeded;
-		messageOut.dataSize = sizeof(messageOut.data.ul);
-		if (sendMessageXPC(&messageOut, &messageIn)) {
-			NSLog(@"Error sending message to set shmmax");
-		}
-		if (messageIn.data.i) {
-			NSLog(@"sysctlbyname() returned errno %i", messageIn.data.i);
-		}
-	}
- */
+	unsigned long physicalMemory = [[NSProcessInfo processInfo] physicalMemory];
+	xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
+	NSString *versionString = NSBundle.mainBundle.infoDictionary[@"CFBundleShortVersionString"];
+	xpc_dictionary_set_string(message, "version", [versionString cStringUsingEncoding:NSASCIIStringEncoding]);
+	xpc_dictionary_set_uint64(message, "request", GS_HELPER_MEMORY);
+	xpc_dictionary_set_uint64(message, "shmmax", physicalMemory);
+	xpc_dictionary_set_uint64(message, "shmall", physicalMemory / 4096);
+	xpc_connection_send_message_with_reply(connection,
+										   message,
+										   dispatch_get_main_queue(),
+										   ^(xpc_object_t event) { [self xpcEvent:event]; });
+	NSLog(@"Sent XPC request (%i) on connection (%lu).", GS_HELPER_MEMORY, (unsigned long) connection);
 }
 
 - (id)init;
@@ -115,9 +86,9 @@
     
 }
 
-- (void)updateHelperToolStatus;
+- (void)updateSetupState;
 {
-	[appController performSelectorOnMainThread:@selector(updateHelperToolStatus) withObject:nil waitUntilDone:NO];
+	[appController performSelectorOnMainThread:@selector(updateSetupState) withObject:nil waitUntilDone:NO];
 }
 
 - (void)verifyVersionString;
@@ -147,7 +118,7 @@
     NSString *bundleVersionString = NSBundle.mainBundle.infoDictionary[@"CFBundleShortVersionString"];
     const char *helperVersionString = xpc_dictionary_get_string(dictionary, "version");
     _isAvailable = helperVersionString && [bundleVersionString isEqualToString:@(helperVersionString)];
-    [self updateHelperToolStatus];
+    [self updateSetupState];
 }
 
 - (void)xpcEventError:(xpc_object_t)error;
@@ -159,7 +130,7 @@
 //		NSLog(@"XPC connection invalid, releasing.");
 		connection = nil;
 		_isAvailable = NO;
-		[self updateHelperToolStatus];
+		[self updateSetupState];
 		
 	} else {
 		NSLog(@"Unexpected XPC error (%lu).", (unsigned long) error);
@@ -176,19 +147,21 @@
     }
     xpc_connection_set_event_handler(connection, ^(xpc_object_t event) { [self xpcEvent:event]; });
     xpc_connection_resume(connection);
-    [self xpcRequest:GS_HELPER_STATUS];
-	[self updateHelperToolStatus];		// if no helper tool, then we don't get a response to the request!
+    [self ensureSharedMemory];
+	[self updateSetupState];		// if no helper tool, then we don't get a response to the request!
 }
 
 - (void)xpcRequest:(gs_helper_t) request;
 {
     xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
     xpc_dictionary_set_uint64(message, "request", request);
+	NSString *versionString = NSBundle.mainBundle.infoDictionary[@"CFBundleShortVersionString"];
+	xpc_dictionary_set_string(message, "version", [versionString cStringUsingEncoding:NSASCIIStringEncoding]);
     xpc_connection_send_message_with_reply(connection,
                                            message,
                                            dispatch_get_main_queue(),
                                            ^(xpc_object_t event) { [self xpcEvent:event]; });
-//	NSLog(@"Sent XPC request (%i) on connection (%lu).", request, (unsigned long) connection);
+	NSLog(@"Sent XPC request (%i) on connection (%lu).", request, (unsigned long) connection);
 }
 
 @end

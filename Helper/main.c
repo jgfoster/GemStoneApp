@@ -8,34 +8,23 @@
 //  Based on https://github.com/atnan/SMJobBlessXPC/blob/master/SMJobBlessHelper/SMJobBlessHelper.c
 //
 
+#include <errno.h>
+#include <sys/sysctl.h>
 #include <syslog.h>
 #include <xpc/xpc.h>
 
 #import "HelperTool.h"
 
-/*
-			case Helper_shmall: {
-				unsigned long	shmall = messageIn.data.ul;
-				int				result = sysctlbyname("kern.sysv.shmall", NULL, 0, &shmall, sizeof(shmall));
-				syslog(LOG_NOTICE, "shmall returned %i (errno = %i) when set to %lu", result, errno, shmall);
-				messageOut.data.i = result ? errno : 0;
-				messageOut.dataSize = sizeof(messageOut.data.i);
-				break;
-			}
-			case Helper_shmmax: {
-				unsigned long	shmmax = (unsigned long)messageIn.data.ul;
-				int				result = sysctlbyname("kern.sysv.shmmax", NULL, 0, &shmmax, sizeof(shmmax));
-				syslog(LOG_NOTICE, "shmmax returned %i (errno = %i) when set to %lu", result, errno, shmmax);
-				messageOut.data.i = result ? errno : 0;
-				messageOut.dataSize = sizeof(messageOut.data.i);
-				break;
-			}
- */
-
 static void xpcEventDictionary(xpc_connection_t connection, xpc_object_t dictionary) {
-    int error = 0;
+	const char *appVersion = xpc_dictionary_get_string(dictionary, "version");
+	if (!strncmp(appVersion, kShortVersionString, strlen(kShortVersionString))) {
+		syslog(LOG_NOTICE, "Ignoring request from version %s.", appVersion);
+		xpc_connection_cancel(connection);
+		exit(EXIT_FAILURE);
+	}
+	int error = 0;
     gs_helper_t request = (int) xpc_dictionary_get_uint64(dictionary, "request");
-	syslog(LOG_NOTICE, "Received request (%d) in dictionary (%lu) for connection (%lu)",
+	syslog(LOG_NOTICE, "Received request (%d) in dictionary (%lu) for new connection (%lu)",
            request,
            (unsigned long) dictionary,
            (unsigned long) connection);
@@ -43,6 +32,17 @@ static void xpcEventDictionary(xpc_connection_t connection, xpc_object_t diction
 	xpc_dictionary_set_uint64(reply, "pid", (unsigned long) getpid());
     xpc_dictionary_set_string(reply, "version", kShortVersionString);
     switch (request) {
+		case GS_HELPER_MEMORY: {
+			unsigned long shmall = xpc_dictionary_get_uint64(dictionary, "shmall");
+			unsigned long shmmax = xpc_dictionary_get_uint64(dictionary, "shmmax");
+			error = sysctlbyname("kern.sysv.shmall", NULL, 0, &shmall, sizeof(shmall));
+			syslog(LOG_NOTICE, "shmall returned %i (errno = %i) when set to %lu", error, errno, shmall);
+			if (!error) {
+				error = sysctlbyname("kern.sysv.shmmax", NULL, 0, &shmmax, sizeof(shmmax));
+				syslog(LOG_NOTICE, "shmmax returned %i (errno = %i) when set to %lu", error, errno, shmmax);
+			}
+			break;
+		}
         case GS_HELPER_REMOVE:
             xpc_dictionary_set_value(reply, "version", NULL);
             error = unlink(kHelperPlistPath);
@@ -51,6 +51,7 @@ static void xpcEventDictionary(xpc_connection_t connection, xpc_object_t diction
             }
             break;
 
+		case GS_HELPER_STATUS:	//	status information included for everyone
         default:
             break;
     }

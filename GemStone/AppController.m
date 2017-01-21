@@ -7,6 +7,7 @@
 //
 
 #import <ExceptionHandling/NSExceptionHandler.h>
+#include <sys/sysctl.h>
 
 #import "AppController.h"
 #import "Database.h"
@@ -526,7 +527,24 @@
 
 - (IBAction)showHelperToolInfo:(id)sender;
 {
-	NSString *string = @"Each running GemStone/S 64 Bit database requires a local \"Shared Page Cache (SPC)\" that can be accessed by related processes.\n\nIn order to allocate this shared memory, certain kernel settings need be be adjusted. This can be done manually in a Terminal as follows:\n$ sudo sysctl -w kern.sysv.shmall=614400\n$ sudo sysctl -w kern.sysv.shmmax=2516582400\nAlternatively, we can install a \"helper tool\" that is managed by launchd and updates the kernel settings (if necessary) when starting a local database.\n\nIf you click the \"Authenticate\" button and provide authentication as an administrative user then we will use the SMJobBless() function to install\n\t'/Library/LaunchDaemons/com.GemTalk.GemStone.Helper.plist'\nand the tool as\n\t'/Library/PrivilegedHelperTools/com.GemTalk.GemStone.Helper'.\n\nIf you have manually configured the kernel settings (as above) then this should not be necessary. Also, if your only use of this application is to access databases running on another host, then you don't need to install the helper tool.\n\nIn any case, you may skip this step for now and we will ask for permission if the tool is needed.";
+	NSString *string =
+		@"For GemStone/S 64 Bit to run properly, certain kernel settings may need be be adjusted: \n\n"
+	
+		"kern.sysv.shmmax and kern.sysv.shmall can be configured at boot time by editing \n"
+			"\t'/etc/sysctl.conf' \n"
+		"or set anytime by using 'sysctl' in a Terminal (though these changes will not be persistent). "
+		"If the helper tool is installed we will temporarily set these values to the available RAM.\n\n"
+	
+		"If you click the 'Authenticate' button and provide authentication as an administrative user "
+		"then we will use the SMJobBless() function to install\n"
+			"\t'/Library/LaunchDaemons/com.GemTalk.GemStone.Helper.plist'\n"
+		"and the tool as\n"
+			"\t'/Library/PrivilegedHelperTools/com.GemTalk.GemStone.Helper'.\n"
+		"These can be removed with the Remove button.";
+	/*
+	. If the helper tool is installed, we will set these automatically.\n"
+		This can be done manually in a Terminal as follows:\n$ sudo sysctl -w kern.sysv.shmall=614400\n$ sudo sysctl -w kern.sysv.shmmax=2516582400\nAlternatively, we can install a \"helper tool\" that is managed by launchd and updates the kernel settings (if necessary) when starting a local database.\n\nIf you have manually configured the kernel settings (as above) then this should not be necessary. Also, if your only use of this application is to access databases running on another host, then you don't need to install the helper tool.\n\nIn any case, you may skip this step for now and we will ask for permission if the tool is needed.";
+	 */
 	[infoPanelTextView setString:string];
     [[NSApp mainWindow]beginSheet:infoPanel completionHandler:^(NSModalResponse returnCode) {
         return;
@@ -540,6 +558,10 @@
 
 - (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem;
 {
+	if (tabViewItem == setupTabViewItem) {
+		[self updateSetupState];
+		return;
+	}
 	if (tabViewItem == gsListTabViewItem) {
 		[self updateDatabaseState];
 		return;
@@ -691,7 +713,7 @@
 	[databaseTableView reloadData];
 }
 
-- (void)updateHelperToolStatus;
+- (void)updateSetupState;
 {
 	BOOL isAvailable = [helper isAvailable];
 	[helperToolMessage setHidden:!isAvailable];
@@ -701,6 +723,37 @@
 		//	if helper tool needs to be installed, then ensure that Setup tab is selected
 		[topTabView selectFirstTabViewItem:nil];
 	}
+
+	unsigned long	current = 0;
+
+	size_t			mySize = sizeof(NSUInteger);
+	int				result;
+	NSString		*string;
+	result = sysctlbyname("kern.sysv.shmall", &current, &mySize, NULL, 0);
+	current = current * 4096;
+	if (!(current & 0x3FFFFFFF)) {
+		string = [NSString stringWithFormat:@"%lu GB", current / 0x3FFFFFFF];
+	} else if (!(current & 0xFFFFF)) {
+		string = [NSString stringWithFormat:@"%lu MB", current / 0xFFFFF];
+	} else if (!(current & 0x3FF)) {
+		string = [NSString stringWithFormat:@"%lu KB", current / 0x3FF];
+	} else {
+		string = [NSString stringWithFormat:@"%lu bytes", current];
+	}
+	[currentShmall setStringValue:string];
+	
+	result = sysctlbyname("kern.sysv.shmmax", &current, &mySize, NULL, 0);
+	if (!(current & 0x3FFFFFFF)) {
+		string = [NSString stringWithFormat:@"%lu GB", current / 0x3FFFFFFF];
+	} else if (!(current & 0xFFFFF)) {
+		string = [NSString stringWithFormat:@"%lu MB", current / 0xFFFFF];
+	} else if (!(current & 0x3FF)) {
+		string = [NSString stringWithFormat:@"%lu KB", current / 0x3FF];
+	} else {
+		string = [NSString stringWithFormat:@"%lu bytes", current];
+	}
+	[currentShmmax setStringValue:string];
+
 }
 
 - (NSArray *)versionList;
