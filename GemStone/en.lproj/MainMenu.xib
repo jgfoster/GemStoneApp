@@ -15,6 +15,7 @@
         </customObject>
         <customObject id="537" customClass="AppController">
             <connections>
+                <outlet property="addToEtcHostsButton" destination="xsY-qr-ERw" id="IQY-kQ-elO"/>
                 <outlet property="authenticateButton" destination="578" id="7967"/>
                 <outlet property="currentShmall" destination="YoM-h6-pH1" id="wri-K2-QNa"/>
                 <outlet property="currentShmmax" destination="It5-Ln-3dq" id="A0Q-ew-FHN"/>
@@ -25,8 +26,10 @@
                 <outlet property="deleteTranLogsButton" destination="11307" id="11581"/>
                 <outlet property="gsListTabViewItem" destination="12775" id="12828"/>
                 <outlet property="helperToolMessage" destination="629" id="7968"/>
+                <outlet property="hostname" destination="sOL-nW-3Xc" id="mfL-ko-pKk"/>
                 <outlet property="infoPanel" destination="13268" id="13270"/>
                 <outlet property="infoPanelTextView" destination="13272" id="13301"/>
+                <outlet property="ipAddress" destination="n8V-8k-z0U" id="wZj-xp-Bgc"/>
                 <outlet property="logFileListController" destination="10039" id="10041"/>
                 <outlet property="oldLogFilesText" destination="11090" id="11582"/>
                 <outlet property="oldTranLogsText" destination="11176" id="11583"/>
@@ -716,7 +719,7 @@
             <windowStyleMask key="styleMask" titled="YES" utility="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="139" y="81" width="550" height="400"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="800"/>
             <view key="contentView" id="13269">
                 <rect key="frame" x="0.0" y="0.0" width="550" height="400"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -725,7 +728,7 @@
                         <rect key="frame" x="20" y="61" width="510" height="319"/>
                         <clipView key="contentView" id="VDm-Oe-Tvh">
                             <rect key="frame" x="1" y="1" width="508" height="317"/>
-                            <autoresizingMask key="autoresizingMask"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <textView editable="NO" importsGraphics="NO" richText="NO" findStyle="panel" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="13272">
                                     <rect key="frame" x="0.0" y="0.0" width="508" height="317"/>
@@ -773,7 +776,7 @@
             <windowStyleMask key="styleMask" documentModal="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="139" y="81" width="550" height="300"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="800"/>
             <view key="contentView" id="1315">
                 <rect key="frame" x="0.0" y="0.0" width="550" height="300"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -801,7 +804,7 @@ Gw
                         <rect key="frame" x="20" y="43" width="510" height="237"/>
                         <clipView key="contentView" id="fXO-Bk-rOy">
                             <rect key="frame" x="1" y="1" width="508" height="235"/>
-                            <autoresizingMask key="autoresizingMask"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <textView importsGraphics="NO" findStyle="panel" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="1389">
                                     <rect key="frame" x="0.0" y="0.0" width="508" height="235"/>
@@ -848,11 +851,12 @@ Gw
                     <constraint firstItem="1345" firstAttribute="top" secondItem="1388" secondAttribute="bottom" constant="8" symbolic="YES" id="12865"/>
                 </constraints>
             </view>
+            <point key="canvasLocation" x="149" y="-507"/>
         </window>
         <window title="GemStone/S 64 Bit " allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" showsToolbarButton="NO" animationBehavior="default" id="534" userLabel="Main Window">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
             <rect key="contentRect" x="163" y="199" width="640" height="483"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="800"/>
             <view key="contentView" id="535">
                 <rect key="frame" x="0.0" y="0.0" width="640" height="483"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -957,6 +961,63 @@ Gw
                                                         <rect key="frame" x="291" y="24" width="165" height="17"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Total for machine (shmall):" id="5bE-kS-GLb">
+                                                            <font key="font" metaFont="system"/>
+                                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                </subviews>
+                                            </view>
+                                        </box>
+                                        <box fixedFrame="YES" title="Hostname Lookup (Domain Name Service)" translatesAutoresizingMaskIntoConstraints="NO" id="XO9-sd-A4V">
+                                            <rect key="frame" x="6" y="125" width="582" height="114"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <view key="contentView" id="0Q3-Qc-7Dj">
+                                                <rect key="frame" x="2" y="2" width="578" height="97"/>
+                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                <subviews>
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DWy-d9-pR5">
+                                                        <rect key="frame" x="18" y="60" width="70" height="17"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Hostname:" id="n20-iF-iDf">
+                                                            <font key="font" metaFont="system"/>
+                                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sOL-nW-3Xc">
+                                                        <rect key="frame" x="94" y="55" width="135" height="22"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="BDI-Me-VEG">
+                                                            <font key="font" metaFont="system"/>
+                                                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="n8V-8k-z0U">
+                                                        <rect key="frame" x="314" y="55" width="113" height="22"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="255.255.255.255" drawsBackground="YES" id="9fc-D5-N8M">
+                                                            <font key="font" metaFont="system"/>
+                                                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xsY-qr-ERw">
+                                                        <rect key="frame" x="429" y="49" width="140" height="32"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <buttonCell key="cell" type="push" title="Add to /etc/hosts" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="y03-Tj-IHr">
+                                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                            <font key="font" metaFont="system"/>
+                                                        </buttonCell>
+                                                        <connections>
+                                                            <action selector="addToEtcHosts:" target="537" id="LcX-4K-i6a"/>
+                                                        </connections>
+                                                    </button>
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Wjw-aV-VS8">
+                                                        <rect key="frame" x="235" y="58" width="73" height="17"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="IP Address:" id="3a2-Bj-UcJ">
                                                             <font key="font" metaFont="system"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -1075,7 +1136,7 @@ Gw
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <clipView key="contentView" ambiguous="YES" id="Ltp-6P-yYt">
                                                 <rect key="frame" x="1" y="0.0" width="298" height="388"/>
-                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                <autoresizingMask key="autoresizingMask"/>
                                                 <subviews>
                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" headerView="6Hx-XL-Vno" id="DCE-ld-kz9" userLabel="Versions Table">
                                                         <rect key="frame" x="0.0" y="0.0" width="298" height="365"/>
@@ -1167,7 +1228,7 @@ Gw
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <clipView key="contentView" ambiguous="YES" id="B1y-Cj-MUF">
                                                 <rect key="frame" x="1" y="0.0" width="519" height="99"/>
-                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                <autoresizingMask key="autoresizingMask"/>
                                                 <subviews>
                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" headerView="8164" id="8162">
                                                         <rect key="frame" x="0.0" y="0.0" width="519" height="76"/>
@@ -2201,7 +2262,7 @@ Gw
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <clipView key="contentView" ambiguous="YES" id="D5p-c6-Gf8">
                                                 <rect key="frame" x="1" y="0.0" width="558" height="399"/>
-                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                <autoresizingMask key="autoresizingMask"/>
                                                 <subviews>
                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" multipleSelection="NO" autosaveColumns="NO" headerView="12781" id="12779">
                                                         <rect key="frame" x="0.0" y="0.0" width="558" height="376"/>
@@ -2378,11 +2439,11 @@ Gw
                                                 </subviews>
                                             </clipView>
                                             <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="12780">
-                                                <rect key="frame" x="1" y="368" width="555" height="16"/>
+                                                <rect key="frame" x="1" y="7" width="0.0" height="16"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                             </scroller>
                                             <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="12782">
-                                                <rect key="frame" x="224" y="17" width="15" height="102"/>
+                                                <rect key="frame" x="-15" y="23" width="16" height="0.0"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                             </scroller>
                                             <tableHeaderView key="headerView" id="12781">
@@ -2403,7 +2464,7 @@ Gw
             <connections>
                 <outlet property="delegate" destination="537" id="m3b-ar-xJo"/>
             </connections>
-            <point key="canvasLocation" x="139" y="-168.5"/>
+            <point key="canvasLocation" x="-498" y="-403.5"/>
         </window>
         <userDefaultsController representsSharedInstance="YES" id="1500"/>
     </objects>

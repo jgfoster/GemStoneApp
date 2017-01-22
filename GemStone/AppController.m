@@ -7,7 +7,6 @@
 //
 
 #import <ExceptionHandling/NSExceptionHandler.h>
-#include <sys/sysctl.h>
 
 #import "AppController.h"
 #import "Database.h"
@@ -51,6 +50,11 @@
 - (void)addOperation:(NSOperation *)anOperation;
 {
 	[operations addOperation:anOperation];
+}
+
+- (IBAction)addToEtcHosts:(id)sender;
+{
+	
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
@@ -724,35 +728,9 @@
 		[topTabView selectFirstTabViewItem:nil];
 	}
 
-	unsigned long	current = 0;
-
-	size_t			mySize = sizeof(NSUInteger);
-	int				result;
-	NSString		*string;
-	result = sysctlbyname("kern.sysv.shmall", &current, &mySize, NULL, 0);
-	current = current * 4096;
-	if (!(current & 0x3FFFFFFF)) {
-		string = [NSString stringWithFormat:@"%lu GB", current / 0x3FFFFFFF];
-	} else if (!(current & 0xFFFFF)) {
-		string = [NSString stringWithFormat:@"%lu MB", current / 0xFFFFF];
-	} else if (!(current & 0x3FF)) {
-		string = [NSString stringWithFormat:@"%lu KB", current / 0x3FF];
-	} else {
-		string = [NSString stringWithFormat:@"%lu bytes", current];
-	}
-	[currentShmall setStringValue:string];
-	
-	result = sysctlbyname("kern.sysv.shmmax", &current, &mySize, NULL, 0);
-	if (!(current & 0x3FFFFFFF)) {
-		string = [NSString stringWithFormat:@"%lu GB", current / 0x3FFFFFFF];
-	} else if (!(current & 0xFFFFF)) {
-		string = [NSString stringWithFormat:@"%lu MB", current / 0xFFFFF];
-	} else if (!(current & 0x3FF)) {
-		string = [NSString stringWithFormat:@"%lu KB", current / 0x3FF];
-	} else {
-		string = [NSString stringWithFormat:@"%lu bytes", current];
-	}
-	[currentShmmax setStringValue:string];
+	[currentShmall setStringValue:[helper shmall]];
+	[currentShmmax setStringValue:[helper shmmax]];
+	[hostname setStringValue:[helper hostName]];
 
 }
 

@@ -17,15 +17,16 @@
 
 static void xpcEventDictionary(xpc_connection_t connection, xpc_object_t dictionary) {
 	const char *appVersion = xpc_dictionary_get_string(dictionary, "version");
-	if (!strncmp(appVersion, kShortVersionString, strlen(kShortVersionString))) {
-		syslog(LOG_NOTICE, "Ignoring request from version %s.", appVersion);
+	if (strncmp(appVersion, kShortVersionString, strlen(kShortVersionString))) {
+		syslog(LOG_NOTICE, "Ignoring request from version '%s' (we are '%s').", appVersion, kShortVersionString);
 		xpc_connection_cancel(connection);
 		exit(EXIT_FAILURE);
 	}
 	int error = 0;
     gs_helper_t request = (int) xpc_dictionary_get_uint64(dictionary, "request");
-	syslog(LOG_NOTICE, "Received request (%d) in dictionary (%lu) for new connection (%lu)",
+	syslog(LOG_NOTICE, "Received request (%d) from appVersion (%s) in dictionary (%lu) for new connection (%lu)",
            request,
+		   appVersion,
            (unsigned long) dictionary,
            (unsigned long) connection);
     xpc_object_t reply = xpc_dictionary_create_reply(dictionary);

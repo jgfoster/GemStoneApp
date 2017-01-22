@@ -20,6 +20,9 @@
 	IBOutlet NSButton				*authenticateButton;
 	IBOutlet NSTextField			*currentShmall;
 	IBOutlet NSTextField			*currentShmmax;
+	IBOutlet NSTextField			*hostname;
+	IBOutlet NSTextField			*ipAddress;
+	IBOutlet NSButton				*addToEtcHostsButton;
 	//	Versions Tab
 	IBOutlet NSTextField			*lastUpdateDateField;
 	//	Databases Tab
@@ -64,6 +67,7 @@
 
 - (IBAction)addDatabase:(id)sender;
 - (void)addOperation:(NSOperation *)anOperation;
+- (IBAction)addToEtcHosts:(id)sender;
 - (IBAction)cancelTask:(id)sender;
 - (IBAction)clickedDataFile:(id)sender;
 - (IBAction)closeInfoPanel:(id)sender;

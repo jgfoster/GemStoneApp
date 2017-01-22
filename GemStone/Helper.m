@@ -9,12 +9,41 @@
 #import "Helper.h"
 #import <ServiceManagement/ServiceManagement.h>
 #import <Security/Authorization.h>
+#include <sys/sysctl.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <arpa/inet.h>
 
 #import "Utilities.h"
 #import "../Helper/HelperTool.h"
 
 @implementation Helper
 
+
+- (void)checkDNS;
+{
+	const char *hostname = [[self hostName] UTF8String];
+	struct addrinfo hints;
+	struct addrinfo *list = nil;
+	memset((void *) &hints, 0, sizeof(hints));
+	hints.ai_flags = AI_ADDRCONFIG | AI_CANONNAME;
+	hints.ai_family = PF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	int result = getaddrinfo(hostname, nil, &hints, &list);
+	if (result) {
+		NSLog(@"getaddrinfo returned %i", result);
+		_ipAddress = nil;
+	} else {
+		struct sockaddr_in *addr;
+		addr = (struct sockaddr_in *)list->ai_addr;
+		const char *address =inet_ntoa((struct in_addr)addr->sin_addr);
+		_ipAddress = [NSString stringWithCString:address encoding:NSASCIIStringEncoding];
+		NSLog(@"inet_ntoa() returned %@",_ipAddress);
+	}
+	freeaddrinfo(list);
+}
 
 //	allow use of max available memory
 - (void)ensureSharedMemory;
@@ -33,11 +62,18 @@
 	NSLog(@"Sent XPC request (%i) on connection (%lu).", GS_HELPER_MEMORY, (unsigned long) connection);
 }
 
+- (NSString*) hostName;
+{
+	return [self systemInfoString:"kern.hostname"];
+}
+
 - (id)init;
 {
     if (self = [super init]) {
         [self verifyVersionString];
+		_ipAddress = nil;
         _isAvailable = NO;
+		[self performSelectorInBackground:@selector(checkDNS) withObject:nil];
         [self xpcInit];
     }
     return self;
@@ -77,6 +113,52 @@
 {
     _isAvailable = NO;
     [self xpcRequest:GS_HELPER_REMOVE];
+}
+
+- (NSString *)shmall;
+{
+	unsigned long	current = 0;
+	size_t			mySize = sizeof(NSUInteger);
+	int				result;
+	result = sysctlbyname("kern.sysv.shmall", &current, &mySize, NULL, 0);
+	return [self shmString:current * 4096];
+}
+
+- (NSString *)shmmax;
+{
+	unsigned long	current = 0;
+	size_t			mySize = sizeof(NSUInteger);
+	int				result;
+	result = sysctlbyname("kern.sysv.shmmax", &current, &mySize, NULL, 0);
+	return [self shmString:current];
+}
+
+- (NSString *)shmString:(unsigned long)current;
+{
+	if (!(current & 0x3FFFFFFF)) {
+		return [NSString stringWithFormat:@"%lu GB", current / 0x3FFFFFFF];
+	} else if (!(current & 0xFFFFF)) {
+		return [NSString stringWithFormat:@"%lu MB", current / 0xFFFFF];
+	} else if (!(current & 0x3FF)) {
+		return [NSString stringWithFormat:@"%lu KB", current / 0x3FF];
+	}
+	return [NSString stringWithFormat:@"%lu bytes", current];;
+}
+
+- (NSString*) systemInfoString:(const char*)attributeName
+{
+	size_t size;
+	sysctlbyname(attributeName, NULL, &size, NULL, 0); // Get the size of the data.
+	char* attributeValue = malloc(size);
+	int err = sysctlbyname(attributeName, attributeValue, &size, NULL, 0);
+	if (err != 0) {
+		NSLog(@"sysctlbyname(%s) failed: %s", attributeName, strerror(errno));
+		free(attributeValue);
+		return nil;
+	}
+	NSString* vs = [NSString stringWithUTF8String:attributeValue];
+	free(attributeValue);
+	return vs;
 }
 
 - (void)terminate;

@@ -12,10 +12,14 @@
     xpc_connection_t    connection;
 }
 
-@property (readonly)	BOOL	isAvailable;
+@property (readonly)	NSString	*ipAddress;
+@property (readonly)	BOOL		isAvailable;
 
 - (void)ensureSharedMemory;
+- (NSString*) hostName;
 - (void)install;
 - (void)remove;
+- (NSString *)shmall;
+- (NSString *)shmmax;
 - (void)terminate;
 @end
