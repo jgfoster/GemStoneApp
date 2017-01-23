@@ -44,6 +44,14 @@ static void xpcEventDictionary(xpc_connection_t connection, xpc_object_t diction
 			}
 			break;
 		}
+			
+		case GS_HELPER_SYSTEM: {
+			const char *command = xpc_dictionary_get_string(dictionary, "command");
+			int error = system(command);
+			syslog(LOG_NOTICE, "%s\nresult = %i", command, error);
+			break;
+		}
+			
         case GS_HELPER_REMOVE:
             xpc_dictionary_set_value(reply, "version", NULL);
             error = unlink(kHelperPlistPath);

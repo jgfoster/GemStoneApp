@@ -21,8 +21,23 @@
 @implementation Helper
 
 
+- (void)addToEtcHosts;
+{
+	xpc_object_t message = [self xpcRequest: GS_HELPER_SYSTEM];
+	NSString *command = [NSString stringWithFormat:@"sed -i '.bak' \"/127\\.0\\.0\\.1/ s/$/ %@/\" /etc/hosts", [self hostName]];
+	xpc_dictionary_set_string(message, "command", [command UTF8String]);
+	[self xpcSendMessage:message];
+}
+
 - (void)checkDNS;
 {
+	[self performSelectorInBackground:@selector(_checkDNS) withObject:nil];
+}
+
+// see also http://stackoverflow.com/questions/11240196/notification-when-wifi-connected-os-x
+- (void)_checkDNS;
+{
+	BOOL oldValue = _hasDNS;
 	const char *hostname = [[self hostName] UTF8String];
 	struct addrinfo hints;
 	struct addrinfo *list = nil;
@@ -34,32 +49,30 @@
 	int result = getaddrinfo(hostname, nil, &hints, &list);
 	if (result) {
 		NSLog(@"getaddrinfo returned %i", result);
+		_hasDNS = NO;
 		_ipAddress = nil;
 	} else {
 		struct sockaddr_in *addr;
 		addr = (struct sockaddr_in *)list->ai_addr;
 		const char *address =inet_ntoa((struct in_addr)addr->sin_addr);
 		_ipAddress = [NSString stringWithCString:address encoding:NSASCIIStringEncoding];
-		NSLog(@"inet_ntoa() returned %@",_ipAddress);
+		NSLog(@"inet_ntoa() returned %s", address);
+		_hasDNS = YES;
 	}
 	freeaddrinfo(list);
+	if (oldValue != _hasDNS) {
+		[self updateSetupState];
+	}
 }
 
 //	allow use of max available memory
 - (void)ensureSharedMemory;
 {
+	xpc_object_t message = [self xpcRequest:GS_HELPER_MEMORY];
 	unsigned long physicalMemory = [[NSProcessInfo processInfo] physicalMemory];
-	xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
-	NSString *versionString = NSBundle.mainBundle.infoDictionary[@"CFBundleShortVersionString"];
-	xpc_dictionary_set_string(message, "version", [versionString cStringUsingEncoding:NSASCIIStringEncoding]);
-	xpc_dictionary_set_uint64(message, "request", GS_HELPER_MEMORY);
 	xpc_dictionary_set_uint64(message, "shmmax", physicalMemory);
 	xpc_dictionary_set_uint64(message, "shmall", physicalMemory / 4096);
-	xpc_connection_send_message_with_reply(connection,
-										   message,
-										   dispatch_get_main_queue(),
-										   ^(xpc_object_t event) { [self xpcEvent:event]; });
-	NSLog(@"Sent XPC request (%i) on connection (%lu).", GS_HELPER_MEMORY, (unsigned long) connection);
+	[self xpcSendMessage:message];
 }
 
 - (NSString*) hostName;
@@ -71,9 +84,10 @@
 {
     if (self = [super init]) {
         [self verifyVersionString];
+		_hasDNS = NO;
 		_ipAddress = nil;
         _isAvailable = NO;
-		[self performSelectorInBackground:@selector(checkDNS) withObject:nil];
+		[self checkDNS];
         [self xpcInit];
     }
     return self;
@@ -102,7 +116,7 @@
      */
     CFErrorRef cfError;
     if (SMJobBless(kSMDomainSystemLaunchd, (__bridge CFStringRef)@kHelperIdentifier, authRef, &cfError)) {
-        NSLog(@"Completed installation of helper tool.");
+        NSLog(@"Completed installation of helper tool (%s).", kShortVersionString);
         [self xpcInit];
     } else {
         AppError(@"Helper tool installation failed: %@", [(__bridge NSError*) cfError localizedDescription]);
@@ -165,7 +179,6 @@
 {
     xpc_connection_cancel(connection);
     connection = nil;
-    
 }
 
 - (void)updateSetupState;
@@ -233,17 +246,23 @@
 	[self updateSetupState];		// if no helper tool, then we don't get a response to the request!
 }
 
-- (void)xpcRequest:(gs_helper_t) request;
+- (xpc_object_t)xpcRequest:(gs_helper_t) request;
 {
-    xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
-    xpc_dictionary_set_uint64(message, "request", request);
+	xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
+	xpc_dictionary_set_uint64(message, "request", request);
 	NSString *versionString = NSBundle.mainBundle.infoDictionary[@"CFBundleShortVersionString"];
 	xpc_dictionary_set_string(message, "version", [versionString cStringUsingEncoding:NSASCIIStringEncoding]);
-    xpc_connection_send_message_with_reply(connection,
-                                           message,
-                                           dispatch_get_main_queue(),
-                                           ^(xpc_object_t event) { [self xpcEvent:event]; });
-	NSLog(@"Sent XPC request (%i) on connection (%lu).", request, (unsigned long) connection);
+	[self xpcSendMessage:message];
+	return message;
+}
+
+- (void)xpcSendMessage:(xpc_object_t) message;
+{
+	xpc_connection_send_message_with_reply(connection,
+										   message,
+										   dispatch_get_main_queue(),
+										   ^(xpc_object_t event) { [self xpcEvent:event]; });
+	NSLog(@"Sent XPC request on connection (%lu).", (unsigned long) connection);
 }
 
 @end

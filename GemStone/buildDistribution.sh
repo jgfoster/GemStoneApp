@@ -9,7 +9,7 @@
 set -x
 
 cd $TARGET_BUILD_DIR/
-rm GemStoneApp.dmg GemStoneApp.sparseimage /Users/$USER/Desktop/GemStoneApp.dmg 2> /dev/null
+rm GemStoneApp.dmg GemStoneApp.sparseimage $PROJECT_DIR/GemStoneApp.dmg 2> /dev/null
 
 if [[ $1 = "clean" ]] ; then
 echo "clean does not require any further activity"
@@ -17,7 +17,7 @@ exit 0
 fi
 
 echo "** Copy disk image template"
-hdiutil convert $PROJECT_DIR/GemStoneApp.dmg -format UDSP -o ./GemStoneApp.sparseimage
+hdiutil convert $PROJECT_DIR/Empty.dmg -format UDSP -o ./GemStoneApp.sparseimage
 rc=$?
 if [[ $rc != 0 ]] ; then
 exit $rc
@@ -43,10 +43,10 @@ rc=$?
 if [[ $rc != 0 ]] ; then
 exit $rc
 fi
-mv GemStoneApp.dmg /Users/$USER/Desktop/GemStoneApp.dmg
+mv GemStoneApp.dmg $PROJECT_DIR/GemStoneApp.dmg
 rc=$?
 if [[ $rc != 0 ]] ; then
 exit $rc
 fi
-echo "** Moving disk image to Desktop"
+echo "** Moving disk image to Project"
 rm ./GemStoneApp.sparseimage

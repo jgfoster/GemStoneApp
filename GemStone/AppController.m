@@ -54,7 +54,7 @@
 
 - (IBAction)addToEtcHosts:(id)sender;
 {
-	
+	[helper addToEtcHosts];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
@@ -544,7 +544,12 @@
 			"\t'/Library/LaunchDaemons/com.GemTalk.GemStone.Helper.plist'\n"
 		"and the tool as\n"
 			"\t'/Library/PrivilegedHelperTools/com.GemTalk.GemStone.Helper'.\n"
-		"These can be removed with the Remove button.";
+		"These can be removed with the Remove button.\n\n"
+	
+		"The local host needs to be reachable on the network. If the IP Address is unknown, then "
+		"you can enable File Sharing in System Preferences or add the hostname to /etc/hosts.\n\n"
+	
+		"";
 	/*
 	. If the helper tool is installed, we will set these automatically.\n"
 		This can be done manually in a Terminal as follows:\n$ sudo sysctl -w kern.sysv.shmall=614400\n$ sudo sysctl -w kern.sysv.shmmax=2516582400\nAlternatively, we can install a \"helper tool\" that is managed by launchd and updates the kernel settings (if necessary) when starting a local database.\n\nIf you have manually configured the kernel settings (as above) then this should not be necessary. Also, if your only use of this application is to access databases running on another host, then you don't need to install the helper tool.\n\nIn any case, you may skip this step for now and we will ask for permission if the tool is needed.";
@@ -564,11 +569,8 @@
 {
 	if (tabViewItem == setupTabViewItem) {
 		[self updateSetupState];
-		return;
-	}
-	if (tabViewItem == gsListTabViewItem) {
+	} else if (tabViewItem == gsListTabViewItem) {
 		[self updateDatabaseState];
-		return;
 	}
 }
 
@@ -719,6 +721,7 @@
 
 - (void)updateSetupState;
 {
+	[helper checkDNS];
 	BOOL isAvailable = [helper isAvailable];
 	[helperToolMessage setHidden:!isAvailable];
 	[authenticateButton setEnabled:!isAvailable];
@@ -731,7 +734,13 @@
 	[currentShmall setStringValue:[helper shmall]];
 	[currentShmmax setStringValue:[helper shmmax]];
 	[hostname setStringValue:[helper hostName]];
-
+	if ([helper hasDNS]) {
+		[ipAddress setStringValue:[helper ipAddress]];
+		[addToEtcHostsButton setEnabled:NO];
+	} else {
+		[ipAddress setStringValue:@"UNKNOWN!"];
+		[addToEtcHostsButton setEnabled:isAvailable];
+	}
 }
 
 - (NSArray *)versionList;

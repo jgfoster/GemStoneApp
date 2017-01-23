@@ -12,9 +12,12 @@
     xpc_connection_t    connection;
 }
 
+@property (readonly)	BOOL		hasDNS;
 @property (readonly)	NSString	*ipAddress;
 @property (readonly)	BOOL		isAvailable;
 
+- (void)addToEtcHosts;
+- (void)checkDNS;
 - (void)ensureSharedMemory;
 - (NSString*) hostName;
 - (void)install;
