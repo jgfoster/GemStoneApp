@@ -56,7 +56,6 @@
 		addr = (struct sockaddr_in *)list->ai_addr;
 		const char *address =inet_ntoa((struct in_addr)addr->sin_addr);
 		_ipAddress = [NSString stringWithCString:address encoding:NSASCIIStringEncoding];
-		NSLog(@"inet_ntoa() returned %s", address);
 		_hasDNS = YES;
 	}
 	freeaddrinfo(list);
@@ -114,9 +113,18 @@
      * is extracted and placed in /Library/LaunchDaemons and then loaded. The
      * executable is placed in /Library/PrivilegedHelperTools.
      */
-    CFErrorRef cfError;
+    CFErrorRef cfError = nil;
+	NSLog(@"existing: %@", [self system:@"/usr/bin/otool -P "
+							"/Library/PrivilegedHelperTools/com.GemTalk.GemStone.Helper | "
+							"grep -A 1 VersionString | tail -1"]);
+	NSLog(@"replacement: %@", [self system:@"/usr/bin/otool -P "
+							   "GemStone.app/Contents/Library/LaunchServices/com.GemTalk.GemStone.Helper | "
+							   "grep -A 1 VersionString | tail -1"]);
     if (SMJobBless(kSMDomainSystemLaunchd, (__bridge CFStringRef)@kHelperIdentifier, authRef, &cfError)) {
-        NSLog(@"Completed installation of helper tool (%s).", kShortVersionString);
+        NSLog(@"SMJobBless(%s,...) returned true; attempting (%s).", kHelperIdentifier, kShortVersionString);
+		NSLog(@"now found: %@", [self system:@"/usr/bin/otool -P "
+								 "/Library/PrivilegedHelperTools/com.GemTalk.GemStone.Helper | "
+								"grep -A 1 VersionString | tail -1"]);
         [self xpcInit];
     } else {
         AppError(@"Helper tool installation failed: %@", [(__bridge NSError*) cfError localizedDescription]);
@@ -126,7 +134,7 @@
 - (void)remove;
 {
     _isAvailable = NO;
-    [self xpcRequest:GS_HELPER_REMOVE];
+	[self xpcSendMessage:[self xpcRequest:GS_HELPER_REMOVE]];
 }
 
 - (NSString *)shmall;
@@ -157,6 +165,24 @@
 		return [NSString stringWithFormat:@"%lu KB", current / 0x3FF];
 	}
 	return [NSString stringWithFormat:@"%lu bytes", current];;
+}
+
+- (NSString *)system:(NSString *)command;
+{
+	NSPipe *inPipe = [NSPipe pipe];
+	NSFileHandle *inFile = inPipe.fileHandleForWriting;
+	NSPipe *outPipe = [NSPipe pipe];
+	NSFileHandle *outFile = outPipe.fileHandleForReading;
+	NSTask *task = [[NSTask alloc] init];
+	task.launchPath = @"/bin/bash";
+	task.standardInput = inPipe;
+	task.standardOutput = outPipe;
+	[task launch];
+	[inFile writeData:[command dataUsingEncoding:NSASCIIStringEncoding]];
+	[inFile closeFile];
+	NSData *data = [outFile readDataToEndOfFile];
+	[outFile closeFile];
+	return [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
 }
 
 - (NSString*) systemInfoString:(const char*)attributeName
@@ -252,7 +278,6 @@
 	xpc_dictionary_set_uint64(message, "request", request);
 	NSString *versionString = NSBundle.mainBundle.infoDictionary[@"CFBundleShortVersionString"];
 	xpc_dictionary_set_string(message, "version", [versionString cStringUsingEncoding:NSASCIIStringEncoding]);
-	[self xpcSendMessage:message];
 	return message;
 }
 
@@ -262,7 +287,9 @@
 										   message,
 										   dispatch_get_main_queue(),
 										   ^(xpc_object_t event) { [self xpcEvent:event]; });
-	NSLog(@"Sent XPC request on connection (%lu).", (unsigned long) connection);
+	NSLog(@"Sent XPC request (%lu) on connection (%lu).",
+		  (unsigned long) xpc_dictionary_get_uint64(message, "request"),
+		  (unsigned long) connection);
 }
 
 @end

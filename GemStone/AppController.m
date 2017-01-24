@@ -219,6 +219,11 @@
 	[helper ensureSharedMemory];
 }
 
+- (BOOL)exceptionHandler:(NSExceptionHandler *)sender shouldHandleException:(NSException *)exception mask:(NSUInteger)aMask;
+{
+	return YES;
+}
+
 - (BOOL)exceptionHandler:(NSExceptionHandler *)sender shouldLogException:(NSException *)exception mask:(NSUInteger)aMask;
 {
 	NSString *string = [NSString stringWithFormat:@"%@\n\nSee Console for details.", [exception reason]];
@@ -568,6 +573,7 @@
 - (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem;
 {
 	if (tabViewItem == setupTabViewItem) {
+		[helper checkDNS];
 		[self updateSetupState];
 	} else if (tabViewItem == gsListTabViewItem) {
 		[self updateDatabaseState];
@@ -710,7 +716,18 @@
 {
 	Database *database = [self mostAdvancedDatabase];
 	if (!database) return;
+	[self performSelectorInBackground:@selector(_updateDatabaseState:) withObject:database];
+}
+
+- (void)_updateDatabaseState:(Database *)database;
+{
 	NSArray *list = [GSList processListUsingDatabase:database];
+	[self performSelectorOnMainThread:@selector(updateDatabaseState:) withObject:list waitUntilDone:NO];
+}
+
+- (void)updateDatabaseState:(NSArray *)list;
+{
+	Database *database;
 	for (database in [databaseListController arrangedObjects]) {
 		[database gsList:list];
 	}
@@ -721,7 +738,6 @@
 
 - (void)updateSetupState;
 {
-	[helper checkDNS];
 	BOOL isAvailable = [helper isAvailable];
 	[helperToolMessage setHidden:!isAvailable];
 	[authenticateButton setEnabled:!isAvailable];
@@ -738,7 +754,7 @@
 		[ipAddress setStringValue:[helper ipAddress]];
 		[addToEtcHostsButton setEnabled:NO];
 	} else {
-		[ipAddress setStringValue:@"UNKNOWN!"];
+		[ipAddress setStringValue:@"-unknown-"];
 		[addToEtcHostsButton setEnabled:isAvailable];
 	}
 }

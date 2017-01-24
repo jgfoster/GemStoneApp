@@ -191,7 +191,7 @@
 
 - (void)startTask;
 {
-    NSLog(@"starting %@", NSStringFromClass([self class]));
+    NSLog(@"starting %@ in %@", [self className], [NSThread currentThread]);
 	task = [NSTask new];
 	[task setCurrentDirectoryPath:[self currentDirectoryPath]];
 	[task setLaunchPath:[self launchPath]];
