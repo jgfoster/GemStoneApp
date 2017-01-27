@@ -11,7 +11,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.4.0</string>
 	<key>CFBundleVersion</key>
-	<string>C2</string>
+	<string>110</string>
 	<key>SMAuthorizedClients</key>
 	<array>
 		<string>identifier "com.GemTalk.GemStone" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: James Foster (5HVEZ5GM35)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
