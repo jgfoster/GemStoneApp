@@ -114,17 +114,7 @@
      * executable is placed in /Library/PrivilegedHelperTools.
      */
     CFErrorRef cfError = nil;
-	NSLog(@"existing: %@", [self system:@"/usr/bin/otool -P "
-							"/Library/PrivilegedHelperTools/com.GemTalk.GemStone.Helper | "
-							"grep -A 1 VersionString | tail -1"]);
-	NSLog(@"replacement: %@", [self system:@"/usr/bin/otool -P "
-							   "GemStone.app/Contents/Library/LaunchServices/com.GemTalk.GemStone.Helper | "
-							   "grep -A 1 VersionString | tail -1"]);
     if (SMJobBless(kSMDomainSystemLaunchd, (__bridge CFStringRef)@kHelperIdentifier, authRef, &cfError)) {
-        NSLog(@"SMJobBless(%s,...) returned true; attempting (%s).", kHelperIdentifier, kShortVersionString);
-		NSLog(@"now found: %@", [self system:@"/usr/bin/otool -P "
-								 "/Library/PrivilegedHelperTools/com.GemTalk.GemStone.Helper | "
-								"grep -A 1 VersionString | tail -1"]);
         [self xpcInit];
     } else {
         AppError(@"Helper tool installation failed: %@", [(__bridge NSError*) cfError localizedDescription]);
@@ -287,9 +277,9 @@
 										   message,
 										   dispatch_get_main_queue(),
 										   ^(xpc_object_t event) { [self xpcEvent:event]; });
-	NSLog(@"Sent XPC request (%lu) on connection (%lu).",
-		  (unsigned long) xpc_dictionary_get_uint64(message, "request"),
-		  (unsigned long) connection);
+//	NSLog(@"Sent XPC request (%lu) on connection (%lu).",
+//		  (unsigned long) xpc_dictionary_get_uint64(message, "request"),
+//		  (unsigned long) connection);
 }
 
 @end

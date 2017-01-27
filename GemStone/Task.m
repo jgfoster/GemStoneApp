@@ -53,12 +53,12 @@
 - (void)done;
 {
 	[self removeReadCompletionNotifications];
-    NSLog(@"done %@", NSStringFromClass([self class]));
+//	NSLog(@"done %@", NSStringFromClass([self class]));
 }
 
 - (void)doneWithError:(int)statusCode;
 {
-	NSLog(@"done %@ with error (%i)", NSStringFromClass([self class]), statusCode);
+//	NSLog(@"done %@ with error (%i)", NSStringFromClass([self class]), statusCode);
 	if (statusCode) {
 		if (![errorOutput length]) {
 			errorOutput = [NSMutableString stringWithFormat:@"Task returned status code %i", statusCode];
@@ -191,7 +191,7 @@
 
 - (void)startTask;
 {
-    NSLog(@"starting %@ in %@", [self className], [NSThread currentThread]);
+//	NSLog(@"starting %@ in %@", [self className], [NSThread currentThread]);
 	task = [NSTask new];
 	[task setCurrentDirectoryPath:[self currentDirectoryPath]];
 	[task setLaunchPath:[self launchPath]];
