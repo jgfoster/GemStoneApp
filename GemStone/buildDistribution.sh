@@ -36,6 +36,7 @@ if [[ $rc != 0 ]] ; then
 exit $rc
 fi
 cd ../
+sleep 1
 hdiutil detach /Volumes/GemStoneApp/
 echo "** Convert disk image"
 hdiutil convert GemStoneApp.sparseimage -format UDBZ -o GemStoneApp.dmg

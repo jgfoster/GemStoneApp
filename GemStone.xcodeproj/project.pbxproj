@@ -408,7 +408,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = E593F5AD1540C1CB00CA44CE /* Build configuration list for PBXNativeTarget "GemStone" */;
 			buildPhases = (
-				E583B371162B54F100C15E49 /* ShellScript */,
 				E593F5711540C1CA00CA44CE /* Sources */,
 				E593F5721540C1CA00CA44CE /* Frameworks */,
 				E593F5731540C1CA00CA44CE /* Resources */,
@@ -455,7 +454,10 @@
 				TargetAttributes = {
 					E51C7D0D1E2D437A00C37ACC = {
 						CreatedOnToolsVersion = 8.2.1;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
+					};
+					E593F5741540C1CA00CA44CE = {
+						ProvisioningStyle = Manual;
 					};
 				};
 			};
@@ -507,19 +509,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		E583B371162B54F100C15E49 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "buildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\")\nbuildNumber=$(($buildNumber + 1))\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/Helper/Info.plist\"";
-		};
 		E593F59A1540C1CA00CA44CE /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -651,7 +640,8 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Developer ID Application: GemTalk Systems LLC (72G58AHU7P)";
+				CURRENT_PROJECT_VERSION = 1.4.1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 72G58AHU7P;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -683,8 +673,9 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Developer ID Application: GemTalk Systems LLC (72G58AHU7P)";
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1.4.1;
 				DEVELOPMENT_TEAM = 72G58AHU7P;
 				ENABLE_NS_ASSERTIONS = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -722,6 +713,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "Developer ID Application: GemTalk Systems LLC (72G58AHU7P)";
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1.4.1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 72G58AHU7P;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -748,6 +740,7 @@
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
 				VALID_ARCHS = x86_64;
+				VERSIONING_SYSTEM = "";
 			};
 			name = Debug;
 		};
@@ -767,6 +760,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "Developer ID Application: GemTalk Systems LLC (72G58AHU7P)";
 				COPY_PHASE_STRIP = YES;
+				CURRENT_PROJECT_VERSION = 1.4.1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 72G58AHU7P;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -785,16 +779,18 @@
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
 				VALID_ARCHS = x86_64;
+				VERSIONING_SYSTEM = "";
 			};
 			name = Release;
 		};
 		E593F5AE1540C1CB00CA44CE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				"CODE_SIGN_IDENTITY[sdk=*]" = "Mac Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Developer ID Application: GemTalk Systems LLC (72G58AHU7P)";
+				"CODE_SIGN_IDENTITY[sdk=*]" = "Developer ID Application: GemTalk Systems LLC (72G58AHU7P)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application: GemTalk Systems LLC (72G58AHU7P)";
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1.4.1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 72G58AHU7P;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -804,6 +800,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				VALID_ARCHS = x86_64;
+				VERSIONING_SYSTEM = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -811,10 +808,11 @@
 		E593F5AF1540C1CB00CA44CE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Developer ID Application: GemTalk Systems LLC (72G58AHU7P)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application: GemTalk Systems LLC (72G58AHU7P)";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1.4.1;
 				DEVELOPMENT_TEAM = 72G58AHU7P;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "GemStone/GemStone-Prefix.pch";
@@ -823,6 +821,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				VALID_ARCHS = x86_64;
+				VERSIONING_SYSTEM = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
