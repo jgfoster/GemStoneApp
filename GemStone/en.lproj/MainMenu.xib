@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12120" systemVersion="16E195" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11762"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12120"/>
         <capability name="box content view" minToolsVersion="7.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -722,7 +722,7 @@
             <windowStyleMask key="styleMask" titled="YES" utility="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="139" y="81" width="550" height="400"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="777"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
             <view key="contentView" id="13269">
                 <rect key="frame" x="0.0" y="0.0" width="550" height="400"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -779,7 +779,7 @@
             <windowStyleMask key="styleMask" documentModal="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="139" y="81" width="550" height="300"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="777"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
             <view key="contentView" id="1315">
                 <rect key="frame" x="0.0" y="0.0" width="550" height="300"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -859,7 +859,7 @@ Gw
         <window title="GemStone/S 64 Bit " allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" showsToolbarButton="NO" animationBehavior="default" id="534" userLabel="Main Window">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
             <rect key="contentRect" x="163" y="199" width="640" height="483"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="800"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
             <view key="contentView" id="535">
                 <rect key="frame" x="0.0" y="0.0" width="640" height="483"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -871,11 +871,11 @@ Gw
                         <tabViewItems>
                             <tabViewItem label="Setup" identifier="1" id="1733" userLabel="Setup Tab">
                                 <view key="view" id="1736">
-                                    <rect key="frame" x="10" y="33" width="594" height="409"/>
+                                    <rect key="frame" x="10" y="33" width="258" height="0.0"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <box autoresizesSubviews="NO" fixedFrame="YES" borderType="line" title="Helper Tool" translatesAutoresizingMaskIntoConstraints="NO" id="1750">
-                                            <rect key="frame" x="6" y="327" width="582" height="80"/>
+                                            <rect key="frame" x="6" y="-82" width="582" height="80"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <view key="contentView" id="YMz-Hi-dYp">
                                                 <rect key="frame" x="1" y="1" width="580" height="64"/>
@@ -892,7 +892,7 @@ Gw
                                                             <action selector="showHelperToolInfo:" target="537" id="13315"/>
                                                         </connections>
                                                     </button>
-                                                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" preferredMaxLayoutWidth="242" translatesAutoresizingMaskIntoConstraints="NO" id="629" userLabel="Helper Installed Message">
+                                                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="242" translatesAutoresizingMaskIntoConstraints="NO" id="629" userLabel="Helper Installed Message">
                                                         <rect key="frame" x="79" y="23" width="246" height="20"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Current Helper Tools is installed!" id="630">
@@ -927,7 +927,7 @@ Gw
                                             </view>
                                         </box>
                                         <box fixedFrame="YES" title="Shared Memory" translatesAutoresizingMaskIntoConstraints="NO" id="QDb-Qs-9TA">
-                                            <rect key="frame" x="6" y="243" width="582" height="80"/>
+                                            <rect key="frame" x="6" y="-166" width="582" height="80"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <view key="contentView" id="i65-fG-xd7">
                                                 <rect key="frame" x="2" y="2" width="578" height="63"/>
@@ -973,7 +973,7 @@ Gw
                                             </view>
                                         </box>
                                         <box fixedFrame="YES" title="Hostname Lookup (Domain Name Service)" translatesAutoresizingMaskIntoConstraints="NO" id="XO9-sd-A4V">
-                                            <rect key="frame" x="6" y="160" width="582" height="79"/>
+                                            <rect key="frame" x="6" y="-249" width="582" height="79"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <view key="contentView" id="0Q3-Qc-7Dj">
                                                 <rect key="frame" x="2" y="2" width="578" height="62"/>
@@ -1048,7 +1048,7 @@ Gw
                                                 <action selector="openBrowserOnAvailableVersions:" target="537" id="Xdt-e5-R1H"/>
                                             </connections>
                                         </button>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" preferredMaxLayoutWidth="221" translatesAutoresizingMaskIntoConstraints="NO" id="3Xq-9Y-9RN">
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="221" translatesAutoresizingMaskIntoConstraints="NO" id="3Xq-9Y-9RN">
                                             <rect key="frame" x="15" y="361" width="219" height="16"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Checked version are already installed." id="z5p-p5-h2l">
@@ -1057,7 +1057,7 @@ Gw
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" preferredMaxLayoutWidth="112" translatesAutoresizingMaskIntoConstraints="NO" id="81n-ph-rbL" userLabel="Last update label">
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="112" translatesAutoresizingMaskIntoConstraints="NO" id="81n-ph-rbL" userLabel="Last update label">
                                             <rect key="frame" x="15" y="337" width="241" height="16"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Last update of the version list was on:" id="jLk-LB-0sv">
@@ -1066,7 +1066,7 @@ Gw
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9Rt-01-td9" userLabel="last update text">
+                                        <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9Rt-01-td9" userLabel="last update text">
                                             <rect key="frame" x="146" y="305" width="108" height="24"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="(needs update)" drawsBackground="YES" id="Qx3-2Q-KUT">
@@ -1076,7 +1076,7 @@ Gw
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" preferredMaxLayoutWidth="114" translatesAutoresizingMaskIntoConstraints="NO" id="dY9-Zz-wAW" userLabel="Update version list label">
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="114" translatesAutoresizingMaskIntoConstraints="NO" id="dY9-Zz-wAW" userLabel="Update version list label">
                                             <rect key="frame" x="15" y="281" width="241" height="16"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Update the version list (using HTTP)." id="PeP-0W-7Ch">
@@ -1096,7 +1096,7 @@ Gw
                                                 <action selector="versionListDownloadRequest:" target="537" id="xxa-5s-R9D"/>
                                             </connections>
                                         </button>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" preferredMaxLayoutWidth="237" translatesAutoresizingMaskIntoConstraints="NO" id="ZpC-CR-RdN">
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="237" translatesAutoresizingMaskIntoConstraints="NO" id="ZpC-CR-RdN">
                                             <rect key="frame" x="15" y="196" width="241" height="48"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="To download a new version of GemStone/S 64 Bit (using HTTP), click the box next to the version." id="HF5-lQ-gWJ">
@@ -1105,7 +1105,7 @@ Gw
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" preferredMaxLayoutWidth="237" translatesAutoresizingMaskIntoConstraints="NO" id="Agc-fi-kYb">
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="237" translatesAutoresizingMaskIntoConstraints="NO" id="Agc-fi-kYb">
                                             <rect key="frame" x="15" y="156" width="241" height="32"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="To remove an installed version, uncheck the box next to the version name." id="Qbh-yq-d2i">
@@ -1114,7 +1114,7 @@ Gw
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" preferredMaxLayoutWidth="124" translatesAutoresizingMaskIntoConstraints="NO" id="wUx-O0-a9G">
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="124" translatesAutoresizingMaskIntoConstraints="NO" id="wUx-O0-a9G">
                                             <rect key="frame" x="15" y="130" width="128" height="16"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Install from a ZIP file." id="RhL-bg-pub">
@@ -1139,7 +1139,7 @@ Gw
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <clipView key="contentView" ambiguous="YES" id="Ltp-6P-yYt">
                                                 <rect key="frame" x="1" y="0.0" width="298" height="388"/>
-                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                <autoresizingMask key="autoresizingMask"/>
                                                 <subviews>
                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" headerView="6Hx-XL-Vno" id="DCE-ld-kz9" userLabel="Versions Table">
                                                         <rect key="frame" x="0.0" y="0.0" width="298" height="365"/>
@@ -1395,7 +1395,7 @@ Gw
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="11606" userLabel="Open Directory Button">
                                             <rect key="frame" x="543" y="299" width="40" height="32"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="push" bezelStyle="rounded" imagePosition="overlaps" alignment="center" alternateImage="GemStone" borderStyle="border" imageScaling="axesIndependently" inset="2" id="11607">
+                                            <buttonCell key="cell" type="push" bezelStyle="rounded" image="NSFolder" imagePosition="overlaps" alignment="center" alternateImage="GemStone" borderStyle="border" imageScaling="axesIndependently" inset="2" id="11607">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
@@ -1409,7 +1409,7 @@ Gw
                                                 <outlet property="nextKeyView" destination="8326" id="15373"/>
                                             </connections>
                                         </button>
-                                        <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8354">
+                                        <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8354">
                                             <rect key="frame" x="15" y="277" width="54" height="17"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Version:" id="8355">
@@ -1447,7 +1447,7 @@ Gw
                                                 <outlet property="nextKeyView" destination="8270" id="15374"/>
                                             </connections>
                                         </popUpButton>
-                                        <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8266">
+                                        <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8266">
                                             <rect key="frame" x="201" y="277" width="80" height="17"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Stone name:" id="8267">
@@ -1456,7 +1456,7 @@ Gw
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8270" userLabel="Stone Name">
+                                        <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8270" userLabel="Stone Name">
                                             <rect key="frame" x="287" y="274" width="120" height="22"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="gs64stone" drawsBackground="YES" id="8271">
@@ -1521,11 +1521,11 @@ Gw
                                             <tabViewItems>
                                                 <tabViewItem label="Config" identifier="" id="1d9-Az-dIT" userLabel="Config Tab">
                                                     <view key="view" id="fVY-8f-S3M">
-                                                        <rect key="frame" x="10" y="33" width="481" height="0.0"/>
+                                                        <rect key="frame" x="10" y="33" width="554" height="224"/>
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>
-                                                            <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="10455" userLabel="Name label">
-                                                                <rect key="frame" x="18" y="-20" width="87" height="17"/>
+                                                            <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="10455" userLabel="Name label">
+                                                                <rect key="frame" x="18" y="204" width="87" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="NetLDI name:" id="10456">
                                                                     <font key="font" metaFont="system"/>
@@ -1533,8 +1533,8 @@ Gw
                                                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                 </textFieldCell>
                                                             </textField>
-                                                            <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="10459" userLabel="NetLDI">
-                                                                <rect key="frame" x="111" y="-25" width="111" height="22"/>
+                                                            <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="10459" userLabel="NetLDI">
+                                                                <rect key="frame" x="111" y="199" width="111" height="22"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="gs64ldi" drawsBackground="YES" id="10460">
                                                                     <font key="font" metaFont="system"/>
@@ -1555,8 +1555,8 @@ Gw
                                                                     <outlet property="nextKeyView" destination="8646" id="15377"/>
                                                                 </connections>
                                                             </textField>
-                                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wQZ-dk-w3h" userLabel="Port label">
-                                                                <rect key="frame" x="228" y="-20" width="79" height="17"/>
+                                                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wQZ-dk-w3h" userLabel="Port label">
+                                                                <rect key="frame" x="228" y="204" width="79" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="NetLDI Port:" id="aL9-4x-G1o">
                                                                     <font key="font" metaFont="system"/>
@@ -1564,8 +1564,8 @@ Gw
                                                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                 </textFieldCell>
                                                             </textField>
-                                                            <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KXZ-lo-3VI" userLabel="NetLDI Port">
-                                                                <rect key="frame" x="313" y="-25" width="64" height="22"/>
+                                                            <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KXZ-lo-3VI" userLabel="NetLDI Port">
+                                                                <rect key="frame" x="313" y="199" width="64" height="22"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="right" placeholderString="default" drawsBackground="YES" id="zuy-ZZ-R5m">
                                                                     <font key="font" metaFont="system"/>
@@ -1574,7 +1574,7 @@ Gw
                                                                 </textFieldCell>
                                                             </textField>
                                                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iFE-2n-tOf" userLabel="Edit Stone Config File">
-                                                                <rect key="frame" x="14" y="-82" width="190" height="32"/>
+                                                                <rect key="frame" x="14" y="142" width="190" height="32"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <buttonCell key="cell" type="push" title="Open Stone Config File" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="TFp-ng-59m">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1586,7 +1586,7 @@ Gw
                                                                 </connections>
                                                             </button>
                                                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nsO-e0-UNR" userLabel="Edit Gem Config File">
-                                                                <rect key="frame" x="14" y="-115" width="190" height="32"/>
+                                                                <rect key="frame" x="14" y="109" width="190" height="32"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <buttonCell key="cell" type="push" title="Open Gem Config File" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="9WA-9B-A5e">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1598,7 +1598,7 @@ Gw
                                                                 </connections>
                                                             </button>
                                                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7Yy-mv-mEW" userLabel="Edit System Config File">
-                                                                <rect key="frame" x="14" y="-148" width="190" height="32"/>
+                                                                <rect key="frame" x="14" y="76" width="190" height="32"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <buttonCell key="cell" type="push" title="Open System Config File" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="X7M-pp-Ssu">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1610,11 +1610,11 @@ Gw
                                                                 </connections>
                                                             </button>
                                                             <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="tHr-B4-8An">
-                                                                <rect key="frame" x="20" y="-36" width="525" height="5"/>
+                                                                <rect key="frame" x="20" y="188" width="525" height="5"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             </box>
                                                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gbS-TK-9gG">
-                                                                <rect key="frame" x="14" y="-181" width="190" height="32"/>
+                                                                <rect key="frame" x="14" y="43" width="190" height="32"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <buttonCell key="cell" type="push" title="Open Default Config FIle" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="aVo-ja-l3r">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1765,7 +1765,7 @@ Gw
                                                                     <autoresizingMask key="autoresizingMask"/>
                                                                 </scroller>
                                                             </scrollView>
-                                                            <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Uhu-TG-8yf" userLabel="Size Field">
+                                                            <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Uhu-TG-8yf" userLabel="Size Field">
                                                                 <rect key="frame" x="53" y="18" width="84" height="22"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="right" drawsBackground="YES" id="4YC-vc-Iaa">
@@ -2238,7 +2238,7 @@ Gw
                                                                     <autoresizingMask key="autoresizingMask"/>
                                                                 </scroller>
                                                             </scrollView>
-                                                            <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pl9-Tz-Uve" userLabel="Size Label">
+                                                            <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pl9-Tz-Uve" userLabel="Size Label">
                                                                 <rect key="frame" x="15" y="21" width="32" height="17"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Size:" id="5uR-Iw-n6F">
@@ -2255,7 +2255,7 @@ Gw
                                                         <rect key="frame" x="10" y="33" width="554" height="224"/>
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>
-                                                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="15291">
+                                                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="15291">
                                                                 <rect key="frame" x="15" y="204" width="322" height="17"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="When the selected database is not running you may:" id="15292">
                                                                     <font key="font" metaFont="system"/>
@@ -2282,7 +2282,7 @@ Gw
                                                                     </binding>
                                                                 </connections>
                                                             </button>
-                                                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="15249">
+                                                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="15249">
                                                                 <rect key="frame" x="210" y="178" width="316" height="17"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="A database containing only base GemStone classes" id="15250">
                                                                     <font key="font" metaFont="system"/>
@@ -2309,7 +2309,7 @@ Gw
                                                                     </binding>
                                                                 </connections>
                                                             </button>
-                                                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="15253">
+                                                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="15253">
                                                                 <rect key="frame" x="209" y="145" width="308" height="17"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="A database suitable for loading Seaside (&amp; others)" id="15254">
                                                                     <font key="font" metaFont="system"/>
@@ -2336,7 +2336,7 @@ Gw
                                                                     </binding>
                                                                 </connections>
                                                             </button>
-                                                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="15261">
+                                                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="15261">
                                                                 <rect key="frame" x="209" y="110" width="316" height="17"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Use a file open dialog to restore a database backup" id="15262">
                                                                     <font key="font" metaFont="system"/>
@@ -2344,7 +2344,7 @@ Gw
                                                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                 </textFieldCell>
                                                             </textField>
-                                                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="15304">
+                                                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="15304">
                                                                 <rect key="frame" x="15" y="82" width="298" height="17"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="When the selected database is running you may:" id="15305">
                                                                     <font key="font" metaFont="system"/>
@@ -2367,7 +2367,7 @@ Gw
                                                                     <binding destination="8210" name="enabled" keyPath="selection.isRunningCode" id="13266"/>
                                                                 </connections>
                                                             </button>
-                                                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="15310">
+                                                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="15310">
                                                                 <rect key="frame" x="210" y="56" width="308" height="17"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Use a file save dialog to create a database backup" id="15311">
                                                                     <font key="font" metaFont="system"/>
@@ -2545,7 +2545,7 @@ Gw
                                                         <rect key="frame" x="10" y="33" width="554" height="224"/>
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>
-                                                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="11077">
+                                                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="11077">
                                                                 <rect key="frame" x="15" y="204" width="114" height="17"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" constant="110" id="s0i-Sl-IcM"/>
@@ -2556,7 +2556,7 @@ Gw
                                                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                 </textFieldCell>
                                                             </textField>
-                                                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="11090" userLabel="Log file count">
+                                                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="11090" userLabel="Log file count">
                                                                 <rect key="frame" x="135" y="199" width="128" height="22"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" constant="128" id="xMo-lI-U7u"/>
@@ -2582,7 +2582,7 @@ Gw
                                                                     </binding>
                                                                 </connections>
                                                             </button>
-                                                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="11084">
+                                                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="11084">
                                                                 <rect key="frame" x="15" y="172" width="114" height="17"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Old Transactions:" id="11085">
                                                                     <font key="font" metaFont="system"/>
@@ -2590,7 +2590,7 @@ Gw
                                                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                 </textFieldCell>
                                                             </textField>
-                                                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="11176" userLabel="Tran log file count">
+                                                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="11176" userLabel="Tran log file count">
                                                                 <rect key="frame" x="135" y="167" width="128" height="22"/>
                                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="11177">
                                                                     <font key="font" metaFont="system"/>
@@ -2734,7 +2734,7 @@ Gw
                                                                     <binding destination="13148" name="enabled" keyPath="selection.boolValue" id="13154"/>
                                                                 </connections>
                                                             </button>
-                                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="82" translatesAutoresizingMaskIntoConstraints="NO" id="12997">
+                                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="82" translatesAutoresizingMaskIntoConstraints="NO" id="12997">
                                                                 <rect key="frame" x="453" y="136" width="86" height="85"/>
                                                                 <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Statistics can be viewed with VSD on versions 3.0 and later." id="12998">
                                                                     <font key="font" metaFont="system"/>
@@ -2774,7 +2774,7 @@ Gw
                                                         <rect key="frame" x="10" y="33" width="554" height="224"/>
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>
-                                                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="13172">
+                                                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="13172">
                                                                 <rect key="frame" x="15" y="202" width="87" height="17"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" constant="83" id="Ooi-Nd-aA4"/>
@@ -3099,6 +3099,7 @@ Gw
     <resources>
         <image name="GemStone" width="512" height="512"/>
         <image name="NSAddTemplate" width="11" height="11"/>
+        <image name="NSFolder" width="32" height="32"/>
         <image name="NSRemoveTemplate" width="11" height="11"/>
     </resources>
 </document>
