@@ -64,6 +64,13 @@
 
 - (void)errorOutputString:(NSString *)aString;
 {
+	[self performSelectorOnMainThread:@selector(errorOutputStringA:)
+						   withObject:aString
+						waitUntilDone:YES];
+}
+
+- (void)errorOutputStringA:(NSString *)aString;
+{
 	NSLog(@"%@", aString);
 	NSAlert *alert = [[NSAlert alloc] init];
 	[alert setMessageText:@"Unzip error!"];
@@ -120,6 +127,7 @@
     [op setTreatsFilePackagesAsDirectories:NO];
     [op beginSheetModalForWindow:[NSApp mainWindow]
                completionHandler:^(NSInteger result) {
+				   [op orderOut:nil];
                    if (result != NSFileHandlingPanelOKButton) return;
                    __block id me = self;
                    zipFilePath = [[[op URLs] objectAtIndex:0] path];

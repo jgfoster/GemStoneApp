@@ -102,6 +102,7 @@
     [panel setTreatsFilePackagesAsDirectories:NO];
     [panel beginSheetModalForWindow:[NSApp mainWindow]
                   completionHandler:^(NSInteger result) {
+					  [panel orderOut:nil];
                       if (result != NSFileHandlingPanelOKButton) return;
                       NSString *path = [[panel URL] path];
                       Topaz *topaz = [Topaz database:self
@@ -634,6 +635,7 @@
     [panel setTreatsFilePackagesAsDirectories:NO];
     [panel beginSheetModalForWindow:[NSApp mainWindow]
                completionHandler:^(NSInteger result) {
+				   [panel orderOut:nil];
                    if (result != NSFileHandlingPanelOKButton) return;
                    __block id me = self;
                    NSString *path = [[[panel URLs] objectAtIndex:0] path];

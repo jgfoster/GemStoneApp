@@ -145,8 +145,8 @@
 
 - (IBAction)closeInfoPanel:(id)sender;
 {
-	[NSApp endSheet:infoPanel];
 	[infoPanel orderOut:nil];
+	[[NSApp mainWindow] endSheet:infoPanel];
 }
 
 - (void)criticalAlert:(NSString *)textString details:(NSString *)detailsString;
@@ -612,8 +612,8 @@
 - (void)taskFinishedA;
 {
 	[taskProgressText setString:[NSMutableString new]];
-	[NSApp endSheet:taskProgressPanel];
 	[taskProgressPanel orderOut:nil];
+	[[NSApp mainWindow] endSheet:taskProgressPanel];
 }
 
 - (void)taskFinishedAfterDelay;
@@ -635,7 +635,7 @@
 - (void)taskFinishedAfterDelayB;
 {
 	if ([[mySetup taskCloseWhenDoneCode] boolValue]) {
-		[self taskFinishedA];
+		[self taskFinished];
 	}
 }
 
