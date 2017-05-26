@@ -814,11 +814,13 @@
 {
 	[appController taskStart:@"Obtaining GemStone/S 64 Bit version list ...\n"];
 	DownloadVersionList *task = [DownloadVersionList new];
-	__block Task *blockTask = task;
+	//	https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/Blocks/Articles/bxVariables.html#//apple_ref/doc/uid/TP40007502-CH6-SW1
+	__block Task *blockTask = task;		//	blocks get a COPY of referenced objects unless explicitly shared
 	[task setCompletionBlock:^(){
 		[self performSelectorOnMainThread:@selector(versionListDownloadDone:) 
 							   withObject:blockTask
 							waitUntilDone:NO];
+		blockTask = nil;				//	break reference count cycle
 	}];
 	[operations addOperation:task];
 }

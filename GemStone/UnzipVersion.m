@@ -129,12 +129,13 @@
                completionHandler:^(NSInteger result) {
 				   [op orderOut:nil];
                    if (result != NSFileHandlingPanelOKButton) return;
-                   __block id me = self;
+                   __block id me = self;		//	blocks get a COPY of referenced objects unless explicitly shared
                    zipFilePath = [[[op URLs] objectAtIndex:0] path];
                    [self setCompletionBlock:^(){
                        [appController performSelectorOnMainThread:@selector(versionUnzipDone:)
                                                        withObject:me
                                                     waitUntilDone:NO];
+					   me = nil;	// to break retain cycle
                    }];
                    [appController addOperation:self];
                }];

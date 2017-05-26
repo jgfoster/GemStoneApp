@@ -637,14 +637,14 @@
                completionHandler:^(NSInteger result) {
 				   [panel orderOut:nil];
                    if (result != NSFileHandlingPanelOKButton) return;
-                   __block id me = self;
+                   __block id me = self;		//	blocks get a COPY of referenced objects unless explicitly shared
                    NSString *path = [[[panel URLs] objectAtIndex:0] path];
                    //	defines statmonitor, but does not add it as an operation
                    [self startDatabaseWithArgs:[NSArray arrayWithObject:@"-R"]];
                    Topaz *topaz = [Topaz database:self
                                    do:^(Topaz *aTopaz) { [aTopaz restoreFromBackup:path]; } ];
                    [topaz addDependency:statmonitor];
-                   [topaz setCompletionBlock:^(){ [me startIsDone]; }];
+				   [topaz setCompletionBlock:^(){ [me startIsDone]; me = nil; }];
                    [appController addOperation:statmonitor];
                    [appController addOperation:topaz];
                }];
@@ -692,9 +692,9 @@
 - (void)startDatabase;
 {
 	[self startDatabaseWithArgs:nil];
-	__block id me = self;
+	__block id me = self;		//	blocks get a COPY of referenced objects unless explicitly shared
 	StartCacheWarmer *cacheWarmer = [StartCacheWarmer forDatabase:self];
-	[cacheWarmer setCompletionBlock:^(){ [me startIsDone]; }];
+	[cacheWarmer setCompletionBlock:^(){ [me startIsDone]; me = nil; }];
 	[cacheWarmer addDependency:statmonitor];
 	[appController addOperation:cacheWarmer];
 	[appController addOperation:statmonitor];
@@ -785,8 +785,8 @@
 	[stopStone addDependency:stopNetLdi];
 	[statmonitor cancel];
 	statmonitor = nil;
-	__block id me = self;
-	[stopStone setCompletionBlock:^(){ [me stopIsDone]; }];
+	__block id me = self;		//	blocks get a COPY of referenced objects unless explicitly shared
+	[stopStone setCompletionBlock:^(){ [me stopIsDone]; me = nil; }];
 	
 	[appController addOperation:stopNetLdi];
 	[appController addOperation:stopStone];

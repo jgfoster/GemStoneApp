@@ -53,11 +53,12 @@
 	UnzipVersion *unzip = [UnzipVersion new];
 	[unzip setZipFilePath: [download zipFilePath]];
 	[unzip addDependency:download];
-	__block Task *blockTask = unzip;
+	__block Task *blockTask = unzip;		//	blocks get a COPY of referenced objects unless explicitly shared
 	[unzip setCompletionBlock:^(){
 		[appController performSelectorOnMainThread:@selector(versionUnzipDone:) 
 										withObject:blockTask
 									 waitUntilDone:NO];
+		blockTask = nil;		//	to break retain cycle
 	}];
 	[appController addOperation:download];
 	[appController addOperation:unzip];
