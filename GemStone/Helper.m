@@ -18,6 +18,12 @@
 #import "Utilities.h"
 #import "../Helper/HelperTool.h"
 
+@interface Helper ()
+
+@property xpc_connection_t    connection;
+
+@end
+
 @implementation Helper
 
 
@@ -193,8 +199,8 @@
 
 - (void)terminate;
 {
-    xpc_connection_cancel(connection);
-    connection = nil;
+    xpc_connection_cancel(self.connection);
+    self.connection = nil;
 }
 
 - (void)updateSetupState;
@@ -239,7 +245,7 @@
 		
 	} else if (error == XPC_ERROR_CONNECTION_INVALID) {
 //		NSLog(@"XPC connection invalid, releasing.");
-		connection = nil;
+		self.connection = nil;
 		_isAvailable = NO;
 		[self updateSetupState];
 		
@@ -250,14 +256,14 @@
 
 - (void)xpcInit;
 {
-    connection = xpc_connection_create_mach_service(kHelperIdentifier,
+    self.connection = xpc_connection_create_mach_service(kHelperIdentifier,
                                                     NULL,
                                                     XPC_CONNECTION_MACH_SERVICE_PRIVILEGED);
-    if (!connection) {
+    if (!self.connection) {
         AppError(@"Failed to create XPC connection.");
     }
-    xpc_connection_set_event_handler(connection, ^(xpc_object_t event) { [self xpcEvent:event]; });
-    xpc_connection_resume(connection);
+    xpc_connection_set_event_handler(self.connection, ^(xpc_object_t event) { [self xpcEvent:event]; });
+    xpc_connection_resume(self.connection);
     [self ensureSharedMemory];
 	[self updateSetupState];		// if no helper tool, then we don't get a response to the request!
 }
@@ -273,7 +279,7 @@
 
 - (void)xpcSendMessage:(xpc_object_t) message;
 {
-	xpc_connection_send_message_with_reply(connection,
+	xpc_connection_send_message_with_reply(self.connection,
 										   message,
 										   dispatch_get_main_queue(),
 										   ^(xpc_object_t event) { [self xpcEvent:event]; });

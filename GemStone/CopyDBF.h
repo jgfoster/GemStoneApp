@@ -8,9 +8,9 @@
 
 #import "DatabaseTask.h"
 
-@interface CopyDBF : DatabaseTask {
-	NSString *path;
-}
+@interface CopyDBF : DatabaseTask { }
+
+@property	NSString *path;
 
 + (NSString *)infoForFile:(NSString *)aString in:(Database *)aDatabase;
 

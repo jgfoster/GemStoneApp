@@ -46,7 +46,7 @@
 
 - (void)download;
 {
-	[appController taskStart:[NSString stringWithFormat:@"Downloading %@ . . .\n", name]];
+	[appController taskStart:[NSString stringWithFormat:@"Downloading %@ . . .\n", self.name]];
 	DownloadVersion *download = [DownloadVersion new];
 	[download setVersion:self];
 	
@@ -100,9 +100,9 @@
 
 - (void)setIsInstalledCode:(NSNumber *)aNumber;
 {
-	if (isInstalledCode == aNumber) return;
+	if (self.isInstalledCode == aNumber) return;
 	if ([self isActuallyInstalled] == [aNumber boolValue]) {
-		isInstalledCode = aNumber;
+		_isInstalledCode = aNumber;
 		return;
 	}
 	if ([aNumber boolValue]) {
@@ -115,8 +115,8 @@
 - (void)updateIsInstalled;
 {
 	NSNumber *code = [NSNumber numberWithBool:[self isActuallyInstalled]];
-	if (code != isInstalledCode) {
-		self.isInstalledCode = code;
+	if (code != self.isInstalledCode) {
+		_isInstalledCode = code;
 	}
 }
 
@@ -124,7 +124,7 @@
 {
 	NSMutableString *string = [NSMutableString new];
 	[string appendString:@"GemStone64Bit"];
-	[string appendString:name];
+	[string appendString:self.name];
 	[string appendString:@"-i386.Darwin.zip"];
 	return string;
 }

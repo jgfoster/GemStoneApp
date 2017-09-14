@@ -9,6 +9,12 @@
 #import "GSList.h"
 #import "Utilities.h"
 
+@interface GSList ()
+
+@property 	BOOL	foundNoProcesses;
+
+@end
+
 @implementation GSList
 
 + (NSArray *)processListUsingDatabase:(Database *)aDatabase;
@@ -34,13 +40,13 @@
 - (void)done;
 {
 	[super done];
-	if ([standardOutput length]) return;
+	if ([self.standardOutput length]) return;
 	NSLog(@"done with no output!?");
 }
 
 - (void)doneWithError:(int)statusCode;
 {
-	foundNoProcesses = YES;
+	self.foundNoProcesses = YES;
 	[super doneWithError:0];	//	Not really an error to have no processes
 }
 
@@ -48,10 +54,10 @@
 {
 	NSMutableArray *list = [NSMutableArray new];
 	NSMutableDictionary *process = nil;
-	foundNoProcesses = NO;
+	self.foundNoProcesses = NO;
 	[self main];
-	if (foundNoProcesses) return list;
-	for (NSString *line in [standardOutput componentsSeparatedByString:@"\n"]) {
+	if (self.foundNoProcesses) return list;
+	for (NSString *line in [self.standardOutput componentsSeparatedByString:@"\n"]) {
 		if ([line length]) {
 			if ([line characterAtIndex:0] != ' ') {
 				// next process

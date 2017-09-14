@@ -13,57 +13,7 @@
 #import "UnzipVersion.h"
 #import "Version.h"
 
-@interface AppController : NSObject <NSTabViewDelegate> {
-	//	Setup Tab
-	IBOutlet NSTabViewItem			*setupTabViewItem;
-	IBOutlet NSTextField			*helperToolMessage;
-	IBOutlet NSButton				*authenticateButton;
-	IBOutlet NSTextField			*currentShmall;
-	IBOutlet NSTextField			*currentShmmax;
-	IBOutlet NSTextField			*hostname;
-	IBOutlet NSTextField			*ipAddress;
-	IBOutlet NSButton				*addToEtcHostsButton;
-	//	Versions Tab
-	IBOutlet NSTextField			*lastUpdateDateField;
-	//	Databases Tab
-	IBOutlet NSArrayController		*databaseListController;
-	IBOutlet NSTableView			*databaseTableView;
-	IBOutlet NSTextView				*infoPanelTextView;
-	IBOutlet NSArrayController		*logFileListController;
-	IBOutlet NSButton				*removeButton;
-	IBOutlet NSArrayController		*versionListController;
-	IBOutlet NSArrayController		*versionPopupController;
-	IBOutlet NSArrayController		*upgradePopupController;
-	IBOutlet NSTextField			*oldLogFilesText;
-	IBOutlet NSButton				*deleteLogFilesButton;
-	IBOutlet NSTextField			*oldTranLogsText;
-	IBOutlet NSButton				*deleteTranLogsButton;
-	IBOutlet NSArrayController		*dataFileListController;
-	IBOutlet NSTextView				*dataFileInfo;
-	IBOutlet NSTextField			*dataFileSizeText;
-	IBOutlet NSArrayController		*processListController;
-	IBOutlet NSTabViewItem			*gsListTabViewItem;
-	IBOutlet NSTableView			*statmonTableView;
-	IBOutlet NSObjectController		*statmonFileSelectedController;
-	IBOutlet NSTabView				*topTabView;
-	IBOutlet NSButton				*repositoryConversionCheckbox;
-	IBOutlet NSButton				*upgradeSeasideCheckbox;
-
-	IBOutlet NSPanel				*infoPanel;
-	IBOutlet NSPanel				*taskProgressPanel;
-	IBOutlet NSTextView				*taskProgressText;
-	IBOutlet NSProgressIndicator	*taskProgressIndicator;
-	IBOutlet NSButton				*taskCloseWhenDoneButton;
-	IBOutlet NSButton				*taskCancelButton;
-
-    Helper                  *helper;
-	NSManagedObjectContext	*managedObjectContext;
-	NSManagedObject			*mySetup;	//	'setup' is too common for searches!
-	NSMutableDictionary		*statmonitors;
-	NSOperationQueue		*operations;
-}
-
-@property(readonly) NSManagedObjectContext	*managedObjectContext;
+@interface AppController : NSObject <NSTabViewDelegate> { }
 
 - (IBAction)addDatabase:(id)sender;
 - (void)addOperation:(NSOperation *)anOperation;

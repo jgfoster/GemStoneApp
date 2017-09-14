@@ -9,7 +9,8 @@
 #import <Foundation/Foundation.h>
 
 @interface Helper : NSObject {
-    xpc_connection_t    connection;
+	__weak Helper * anotherHelper;
+	char x[10];
 }
 
 @property (readonly)	BOOL		hasDNS;

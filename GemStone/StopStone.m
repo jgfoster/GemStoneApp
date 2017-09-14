@@ -14,7 +14,7 @@
 - (NSArray *)arguments;
 { 
 	return [NSArray arrayWithObjects: 
-			[database name],
+			[self.database name],
 			@"DataCurator",
 			@"swordfish",
 			@"-i",
@@ -28,9 +28,9 @@
 
 - (void)done;
 {
-	[database setIsRunning:NO];
-	[database archiveCurrentLogFiles];
-	[database archiveCurrentTransactionLogs];
+	[self.database setIsRunning:NO];
+	[self.database archiveCurrentLogFiles];
+	[self.database archiveCurrentTransactionLogs];
 	[super done];
 }
 

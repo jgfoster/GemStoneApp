@@ -10,14 +10,19 @@
 #import "Utilities.h"
 #import "Version.h"
 
+@interface DownloadVersion ()
+
+@property 	NSFileHandle	*zipFile;
+
+@end
+
 @implementation DownloadVersion
 
-@synthesize version;
-@synthesize zipFilePath;
+@synthesize version = _version;
 
 - (NSArray *)arguments;
 { 
-	NSString *zippedFileName = [version zippedFileName];
+	NSString *zippedFileName = [self.version zippedFileName];
 	NSMutableString *http = [NSMutableString new];
 	[http appendString:@kDownloadSite];
 	[http appendString:zippedFileName];
@@ -27,10 +32,10 @@
 - (void)cancel;
 {
 	[appController taskProgress:@"\n\nCancel request received.\nDeleting zip file . . .\n"];
-	[zipFile closeFile];
-	zipFile = nil;
-	[fileManager removeItemAtPath:zipFilePath error:nil];
-	zipFilePath = nil;
+	[self.zipFile closeFile];
+	self.zipFile = nil;
+	[fileManager removeItemAtPath:self.zipFilePath error:nil];
+	_zipFilePath = nil;
 	[super cancel];
 	[appController taskProgress:@"Download cancel completed!\n"];
 }
@@ -38,45 +43,45 @@
 - (void)createZipFile;
 {
 	BOOL exists, isDirectory = NO, success;
-	exists = [fileManager fileExistsAtPath:zipFilePath isDirectory:&isDirectory];
+	exists = [fileManager fileExistsAtPath:self.zipFilePath isDirectory:&isDirectory];
 	if (exists) {
 		if (isDirectory) {
-			AppError(@"Please delete directory at: %@", zipFilePath);
+			AppError(@"Please delete directory at: %@", self.zipFilePath);
 		}
 		NSError *error;
-		success = [fileManager removeItemAtPath:zipFilePath error:&error];
+		success = [fileManager removeItemAtPath:self.zipFilePath error:&error];
 		if (!success) {
 			AppError(@"Unable to delete existing file: %@", [error localizedDescription]);
 		}
 	}
 	success = [fileManager
-			   createFileAtPath:zipFilePath 
+			   createFileAtPath:self.zipFilePath
 			   contents:[NSData new] 
 			   attributes:nil];
 	if (!success) {
-		AppError(@"Unable to create file: %@", zipFilePath);
+		AppError(@"Unable to create file: %@", self.zipFilePath);
 	}
-	zipFile = [NSFileHandle fileHandleForWritingAtPath:zipFilePath];
-	if (!zipFile) {
-		AppError(@"Unable to open file: %@", zipFilePath);
+	self.zipFile = [NSFileHandle fileHandleForWritingAtPath:self.zipFilePath];
+	if (!self.zipFile) {
+		AppError(@"Unable to open file: %@", self.zipFilePath);
 	}
 }
 
 - (void)data:(NSData *)data;
 { 
-	[zipFile writeData:data];
+	[self.zipFile writeData:data];
 }
 
 - (void)done;
 { 
-	[zipFile closeFile];
-	zipFile = nil;
+	[self.zipFile closeFile];
+	self.zipFile = nil;
 	unsigned long long fileSize = [[fileManager
-					 attributesOfItemAtPath:zipFilePath 
+					 attributesOfItemAtPath:self.zipFilePath
 					 error:nil] fileSize];
 	if (!fileSize) {
-		[fileManager removeItemAtPath:zipFilePath error:nil];
-		zipFilePath = nil;
+		[fileManager removeItemAtPath:self.zipFilePath error:nil];
+		_zipFilePath = nil;
 		AppError(@"Empty zip file without an error!?");
 	}
 	[super done];
@@ -84,23 +89,28 @@
 
 - (void)doneWithError:(int)statusCode;
 {
-	[zipFile closeFile];
-	zipFile = nil;
-	[fileManager removeItemAtPath:zipFilePath error:nil];
-	zipFilePath = nil;
+	[self.zipFile closeFile];
+	self.zipFile = nil;
+	[fileManager removeItemAtPath:self.zipFilePath error:nil];
+	_zipFilePath = nil;
 	[super doneWithError:statusCode];
 }
 
 - (void)setVersion:(Version *)aVersion;
 {
-	version = aVersion;
-	zipFilePath = [NSMutableString stringWithFormat:@"%@/%@", basePath, [version zippedFileName]];
+	self.version = aVersion;
+	_zipFilePath = [NSMutableString stringWithFormat:@"%@/%@", basePath, [self.version zippedFileName]];
 }
 
 - (void)startTask;
 {
 	[self createZipFile];
 	[super startTask];
+}
+
+- (Version *)version;
+{
+	return _version;
 }
 
 @end

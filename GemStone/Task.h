@@ -11,14 +11,12 @@
 #define mustOverride() 	[NSException raise:NSInternalInconsistencyException \
 format:@"You must override \'%@\' in a subclass", NSStringFromSelector(_cmd)];
 
-@interface Task : NSOperation {
-	NSTask			*task;
-	BOOL			 didLaunch;
-	int				 doneCount;
-	NSMutableString	*allOutput;
-	NSMutableString *errorOutput;
-	NSMutableString *standardOutput;
-}
+@interface Task : NSOperation { }
+
+@property	NSTask			*task;
+@property	NSMutableString	*allOutput;
+@property	NSMutableString *errorOutput;
+@property	NSMutableString *standardOutput;
 
 - (NSString *)currentDirectoryPath;
 - (void)dataString:(NSString *)aString;

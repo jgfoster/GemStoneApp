@@ -9,6 +9,12 @@
 #import "Utilities.h"
 #import "VSD.h"
 
+@interface VSD ()
+
+@property 	NSString *path;
+
+@end
+
 @implementation VSD
 
 + (VSD *)openPath:(NSString *)path usingDatabase:(Database *)database;
@@ -21,7 +27,7 @@
 - (NSArray *)arguments;
 { 
 	return [NSArray arrayWithObjects: 
-			path,
+			self.path,
 			nil];
 }
 
@@ -42,13 +48,13 @@
 
 - (void)openPath:(NSString *)aString;
 {
-	path = aString;
+	self.path = aString;
 	[self start];
 	[notificationCenter
 	 removeObserver:self 
 	 name:NSFileHandleReadCompletionNotification 
 	 object:nil];
-	task = nil;
+	self.task = nil;
 }
 
 @end

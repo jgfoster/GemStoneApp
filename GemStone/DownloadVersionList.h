@@ -8,10 +8,8 @@
 
 #import "Download.h"
 
-@interface DownloadVersionList : Download {
-	NSMutableArray	*versions;
-}
+@interface DownloadVersionList : Download { }
 
-@property (readonly) NSArray * versions;
+@property (readonly) NSMutableArray *versions;
 
 @end

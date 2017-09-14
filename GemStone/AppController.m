@@ -7,6 +7,7 @@
 //
 
 #import <ExceptionHandling/NSExceptionHandler.h>
+#import <objc/runtime.h>
 
 #import "AppController.h"
 #import "Database.h"
@@ -27,11 +28,61 @@
 [notificationCenter addObserver:self selector:@selector(aSymbol:) name:aString object:nil]
 
 @interface NSManagedObject (Setup)
-@property(nonatomic, retain) NSNumber *lastDatabaseIdentifier;
-@property(nonatomic, retain) NSNumber *taskCloseWhenDoneCode;
-@property(nonatomic, retain) NSDate   *versionsDownloadDate;
+@property NSNumber *lastDatabaseIdentifier;
+@property NSNumber *taskCloseWhenDoneCode;
+@property NSDate   *versionsDownloadDate;
 @end 
 
+@interface AppController()
+//	Setup Tab
+@property (weak)	IBOutlet NSTabViewItem			*setupTabViewItem;
+@property (weak)	IBOutlet NSTextField			*helperToolMessage;
+@property (weak)	IBOutlet NSButton				*authenticateButton;
+@property (weak)	IBOutlet NSTextField			*currentShmall;
+@property (weak)	IBOutlet NSTextField			*currentShmmax;
+@property (weak)	IBOutlet NSTextField			*hostname;
+@property (weak)	IBOutlet NSTextField			*ipAddress;
+@property (weak)	IBOutlet NSButton				*addToEtcHostsButton;
+//	Versions Tab
+@property (weak)	IBOutlet NSTextField			*lastUpdateDateField;
+//	Databases Tab
+@property (weak)	IBOutlet NSArrayController		*databaseListController;
+@property (weak)	IBOutlet NSTableView			*databaseTableView;
+@property			IBOutlet NSTextView				*infoPanelTextView;
+@property (weak)	IBOutlet NSArrayController		*logFileListController;
+@property (weak)	IBOutlet NSButton				*removeButton;
+@property (weak)	IBOutlet NSArrayController		*versionListController;
+@property (weak)	IBOutlet NSArrayController		*versionPopupController;
+@property (weak)	IBOutlet NSArrayController		*upgradePopupController;
+@property (weak)	IBOutlet NSTextField			*oldLogFilesText;
+@property (weak)	IBOutlet NSButton				*deleteLogFilesButton;
+@property (weak)	IBOutlet NSTextField			*oldTranLogsText;
+@property (weak)	IBOutlet NSButton				*deleteTranLogsButton;
+@property (weak)	IBOutlet NSArrayController		*dataFileListController;
+@property			IBOutlet NSTextView				*dataFileInfo;
+@property (weak)	IBOutlet NSTextField			*dataFileSizeText;
+@property (weak)	IBOutlet NSArrayController		*processListController;
+@property (weak)	IBOutlet NSTabViewItem			*gsListTabViewItem;
+@property (weak)	IBOutlet NSTableView			*statmonTableView;
+@property (weak)	IBOutlet NSObjectController		*statmonFileSelectedController;
+@property (weak)	IBOutlet NSTabView				*topTabView;
+@property (weak)	IBOutlet NSButton				*repositoryConversionCheckbox;
+@property (weak)	IBOutlet NSButton				*upgradeSeasideCheckbox;
+
+@property (weak)	IBOutlet NSPanel				*infoPanel;
+@property (weak)	IBOutlet NSPanel				*taskProgressPanel;
+@property			IBOutlet NSTextView				*taskProgressText;
+@property (weak)	IBOutlet NSProgressIndicator	*taskProgressIndicator;
+@property (weak)	IBOutlet NSButton				*taskCloseWhenDoneButton;
+@property (weak)	IBOutlet NSButton				*taskCancelButton;
+
+@property					Helper					*helper;
+@property (readonly)		NSManagedObjectContext	*managedObjectContext;
+@property					NSManagedObject			*mySetup;	//	'setup' is too common for searches!
+@property					NSMutableDictionary		*statmonitors;
+@property					NSOperationQueue		*operations;
+
+@end
 
 @implementation AppController
 
@@ -44,28 +95,28 @@
 	Database *database = [[Database alloc]
 						initWithEntity:entity
 						insertIntoManagedObjectContext:managedObjectContext];
-	[databaseListController addObject:database];
+	[self.databaseListController addObject:database];
 }
 
 - (void)addOperation:(NSOperation *)anOperation;
 {
-	[operations addOperation:anOperation];
+	[self.operations addOperation:anOperation];
 }
 
 - (IBAction)addToEtcHosts:(id)sender;
 {
-	[helper addToEtcHosts];
+	[self.helper addToEtcHosts];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
 {
-    helper = [Helper new];
-	[taskProgressText setFont:[NSFont fontWithName:@"Monaco" size:9]];
-	[statmonFileSelectedController setContent:[NSNumber numberWithBool:NO]];
-	[repositoryConversionCheckbox setState:NSOffState];
-	[upgradeSeasideCheckbox setState:NSOffState];
+    self.helper = [Helper new];
+	[self.taskProgressText setFont:[NSFont fontWithName:@"Monaco" size:9]];
+	[self.statmonFileSelectedController setContent:[NSNumber numberWithBool:NO]];
+	[self.repositoryConversionCheckbox setState:NSOffState];
+	[self.upgradeSeasideCheckbox setState:NSOffState];
 		
-	[databaseListController addObserver:self
+	[self.databaseListController addObserver:self
 							 forKeyPath:@"selection"
 								options:(NSKeyValueObservingOptionNew)
 								context:nil];
@@ -76,6 +127,8 @@
 	[self performSelector:@selector(refreshUpgradeVersionsList)		withObject:nil afterDelay:0.06];
 	[self performSelector:@selector(updateDatabaseState)			withObject:nil afterDelay:0.07];
 	[self performSelector:@selector(checkForSetupRequired)			withObject:nil afterDelay:0.10];
+	
+	[self reflectionTest];
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication {
@@ -85,14 +138,14 @@
 - (void)applicationWillTerminate:(NSNotification *)aNotification;
 {
 	NSArray *list;
-	list = [versionListController arrangedObjects];
+	list = [self.versionListController arrangedObjects];
 	for (int i = 0; i < [list count]; ++i) {
 		Version *version = [list objectAtIndex:i];
 		if (version.indexInArray != [NSNumber numberWithInt:i]) {
 			version.indexInArray = [NSNumber numberWithInt:i];
 		}
 	}
-	list = [databaseListController arrangedObjects];
+	list = [self.databaseListController arrangedObjects];
 	for (int i = 0; i < [list count]; ++i) {
 		Database *database = [list objectAtIndex:i];
 		if (database.indexInArray != [NSNumber numberWithInt:i]) {
@@ -101,13 +154,13 @@
 	}
 
 	[self saveData];
-    [helper terminate];
+    [self.helper terminate];
 }
 
 - (IBAction)cancelTask:(id)sender;
 {
-	if (0 < [operations operationCount]) {
-		[operations cancelAllOperations];
+	if (0 < [self.operations operationCount]) {
+		[self.operations cancelAllOperations];
 		[self taskFinishedAfterDelay];
 	} else {	//	Presumably this means that the title was changed to "Close"
 		[self taskFinished];
@@ -124,14 +177,14 @@
 - (void)checkForSetupRequiredA;
 {
 	if (0 == [[self versionList] count]) {
-		[topTabView selectFirstTabViewItem:nil];
+		[self.topTabView selectFirstTabViewItem:nil];
 	}
 }
 
 - (IBAction)clickedDataFile:(id)sender;
 {
-	[dataFileInfo setString:@""];
-	[dataFileSizeText setStringValue:@""];
+	[self.dataFileInfo setString:@""];
+	[self.dataFileSizeText setStringValue:@""];
 	Database *database = [self selectedDatabase];
 	if (!database) return;
 	NSTableView *dataFileList = sender;
@@ -139,14 +192,14 @@
 	NSInteger rowIndex = [dataFileList selectedRow];
 	if (rowIndex < 0) return;
 	NSString *file = [[arrayController arrangedObjects] objectAtIndex:rowIndex];
-	[dataFileInfo setString:[database infoForDataFile:file]];
-	[dataFileSizeText setStringValue:[database sizeForDataFile:file]];
+	[self.dataFileInfo setString:[database infoForDataFile:file]];
+	[self.dataFileSizeText setStringValue:[database sizeForDataFile:file]];
 }
 
 - (IBAction)closeInfoPanel:(id)sender;
 {
-	[infoPanel orderOut:nil];
-	[[NSApp mainWindow] endSheet:infoPanel];
+	[self.infoPanel orderOut:nil];
+	[[NSApp mainWindow] endSheet:self.infoPanel];
 }
 
 - (void)criticalAlert:(NSString *)textString details:(NSString *)detailsString;
@@ -169,7 +222,7 @@
 
 - (Boolean)databaseExistsForVersion:(Version *)version;
 {
-	for (Database *eachDatabase in [databaseListController arrangedObjects]) {
+	for (Database *eachDatabase in [self.databaseListController arrangedObjects]) {
 		if ([[eachDatabase version] isEqualToString:[version name]]) {
 			return YES;
 		}
@@ -180,22 +233,22 @@
 - (void)databaseStartDone:(Database *)aDatabase;
 {
 	[self updateDatabaseList:nil];
-	[statmonTableView	performSelector:@selector(reloadData)			withObject:nil afterDelay:0.5];
-	[self				performSelector:@selector(updateDatabaseList:)	withObject:nil afterDelay:1.0];
+	[self.statmonTableView	performSelector:@selector(reloadData)			withObject:nil afterDelay:0.5];
+	[self					performSelector:@selector(updateDatabaseList:)	withObject:nil afterDelay:1.0];
 	[self taskFinishedAfterDelay];
 }
 
 - (void)databaseStopDone:(Database *)aDatabase;
 {
 	[self updateDatabaseList:nil];
-	[statmonTableView	performSelector:@selector(reloadData)			withObject:nil afterDelay:0.5];
+	[self.statmonTableView	performSelector:@selector(reloadData)			withObject:nil afterDelay:0.5];
 	[self taskFinishedAfterDelay];
 }
 
 - (IBAction)deleteStatmonFiles:(id)sender;
 {
 	Database *database = [self selectedDatabase];
-	NSIndexSet *indexes = [statmonTableView selectedRowIndexes];
+	NSIndexSet *indexes = [self.statmonTableView selectedRowIndexes];
 	[database deleteStatmonFilesAtIndexes:indexes];
 }
 
@@ -208,15 +261,15 @@
 {
 	Database *database = [self selectedDatabase];
 	NSString *oldVersion = [database version];
-	NSString *newVersion = [[upgradePopupController selectedObjects] objectAtIndex:0];
-	BOOL needsConversion = [repositoryConversionCheckbox state];
-	BOOL doSeasideUpgrade = [upgradeSeasideCheckbox state];
+	NSString *newVersion = [[self.upgradePopupController selectedObjects] objectAtIndex:0];
+	BOOL needsConversion = [self.repositoryConversionCheckbox state];
+	BOOL doSeasideUpgrade = [self.upgradeSeasideCheckbox state];
 	NSLog(@"doUpgrade: from %@ to %@ with %i and %i", oldVersion, newVersion, needsConversion, doSeasideUpgrade);
 }
 
 - (void)ensureSharedMemory;
 {
-	[helper ensureSharedMemory];
+	[self.helper ensureSharedMemory];
 }
 
 - (BOOL)exceptionHandler:(NSExceptionHandler *)sender shouldHandleException:(NSException *)exception mask:(NSUInteger)aMask;
@@ -236,8 +289,8 @@
 {
 	Database *database = [self selectedDatabase];
 	NSString *string = [database gemToolsLogin];
-	[infoPanelTextView setString:string];
-    [[NSApp mainWindow]beginSheet:infoPanel completionHandler:^(NSModalResponse returnCode) {
+	[self.infoPanelTextView setString:string];
+    [[NSApp mainWindow]beginSheet:self.infoPanel completionHandler:^(NSModalResponse returnCode) {
         return;
     }];
 }
@@ -248,9 +301,9 @@
 		[[Utilities new] setupGlobals:self];
 		[self initManagedObjectContext];
 		[self setupExceptionHandler];
-		statmonitors = [NSMutableDictionary new];
-		operations = [NSOperationQueue new];
-		[operations setName:@"OperationQueue"];
+		self.statmonitors = [NSMutableDictionary new];
+		self.operations = [NSOperationQueue new];
+		[self.operations setName:@"OperationQueue"];
 	}
 	return self;
 }
@@ -279,12 +332,12 @@
 
 - (IBAction)installHelperTool:(id)sender
 {
-	[helper install];
+	[self.helper install];
 }
 
 - (void)loadRequestForDatabase;
 {
-	[self loadRequest:@"Database" toController:databaseListController];
+	[self loadRequest:@"Database" toController:self.databaseListController];
 }
 
 - (void)loadRequestForSetup;
@@ -295,9 +348,9 @@
 	NSError *error = nil;
 	NSArray *list = [managedObjectContext executeFetchRequest:request error:&error];
 	if (!list || ![list count]) {
-		mySetup = [NSEntityDescription insertNewObjectForEntityForName:@"Setup" inManagedObjectContext:managedObjectContext];
+		self.mySetup = [NSEntityDescription insertNewObjectForEntityForName:@"Setup" inManagedObjectContext:managedObjectContext];
 	} else {
-		mySetup = [list objectAtIndex:0];
+		self.mySetup = [list objectAtIndex:0];
 	}
 }
 
@@ -305,8 +358,8 @@
 {
 	NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES];
 	NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
-	[versionListController setSortDescriptors:sortDescriptors];
-	[self loadRequest:@"Version" toController:versionListController];
+	[self.versionListController setSortDescriptors:sortDescriptors];
+	[self loadRequest:@"Version" toController:self.versionListController];
 }
 
 - (void)loadRequest:(NSString *)requestName toController:(NSArrayController *)controller;
@@ -333,7 +386,7 @@
 
 - (Database *)mostAdvancedDatabase;
 {
-	NSArray *databases = [databaseListController arrangedObjects];
+	NSArray *databases = [self.databaseListController arrangedObjects];
 	if (0 == [databases count]) return nil;
 	Database *database = [databases objectAtIndex:0];
 	for (Database *each in databases) {
@@ -357,15 +410,15 @@
 
 - (NSNumber *)nextDatabaseIdentifier;
 {
-	NSNumber *identifier = [mySetup lastDatabaseIdentifier];
+	NSNumber *identifier = [self.mySetup lastDatabaseIdentifier];
 	identifier = [NSNumber numberWithInt:[identifier intValue] + 1];
-	[mySetup setLastDatabaseIdentifier:identifier];
+	[self.mySetup setLastDatabaseIdentifier:identifier];
 	return identifier;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context;
 {
-	if (object == databaseListController) {
+	if (object == self.databaseListController) {
 		[self selectedDatabase:[self selectedDatabase]];
 		return;
 	}
@@ -391,7 +444,7 @@
 
 - (IBAction)openStatmonFiles:(id)sender;
 {
-	NSIndexSet *indexes = [statmonTableView selectedRowIndexes];
+	NSIndexSet *indexes = [self.statmonTableView selectedRowIndexes];
 	[[self selectedDatabase] openStatmonFilesAtIndexes:indexes];
 }
 
@@ -410,6 +463,24 @@
 	return [basePath stringByAppendingString:@"/data.binary"];
 }
 
+- (void)reflectionTest;
+{
+	/*
+	const char *myName = class_getName([self.helper class]);
+	size_t mySize = class_getInstanceSize([self.helper class]);
+	unsigned int outCount;
+	Ivar _Nonnull * ivarList = class_copyIvarList([self.helper class], &outCount);
+	const char * iVarName1 = ivar_getName(ivarList[0]);
+	const char * iVarType1 = ivar_getTypeEncoding(ivarList[0]);
+	ptrdiff_t iVarOffset1 = ivar_getOffset(ivarList[0]);
+	objc_property_t myProperty1 = class_getProperty([self.helper class], "hasDNS");
+	Ivar myIvar1 = class_getInstanceVariable([self.helper class], "_hasDNS");
+	objc_property_t myIvar2 = class_getProperty([self.helper class], "ipAddress");
+	objc_property_t myIvar3 = class_getProperty([self.helper class], "isAvailable");
+	objc_property_t myIvar4 = class_getProperty([self.helper class], "connection");
+	*/
+
+}
 - (IBAction)removeDatabase:(id)sender;
 {
 	NSAlert *alert = [[NSAlert alloc] init];
@@ -418,55 +489,55 @@
 	[alert addButtonWithTitle:@"Delete"];
 	[alert addButtonWithTitle:@"Cancel"];
 	if ([alert runModal] == NSAlertSecondButtonReturn) return;
-	NSArray *list = [databaseListController selectedObjects];
+	NSArray *list = [self.databaseListController selectedObjects];
 	Database *database = [list objectAtIndex:0];
 	if ([database isRunning]) {
 		[database stopDatabase];
-		while ([taskProgressPanel isKeyWindow]) {
+		while ([self.taskProgressPanel isKeyWindow]) {
 			[self doRunLoopFor:0.1];
 		}
 	}
 	[database deleteAll];
-	[databaseListController remove:sender];
+	[self.databaseListController remove:sender];
 	[managedObjectContext deleteObject:database];
 	[self saveData];
 }
 
 - (IBAction)removeHelperTool:(id)sender;
 {
-	[helper remove];
+	[self.helper remove];
 }
 
 - (void)removeVersionDone;
 {
 	[self refreshInstalledVersionsList];
 	[self refreshUpgradeVersionsList];
-	[taskProgressText insertText:@" . . . Done!"];
+	[self.taskProgressText insertText:@" . . . Done!"];
 	[self taskFinishedAfterDelay];
 }
 
 - (void)refreshInstalledVersionsList;
 {
-	[versionPopupController removeObjects:[versionPopupController arrangedObjects]];
-	for (Version *version in [versionListController arrangedObjects]) {
+	[self.versionPopupController removeObjects:[self.versionPopupController arrangedObjects]];
+	for (Version *version in [self.versionListController arrangedObjects]) {
 		[version updateIsInstalled];
 		if ([version isInstalled]) {
-			[versionPopupController addObject:[version name]];
+			[self.versionPopupController addObject:[version name]];
 		}
 	}
-	[lastUpdateDateField setObjectValue:[mySetup versionsDownloadDate]];
+	[self.lastUpdateDateField setObjectValue:[self.mySetup versionsDownloadDate]];
 }
 
 - (void)refreshUpgradeVersionsList;
 {
 	Database *database = [self selectedDatabase];
-	[upgradePopupController removeObjects:[upgradePopupController arrangedObjects]];
+	[self.upgradePopupController removeObjects:[self.upgradePopupController arrangedObjects]];
 	if (database) {
 		NSString *currentVersion = [database version];
-		for (Version *version in [versionListController arrangedObjects]) {
+		for (Version *version in [self.versionListController arrangedObjects]) {
 			NSString *name = [version name];
 			if ([version isInstalled] && [currentVersion compare:name] == NSOrderedAscending) {
-				[upgradePopupController addObject:name];
+				[self.upgradePopupController addObject:name];
 			}
 		}
 	}
@@ -487,7 +558,7 @@
 
 - (Database *)selectedDatabase;
 {
-	NSArray *list = [databaseListController selectedObjects];
+	NSArray *list = [self.databaseListController selectedObjects];
 	Database *database = nil;
 	if (0 < [list count]) {
 		database = [list objectAtIndex:0];
@@ -497,34 +568,34 @@
 
 - (void)selectedDatabase:(Database *)aDatabase;
 {
-	[logFileListController removeObjects:[logFileListController arrangedObjects]];
-	[dataFileListController removeObjects:[dataFileListController arrangedObjects]];
-	[statmonTableView setDataSource:nil];
-	[statmonTableView setDelegate:nil];
-	[statmonTableView setTarget:nil];
-	[oldLogFilesText setStringValue:@""];
-	[oldTranLogsText setStringValue:@""];
-	[dataFileInfo setString:@""];
+	[self.logFileListController removeObjects:[self.logFileListController arrangedObjects]];
+	[self.dataFileListController removeObjects:[self.dataFileListController arrangedObjects]];
+	[self.statmonTableView setDataSource:nil];
+	[self.statmonTableView setDelegate:nil];
+	[self.statmonTableView setTarget:nil];
+	[self.oldLogFilesText setStringValue:@""];
+	[self.oldTranLogsText setStringValue:@""];
+	[self.dataFileInfo setString:@""];
 	if (aDatabase == nil) return;
 	[aDatabase createConfigFiles];
 	[aDatabase refreshStatmonFiles];
-	[logFileListController addObjects:[aDatabase logFiles]];
-	[oldLogFilesText setStringValue:[aDatabase descriptionOfOldLogFiles]];
-	[oldTranLogsText setStringValue:[aDatabase descriptionOfOldTranLogs]];
-	[dataFileListController addObjects:[aDatabase dataFiles]];
-	[statmonTableView setDataSource:aDatabase];
-	[statmonTableView setDelegate:aDatabase];
-	[statmonTableView setTarget:aDatabase];
-	[statmonTableView setDoubleAction:@selector(doubleClickStatmon:)];
-	[statmonTableView reloadData];
+	[self.logFileListController addObjects:[aDatabase logFiles]];
+	[self.oldLogFilesText setStringValue:[aDatabase descriptionOfOldLogFiles]];
+	[self.oldTranLogsText setStringValue:[aDatabase descriptionOfOldTranLogs]];
+	[self.dataFileListController addObjects:[aDatabase dataFiles]];
+	[self.statmonTableView setDataSource:aDatabase];
+	[self.statmonTableView setDelegate:aDatabase];
+	[self.statmonTableView setTarget:aDatabase];
+	[self.statmonTableView setDoubleAction:@selector(doubleClickStatmon:)];
+	[self.statmonTableView reloadData];
 	[self refreshUpgradeVersionsList];
-	[repositoryConversionCheckbox setState:NSOffState];
-	[upgradeSeasideCheckbox setState:NSOffState];
+	[self.repositoryConversionCheckbox setState:NSOffState];
+	[self.upgradeSeasideCheckbox setState:NSOffState];
 }
 
 - (void)setIsStatmonFileSelected:(BOOL)flag;
 {
-	[statmonFileSelectedController setContent:[NSNumber numberWithBool:flag]];
+	[self.statmonFileSelectedController setContent:[NSNumber numberWithBool:flag]];
 }
 
 - (void)setupExceptionHandler;
@@ -559,23 +630,18 @@
 	. If the helper tool is installed, we will set these automatically.\n"
 		This can be done manually in a Terminal as follows:\n$ sudo sysctl -w kern.sysv.shmall=614400\n$ sudo sysctl -w kern.sysv.shmmax=2516582400\nAlternatively, we can install a \"helper tool\" that is managed by launchd and updates the kernel settings (if necessary) when starting a local database.\n\nIf you have manually configured the kernel settings (as above) then this should not be necessary. Also, if your only use of this application is to access databases running on another host, then you don't need to install the helper tool.\n\nIn any case, you may skip this step for now and we will ask for permission if the tool is needed.";
 	 */
-	[infoPanelTextView setString:string];
-    [[NSApp mainWindow]beginSheet:infoPanel completionHandler:^(NSModalResponse returnCode) {
+	[self.infoPanelTextView setString:string];
+    [[NSApp mainWindow]beginSheet:self.infoPanel completionHandler:^(NSModalResponse returnCode) {
         return;
     }];
 }
 
-- (NSTableView *)statmonTableView;
-{
-	return statmonTableView;
-}
-
 - (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem;
 {
-	if (tabViewItem == setupTabViewItem) {
-		[helper checkDNS];
+	if (tabViewItem == self.setupTabViewItem) {
+		[self.helper checkDNS];
 		[self updateSetupState];
-	} else if (tabViewItem == gsListTabViewItem) {
+	} else if (tabViewItem == self.gsListTabViewItem) {
 		[self updateDatabaseState];
 	}
 }
@@ -584,7 +650,7 @@
 {
 	NSButton *myButton = sender;
 	NSInteger state = [myButton state];
-	[mySetup setTaskCloseWhenDoneCode:[NSNumber numberWithInteger:state]];
+	[self.mySetup setTaskCloseWhenDoneCode:[NSNumber numberWithInteger:state]];
 }
 
 - (void)taskError:(NSString *)aString;
@@ -611,9 +677,9 @@
 
 - (void)taskFinishedA;
 {
-	[taskProgressText setString:[NSMutableString new]];
-	[taskProgressPanel orderOut:nil];
-	[[NSApp mainWindow] endSheet:taskProgressPanel];
+	[self.taskProgressText setString:[NSMutableString new]];
+	[self.taskProgressPanel orderOut:nil];
+	[[NSApp mainWindow] endSheet:self.taskProgressPanel];
 }
 
 - (void)taskFinishedAfterDelay;
@@ -625,8 +691,8 @@
 
 - (void)taskFinishedAfterDelayA;
 {
-	[taskProgressIndicator stopAnimation:self];
-	[taskCancelButton setTitle:@"Close"];
+	[self.taskProgressIndicator stopAnimation:self];
+	[self.taskCancelButton setTitle:@"Close"];
 	[self performSelector:@selector(taskFinishedAfterDelayB)
 			   withObject:nil
 			   afterDelay:1.0];
@@ -634,14 +700,14 @@
 
 - (void)taskFinishedAfterDelayB;
 {
-	if ([[mySetup taskCloseWhenDoneCode] boolValue]) {
+	if ([[self.mySetup taskCloseWhenDoneCode] boolValue]) {
 		[self taskFinished];
 	}
 }
 
 - (void)taskProgress:(NSString *)aString;
 {
-	Boolean isVisible = [taskProgressPanel isVisible];
+	Boolean isVisible = [self.taskProgressPanel isVisible];
     NSUInteger length =[aString length];
 	Boolean hasLength = 0 < length;
 	if (isVisible && hasLength) {
@@ -656,9 +722,9 @@
 - (void)taskProgressA:(NSString *)aString;
 {
 	NSArray *array = [aString componentsSeparatedByString:@"\r"];
-	[taskProgressText insertText:[array objectAtIndex:0]];
+	[self.taskProgressText insertText:[array objectAtIndex:0]];
 	for (int i = 1; i < [array count]; ++i) {
-		NSString *string = [taskProgressText string];
+		NSString *string = [self.taskProgressText string];
 		NSString *nextLine = [array objectAtIndex:i];
 		int lastLF = -1;
 		for (int j = 0; j < [string length]; ++j) {
@@ -668,14 +734,14 @@
 		}
 		if (0 < lastLF) {
 			NSRange range = {lastLF + 1, [string length] - 1};
-			[taskProgressText setSelectedRange:range];
+			[self.taskProgressText setSelectedRange:range];
 			double value = [nextLine doubleValue];
 			if (value) {
-				[taskProgressIndicator setIndeterminate:NO];
-				[taskProgressIndicator setDoubleValue:value];
+				[self.taskProgressIndicator setIndeterminate:NO];
+				[self.taskProgressIndicator setDoubleValue:value];
 			}
 		}
-		[taskProgressText insertText:nextLine];
+		[self.taskProgressText insertText:nextLine];
 	}
 	[self doRunLoopFor:0.01];	//	ensure that it happens
 }
@@ -689,15 +755,15 @@
 
 - (void)taskStartA:(NSString *)aString;
 {
-	if (![taskProgressPanel isVisible]) {
-        [[NSApp mainWindow] beginSheet:taskProgressPanel
+	if (![self.taskProgressPanel isVisible]) {
+        [[NSApp mainWindow] beginSheet:self.taskProgressPanel
                      completionHandler:^(NSModalResponse returnCode) {
                          return;
                      }];
-		[taskProgressIndicator setIndeterminate:YES];
-		[taskProgressIndicator startAnimation:self];
-		[taskCancelButton setTitle:@"Cancel"];
-		[taskCloseWhenDoneButton setState:[[mySetup taskCloseWhenDoneCode] integerValue]];
+		[self.taskProgressIndicator setIndeterminate:YES];
+		[self.taskProgressIndicator startAnimation:self];
+		[self.taskCancelButton setTitle:@"Cancel"];
+		[self.taskCloseWhenDoneButton setState:[[self.mySetup taskCloseWhenDoneCode] integerValue]];
 	}
 	[self taskProgressA:aString];
 	[self doRunLoopFor:0.01];	//	ensure that it happens
@@ -705,11 +771,11 @@
 
 - (void)updateDatabaseList:(id)sender;
 {
-	NSUInteger index = [databaseListController selectionIndex];
-	[databaseListController setAvoidsEmptySelection:NO];
-	[databaseListController setSelectedObjects:[NSArray new]];
-	[databaseListController setSelectionIndex:index];
-	[databaseListController setAvoidsEmptySelection:YES];
+	NSUInteger index = [self.databaseListController selectionIndex];
+	[self.databaseListController setAvoidsEmptySelection:NO];
+	[self.databaseListController setSelectedObjects:[NSArray new]];
+	[self.databaseListController setSelectionIndex:index];
+	[self.databaseListController setAvoidsEmptySelection:YES];
 }
 
 - (void)updateDatabaseState;
@@ -728,40 +794,40 @@
 - (void)updateDatabaseState:(NSArray *)list;
 {
 	Database *database;
-	for (database in [databaseListController arrangedObjects]) {
+	for (database in [self.databaseListController arrangedObjects]) {
 		[database gsList:list];
 	}
-	[processListController removeObjects:[processListController arrangedObjects]];
-	[processListController addObjects:list];
-	[databaseTableView reloadData];
+	[self.processListController removeObjects:[self.processListController arrangedObjects]];
+	[self.processListController addObjects:list];
+	[self.databaseTableView reloadData];
 }
 
 - (void)updateSetupState;
 {
-	BOOL isAvailable = [helper isAvailable];
-	[helperToolMessage setHidden:!isAvailable];
-	[authenticateButton setEnabled:!isAvailable];
-	[removeButton setEnabled:isAvailable];
+	BOOL isAvailable = [self.helper isAvailable];
+	[self.helperToolMessage setHidden:!isAvailable];
+	[self.authenticateButton setEnabled:!isAvailable];
+	[self.removeButton setEnabled:isAvailable];
 	if (!isAvailable) {
 		//	if helper tool needs to be installed, then ensure that Setup tab is selected
-		[topTabView selectFirstTabViewItem:nil];
+		[self.topTabView selectFirstTabViewItem:nil];
 	}
 
-	[currentShmall setStringValue:[helper shmall]];
-	[currentShmmax setStringValue:[helper shmmax]];
-	[hostname setStringValue:[helper hostName]];
-	if ([helper hasDNS]) {
-		[ipAddress setStringValue:[helper ipAddress]];
-		[addToEtcHostsButton setEnabled:NO];
+	[self.currentShmall setStringValue:[self.helper shmall]];
+	[self.currentShmmax setStringValue:[self.helper shmmax]];
+	[self.hostname setStringValue:[self.helper hostName]];
+	if ([self.helper hasDNS]) {
+		[self.ipAddress setStringValue:[self.helper ipAddress]];
+		[self.addToEtcHostsButton setEnabled:NO];
 	} else {
-		[ipAddress setStringValue:@"-unknown-"];
-		[addToEtcHostsButton setEnabled:isAvailable];
+		[self.ipAddress setStringValue:@"-unknown-"];
+		[self.addToEtcHostsButton setEnabled:isAvailable];
 	}
 }
 
 - (NSArray *)versionList;
 {
-	return [versionListController arrangedObjects];
+	return [self.versionListController arrangedObjects];
 }
 
 - (void)versionListDownloadDone:(DownloadVersionList *)download;
@@ -770,7 +836,7 @@
 		NSManagedObjectModel *managedObjectModel = [[managedObjectContext persistentStoreCoordinator] managedObjectModel];
 		NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Version"];
 		
-		NSMutableArray *oldVersions = [NSMutableArray arrayWithArray:[versionListController arrangedObjects]];
+		NSMutableArray *oldVersions = [NSMutableArray arrayWithArray:[self.versionListController arrangedObjects]];
 		for (NSDictionary *dict in [download versions]) {
 			Version *oldVersion = nil;
 			for (Version *each in oldVersions) {
@@ -789,20 +855,20 @@
 									insertIntoManagedObjectContext:managedObjectContext];
 				[version setName:[dict objectForKey:@"name"]];
 				[version setDate:[dict objectForKey:@"date"]];
-				[versionListController addObject:version];
+				[self.versionListController addObject:version];
 			}
 		}
 		//	remove versions that no longer exist
 		for (Version *eachVersion in oldVersions) {
 			if (![eachVersion isInstalled]) {
 				if (![self databaseExistsForVersion:eachVersion]) {
-					[versionListController removeObject:eachVersion];
+					[self.versionListController removeObject:eachVersion];
 					[managedObjectContext deleteObject:eachVersion];
 				}
 			}
 		}
-		[mySetup setVersionsDownloadDate:[NSDate date]];
-		[versionListController rearrangeObjects];
+		[self.mySetup setVersionsDownloadDate:[NSDate date]];
+		[self.versionListController rearrangeObjects];
 		[self refreshInstalledVersionsList];
 		[self refreshUpgradeVersionsList];
 		[self taskProgressA:@"New version list received!"];
@@ -822,7 +888,7 @@
 							waitUntilDone:NO];
 		blockTask = nil;				//	break reference count cycle
 	}];
-	[operations addOperation:task];
+	[self.operations addOperation:task];
 }
 
 - (void)versionUnzipDone:(UnzipVersion *)unzipTask;
@@ -838,7 +904,7 @@
 		}
 		NSString *name = [[path substringToIndex:lastDash] substringFromIndex:lastSlash + 14];
 		Boolean isVersionPresent = NO;
-		for (Version *version in [versionListController arrangedObjects]) {
+		for (Version *version in [self.versionListController arrangedObjects]) {
 			isVersionPresent = isVersionPresent || [[version name] isEqualToString:name];
 		}
 		if (!isVersionPresent) {
@@ -848,7 +914,7 @@
 								insertIntoManagedObjectContext:managedObjectContext];
 			[version setName:name];
 			[version setDate:[NSDate date]];
-			[versionListController addObject:version];
+			[self.versionListController addObject:version];
 		}
 		[self refreshInstalledVersionsList];
 		[self refreshUpgradeVersionsList];
@@ -865,7 +931,7 @@
 - (BOOL)windowShouldClose:(NSWindow *)window;
 {
     BOOL shouldWait = NO;
-    for (id database in [databaseListController arrangedObjects]) {
+    for (id database in [self.databaseListController arrangedObjects]) {
         if ([database isRunning]) {
             NSAlert *alert = [[NSAlert alloc] init];
             [alert addButtonWithTitle:@"Yes"];
@@ -891,7 +957,7 @@
     if (shouldWait) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^(void){
             //Background Thread
-            while (0 < [operations operationCount]) {
+            while (0 < [self.operations operationCount]) {
                 [NSThread sleepForTimeInterval:0.1f];
             }
             [NSThread sleepForTimeInterval:2.0f];

@@ -8,11 +8,9 @@
 
 #import "DatabaseTask.h"
 
-@interface WaitStone : DatabaseTask {
-	BOOL		isReady;
-}
+@interface WaitStone : DatabaseTask { }
 
-@property (readonly)			BOOL		isReady;
+@property (readonly)	BOOL	isReady;
 
 + (BOOL)isStoneRunningForDatabase:(Database *)database;
 + (BOOL)isNetLdiRunningForDatabase:(Database *)database;

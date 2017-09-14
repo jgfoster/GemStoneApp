@@ -10,15 +10,21 @@
 #import "UnzipVersion.h"
 #import "Utilities.h"
 
+@interface UnzipVersion ()
+
+@property 	NSArray		*directoryContents;
+
+@end
+
 @implementation UnzipVersion
 
-@synthesize zipFilePath;
+// @synthesize zipFilePath;
 
 - (NSArray *)arguments;
 {
-	if (!zipFilePath) AppError(@"Zip file path must be provided!");	
+	if (!self.zipFilePath) AppError(@"Zip file path must be provided!");
 	return [NSArray arrayWithObjects:
-			zipFilePath, 
+			self.zipFilePath,
 			@"-d",
 			basePath,
 			nil];
@@ -27,7 +33,7 @@
 - (void)cancel;
 {
 	[super cancel];
-	if (!directoryContents) return;
+	if (!self.directoryContents) return;
 	[appController taskProgress:@"\n\nCancel request received.\nDeleting unzipped items . . .\n"];
 	NSError *error = nil;
 	NSArray *currentList = [fileManager contentsOfDirectoryAtPath:basePath error:&error];
@@ -36,7 +42,7 @@
 	}
 	for (id current in currentList) {
 		Boolean	flag = NO;
-		for (id prior in directoryContents) {
+		for (id prior in self.directoryContents) {
 			flag = flag || [current isEqualToString:prior];
 		}
 		if (!flag) {
@@ -44,8 +50,8 @@
 			[Version removeVersionAtPath:path];
 		}
 	}
-	if ([zipFilePath hasPrefix:basePath]) {
-		[fileManager removeItemAtPath:zipFilePath error:nil];
+	if ([self.zipFilePath hasPrefix:basePath]) {
+		[fileManager removeItemAtPath:self.zipFilePath error:nil];
 	}
 }
 
@@ -56,8 +62,8 @@
 
 - (void)done;
 {
-	if ([zipFilePath hasPrefix:basePath]) {
-		[fileManager removeItemAtPath:zipFilePath error:nil];
+	if ([self.zipFilePath hasPrefix:basePath]) {
+		[fileManager removeItemAtPath:self.zipFilePath error:nil];
 	}
 	[super done];
 }
@@ -88,8 +94,8 @@
 - (void)main;
 {
 	NSError *error = nil;
-	directoryContents = [fileManager contentsOfDirectoryAtPath:basePath error:&error];
-	if (!directoryContents) {
+	self.directoryContents = [fileManager contentsOfDirectoryAtPath:basePath error:&error];
+	if (!self.directoryContents) {
 		AppError(@"Unable to obtain contents of %@", basePath);
 	}
     [appController taskStart:@"Starting import of zip file . . .\n"];
@@ -130,7 +136,7 @@
 				   [op orderOut:nil];
                    if (result != NSFileHandlingPanelOKButton) return;
                    __block id me = self;		//	blocks get a COPY of referenced objects unless explicitly shared
-                   zipFilePath = [[[op URLs] objectAtIndex:0] path];
+                   self.zipFilePath = [[[op URLs] objectAtIndex:0] path];
                    [self setCompletionBlock:^(){
                        [appController performSelectorOnMainThread:@selector(versionUnzipDone:)
                                                        withObject:me

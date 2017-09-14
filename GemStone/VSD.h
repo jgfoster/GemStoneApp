@@ -8,9 +8,7 @@
 
 #import "DatabaseTask.h"
 
-@interface VSD : DatabaseTask {
-	NSString *path;
-}
+@interface VSD : DatabaseTask { }
 
 + (VSD *)openPath:(NSString *)path usingDatabase:(Database *)database;
 

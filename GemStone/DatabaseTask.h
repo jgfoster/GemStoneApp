@@ -9,11 +9,9 @@
 #import "Task.h"
 #import "Database.h"
 
-@interface DatabaseTask : Task {
-	Database		*database;
-}
+@interface DatabaseTask : Task { }
 
-@property (nonatomic, retain) Database *database;
+@property	Database *database;
 
 + (id)forDatabase:(Database *)aDatabase;
 - (NSString *)binName;

@@ -9,9 +9,13 @@
 #import "Terminal.h"
 #import "Utilities.h"
 
-@implementation Terminal
+@interface Terminal ()
 
-@synthesize script;
+@property	NSString *script;
+
+@end
+
+@implementation Terminal
 
 + (void)doScript:(NSString *)script forDatabase:(Database *)aDatabase;
 {
@@ -25,7 +29,7 @@
 	NSMutableString *string = [NSMutableString new];
 	[string appendString:@"#!/bin/sh\n"];
 	[string appendString:@"# set environment variables for GemStone/S\n"];
-	[string appendFormat: @"cd %@\n", [database directory]];
+	[string appendFormat: @"cd %@\n", [self.database directory]];
 	NSDictionary *environment = [self environment];
 	for (NSString* key in [environment allKeys]) {
 		if ([key rangeOfString:@"GEM"].location != NSNotFound) {
@@ -37,12 +41,12 @@
 	[string appendString:@"export MANPATH=\"$GEMSTONE/doc:$MANPATH\"\n"];
 	[string appendString:@"# from $GEMSTONE/seaside/etc/gemstone.conf\n"];
 	[string appendFormat:@"export GEMSTONE_USER=\"%@\"\n", NSUserName()];
-	[string appendFormat:@"export GEMSTONE_NAME=\"%@\"\n", [database name]];
-	[string appendFormat:@"export GEMSTONE_LOGDIR=\"%@/log\"\n", [database directory]];
-	[string appendFormat:@"export GEMSTONE_DATADIR=\"%@/data\"\n", [database directory]];
+	[string appendFormat:@"export GEMSTONE_NAME=\"%@\"\n", [self.database name]];
+	[string appendFormat:@"export GEMSTONE_LOGDIR=\"%@/log\"\n", [self.database directory]];
+	[string appendFormat:@"export GEMSTONE_DATADIR=\"%@/data\"\n", [self.database directory]];
 	
 	[string appendFormat:@"# rm %@\n", [self scriptPath]];
-	[string appendFormat:@"%@\n", script];
+	[string appendFormat:@"%@\n", self.script];
 	NSNumber *number = [NSNumber numberWithShort:0700];
 	NSDictionary *attributes = [NSDictionary dictionaryWithObject:number
 														   forKey:NSFilePosixPermissions];
@@ -89,7 +93,7 @@
 
 - (NSString *)scriptPath;
 {
-	return [NSString stringWithFormat:@"%@/setEnv.sh", [database directory]];
+	return [NSString stringWithFormat:@"%@/setEnv.sh", [self.database directory]];
 }
 
 @end

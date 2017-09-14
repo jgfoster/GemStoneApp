@@ -8,13 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface LogFile : NSObject {
-	NSString	*path;
-	NSString	*type;
-	NSString	*pid;
-	NSDate		*date;
-	NSNumber	*size;
-}
+@interface LogFile : NSObject { }
 
 @property (readonly)	NSString	*path;
 @property (readonly)	NSString	*type;

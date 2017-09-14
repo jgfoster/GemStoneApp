@@ -10,31 +10,20 @@
 #import <CoreData/CoreData.h>
 #import "Task.h"
 
-@interface Database : NSManagedObject <NSTableViewDataSource, NSTableViewDelegate> {
-	// persistent
-	NSNumber *identifier;  
-	NSNumber *indexInArray;  
-	NSDate	 *lastStartDate;
-	NSString *name;
-	NSString *netLDI;
-	NSNumber *spc_mb;
-	NSString *version;
+@interface Database : NSManagedObject <NSTableViewDataSource, NSTableViewDelegate> { }
 
-	// transient
-	NSNumber	*isRunningCode;
-	NSArray		*statmonFiles;
-	Task		*statmonitor;
-}
-
-@property (readonly)			NSNumber *identifier;  
-@property (nonatomic, retain)	NSNumber *indexInArray;  
-@property (readonly)			NSDate	 *lastStartDate;
-@property (nonatomic, retain)	NSString *name;
-@property (nonatomic, retain)	NSString *netLDI;
-@property (nonatomic, retain)	NSNumber *spc_mb;
-@property (nonatomic, retain)	NSString *version;
-
-@property (nonatomic, retain)	NSNumber *isRunningCode;
+// persistent
+@property (readonly)	NSNumber *identifier;
+@property				NSNumber *indexInArray;
+@property				NSDate	 *lastStartDate;
+@property				NSString *name;
+@property				NSString *netLDI;
+@property				NSNumber *spc_mb;
+@property				NSString *version;
+// transient
+@property (readonly)	BOOL	  isRunning;
+@property (readonly)	NSArray	 *statmonFiles;
+@property				Task	 *statmonitor;
 
 - (void)archiveCurrentLogFiles;
 - (void)archiveCurrentTransactionLogs;

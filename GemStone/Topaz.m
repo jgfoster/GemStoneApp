@@ -9,9 +9,16 @@
 #import "Topaz.h"
 #import "Utilities.h"
 
+@interface Topaz ()
+
+@property	block_t		block;
+@property	NSInteger	 session;
+
+@end
+
 @implementation Topaz
 
-@synthesize block;
+// @synthesize block;
 
 + (id)database:(Database *)aDatabase do:(block_t)aBlock;
 {
@@ -34,8 +41,8 @@
 
 - (void)cancel;
 {
-	if (session) {
-		[task interrupt];	// sends SIGINT, equivalent of <Ctrl>+<C>
+	if (self.session) {
+		[self.task interrupt];	// sends SIGINT, equivalent of <Ctrl>+<C>
 		[self send:@"logout\n"];
 	}
 	[self send:@"exit 1\n"];
@@ -51,7 +58,7 @@
 		[appController taskProgress:[NSString stringWithFormat:@"\nDeleting existing file at '%@'\n", aString]];
 		BOOL flag = [fileManager removeItemAtPath:aString error:&error];
 		if (flag == NO) {
-			errorOutput = [NSMutableString stringWithFormat:@"Unable to delete %@ because %@\n", aString, [error description]];
+			self.errorOutput = [NSMutableString stringWithFormat:@"Unable to delete %@ because %@\n", aString, [error description]];
 			[self cancel];
 			return;
 		}
@@ -65,7 +72,7 @@
 		outString = [self outputUpToPrompt];
 	}
 	if ([outString rangeOfString:@"true\n"].location == NSNotFound) {
-		errorOutput = [NSMutableString stringWithString:outString];
+		self.errorOutput = [NSMutableString stringWithString:outString];
 		[self cancel];
 		return;
 	}
@@ -76,19 +83,19 @@
 - (NSString *)outputUpToPrompt;
 {
 	NSRange range0, range1, range2, range3;
-	if ([[database version] isEqualTo:@"3.2.0"]) {
+	if ([[self.database version] isEqualTo:@"3.2.0"]) {
 		[self send:@"\n"];
 	}
 	do {
 		[self delayFor:0.01];
-		NSInteger index = [standardOutput length] - 10;
+		NSInteger index = [self.standardOutput length] - 10;
 		if (index < 0) index = 0;
 		range0.location = index;
-		range0.length = MIN([standardOutput length], 10);
-		range1 = [standardOutput rangeOfString:@"topaz" options:0 range:range0];
+		range0.length = MIN([self.standardOutput length], 10);
+		range1 = [self.standardOutput rangeOfString:@"topaz" options:0 range:range0];
 		if (range1.location != NSNotFound) {
-			range1.length = [standardOutput length] - range1.location;
-			range2 = [standardOutput rangeOfString:@"> " options:0 range:range1];
+			range1.length = [self.standardOutput length] - range1.location;
+			range2 = [self.standardOutput rangeOfString:@"> " options:0 range:range1];
 		}
 	} while (range1.location == NSNotFound || range2.location == NSNotFound || range1.location <= 1);
 	range3.location = range1.location + 5;
@@ -96,12 +103,12 @@
 	if (range3.length) {
 		range3.location = range3.location + 1;
 		range3.length = range3.length - 1;
-		session = [[standardOutput substringWithRange:range3] integerValue]; 
+		self.session = [[self.standardOutput substringWithRange:range3] integerValue];
 	} else {
-		session = 0;
+		self.session = 0;
 	}
-	NSString *string = [standardOutput substringToIndex:range1.location];
-	standardOutput = [NSMutableString new];
+	NSString *string = [self.standardOutput substringToIndex:range1.location];
+	self.standardOutput = [NSMutableString new];
 	return string;
 }
 
@@ -117,37 +124,37 @@
 	NSString *inString = [NSString 
 						  stringWithFormat:@"run\nSystemRepository restoreFromBackup:'%@'\n%%\n", 
 						  aString];
-	NSString *outString = [NSString stringWithFormat:@"%@ %@", [self responseFrom:inString], errorOutput];
-	errorOutput = [NSMutableString new];
-	standardOutput = [NSMutableString new];
+	NSString *outString = [NSString stringWithFormat:@"%@ %@", [self responseFrom:inString], self.errorOutput];
+	self.errorOutput = [NSMutableString new];
+	self.standardOutput = [NSMutableString new];
 	if ([outString isEqualToString:@" "]) {
 		[self delayFor:1.0];
 		outString = [self outputUpToPrompt];
-		outString = [NSString stringWithFormat:@"%@ %@", outString, errorOutput];
-		errorOutput = [NSMutableString new];
-		standardOutput = [NSMutableString new];
+		outString = [NSString stringWithFormat:@"%@ %@", outString, self.errorOutput];
+		self.errorOutput = [NSMutableString new];
+		self.standardOutput = [NSMutableString new];
 	}
 	NSRange range = [outString rangeOfString:@"The restore from full backup completed"];
 	if (range.location == NSNotFound) {
 		range = [outString rangeOfString:@"The restore from backup completed"];
 	}
 	if (range.location == NSNotFound) {
-		errorOutput = [NSMutableString stringWithString:outString];
+		self.errorOutput = [NSMutableString stringWithString:outString];
 		[self cancel];
 		return;
 	}
 
 	outString = [self responseFrom:@"login\n"];
-	if (!session) {
-		errorOutput = [NSMutableString stringWithString:[outString substringFromIndex:range.location]];
+	if (!self.session) {
+		self.errorOutput = [NSMutableString stringWithString:[outString substringFromIndex:range.location]];
 		[self cancel];
 		return;
 	}
 	outString = [self responseFrom:@"run\nSystemRepository commitRestore\n%\n"];
-	outString = [NSString stringWithFormat:@"%@ %@", outString, errorOutput];
+	outString = [NSString stringWithFormat:@"%@ %@", outString, self.errorOutput];
 	range = [outString rangeOfString:@"Restore from transaction log(s) succeeded"];
-	if (session || range.location == NSNotFound) {
-		errorOutput = [NSMutableString stringWithString:outString];
+	if (self.session || range.location == NSNotFound) {
+		self.errorOutput = [NSMutableString stringWithString:outString];
 		[self cancel];
 		return;
 	}
@@ -156,7 +163,7 @@
 
 - (void)send:(NSString *)inString;
 {
-	NSFileHandle *file = [[task standardInput] fileHandleForWriting];
+	NSFileHandle *file = [[self.task standardInput] fileHandleForWriting];
 	NSData *data = [inString dataUsingEncoding:NSUTF8StringEncoding];
 	[file writeData:data];
 }
@@ -166,12 +173,12 @@
 	[appController taskStart:[NSString stringWithFormat:@"Starting Topaz task...\n"]];
 	[super startTask];
 	[self outputUpToPrompt];
-	if (session) {
-		if (block) {
-			block(self);
+	if (self.session) {
+		if (self.block) {
+			self.block(self);
 		}
 	} else {
-		errorOutput = [NSMutableString stringWithString:@"Topaz login was not successful!"];
+		self.errorOutput = [NSMutableString stringWithString:@"Topaz login was not successful!"];
 		[self cancel];
 	}
 }

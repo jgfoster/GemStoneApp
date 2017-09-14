@@ -28,6 +28,11 @@
 
 @implementation Database
 
+@synthesize identifier		= _identifier;
+@synthesize isRunning		= _isRunning;
+@synthesize statmonFiles	= _statmonFiles;
+@synthesize statmonitor		= _statmonitor;
+
 // following are part of the DataModel handled by Core Data
 @dynamic indexInArray;
 @dynamic lastStartDate;
@@ -35,8 +40,6 @@
 @dynamic netLDI;
 @dynamic spc_mb;
 @dynamic version;
-
-@synthesize isRunningCode;
 
 - (void)archiveCurrentLogFiles;
 {
@@ -313,14 +316,14 @@
 - (void)deleteStatmonFilesAtIndexes:(NSIndexSet *)indexes;
 {
 	[indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-		NSDictionary *statmon = [[self statmonFiles] objectAtIndex:idx];
+		NSDictionary *statmon = [self.statmonFiles objectAtIndex:idx];
 		NSError *error = nil;
 		NSString *path = [statmon objectForKey:@"path"];
 		if (![fileManager removeItemAtPath:path error:&error]) {
 			AppError(@"Unable to delete %@ because %@", path, [error description]);
 		}
 	}];
-	statmonFiles = nil;
+	_statmonFiles = nil;
 	[[appController statmonTableView] reloadData];
 }
 
@@ -394,10 +397,10 @@
 
 - (void)gsList:(NSArray *)list;
 {
-	isRunningCode = [NSNumber numberWithBool:NO];
+	self.isRunning = NO;
 	for (NSDictionary *process in list) {
 		NSString *string = [process valueForKey:@"version"];
-		if ([string isEqualToString:version]) {
+		if ([string isEqualToString:self.version]) {
 			string = [process valueForKey:@"GEMSTONE"];
 			if ([string isEqualToString:[self gemstone]]) {
 				string = [process valueForKey:@"logfile"];
@@ -406,7 +409,7 @@
 				if (range.location == 0) {
 					string = [process valueForKey:@"type"];
 					if ([string isEqualToString:@"Stone"]) {
-						isRunningCode = [NSNumber numberWithBool:YES];
+						self.isRunning = YES;
 						return;
 					}
 				}
@@ -417,14 +420,14 @@
 
 - (NSNumber *)identifier;
 {
-	if (![identifier intValue]) {
-		identifier = [appController nextDatabaseIdentifier];
+	if (![self.identifier intValue]) {
+		_identifier = [appController nextDatabaseIdentifier];
 		[self createDirectories];
-		version = [appController mostAdvancedVersion];
+		self.version = [appController mostAdvancedVersion];
 		[self installGlassExtent];
 		[self createConfigFiles];
 	}
-	return identifier;
+	return self.identifier;
 }
 
 - (NSString *)infoForDataFile:(NSString *)file;
@@ -442,7 +445,7 @@
 	NSError *error = nil;
 	NSString *target = [NSString stringWithFormat:@"%@/data/extent0.dbf", [self directory]];
 	if ([fileManager fileExistsAtPath:target]) {
-		if (lastStartDate) {
+		if (self.lastStartDate) {
 			NSAlert *alert = [[NSAlert alloc] init];
 			[alert setAlertStyle:NSCriticalAlertStyle];
 			[alert setMessageText:@"Replace existing repository?"];
@@ -480,7 +483,7 @@
 	if (!success) {
 		AppError(@"Unable to change permissions of %@ because %@", target, [error description]);
 	}
-	lastStartDate = nil;
+	self.lastStartDate = nil;
 	[appController taskFinishedAfterDelay];
 	[appController updateDatabaseList:nil];
 }
@@ -488,11 +491,6 @@
 - (void)installGlassExtent;
 {
 	[self installExtent:@"extent0.seaside.dbf"];
-}
-
-- (BOOL)isRunning;
-{
-	return [isRunningCode boolValue];
 }
 
 - (NSString *)isRunningString;
@@ -530,20 +528,20 @@
 
 - (NSString *)name;
 {
-	if ([name length]) return name;
-	return [NSString stringWithFormat:@"gs64stone%@", [self identifier]];
+	if ([self.name length]) return self.name;
+	return [NSString stringWithFormat:@"gs64stone%@", self.identifier];
 }
 
 - (NSString *)netLDI;
 {
-	if ([netLDI length]) return netLDI;
-	return [NSString stringWithFormat:@"netldi%@", [self identifier]];
+	if ([self.netLDI length]) return self.netLDI;
+	return [NSString stringWithFormat:@"netldi%@", self.identifier];
 }
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView;
 {
 	if ([appController statmonTableView] == aTableView) {
-		return [[self statmonFiles] count];
+		return [self.statmonFiles count];
 	}
 	return 0;
 }
@@ -577,7 +575,7 @@
 - (void)openStatmonFilesAtIndexes:(NSIndexSet *)indexes;
 {
 	[indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-		NSDictionary *statmon = [[self statmonFiles] objectAtIndex:idx];
+		NSDictionary *statmon = [self.statmonFiles objectAtIndex:idx];
 		NSString *path = [statmon objectForKey:@"path"];
 		[VSD openPath:path usingDatabase:self];
 	}];
@@ -615,7 +613,7 @@
 
 - (void)refreshStatmonFiles;
 {
-	statmonFiles = nil;
+	_statmonFiles = nil;
 }
 
 - (void)restore;
@@ -643,25 +641,25 @@
                    [self startDatabaseWithArgs:[NSArray arrayWithObject:@"-R"]];
                    Topaz *topaz = [Topaz database:self
                                    do:^(Topaz *aTopaz) { [aTopaz restoreFromBackup:path]; } ];
-                   [topaz addDependency:statmonitor];
+                   [topaz addDependency:self.statmonitor];
 				   [topaz setCompletionBlock:^(){ [me startIsDone]; me = nil; }];
-                   [appController addOperation:statmonitor];
+                   [appController addOperation:self.statmonitor];
                    [appController addOperation:topaz];
                }];
  }
 
 - (void)setIsRunning:(BOOL)aBool;
 {
-	isRunningCode = [NSNumber numberWithBool:aBool];
+	_isRunning = aBool;
 	if (aBool) {
-		lastStartDate = [NSDate date];
+		self.lastStartDate = [NSDate date];
 	}
 }
 
 - (void)setVersion:(NSString *)aString;
 {
-	if (version == aString) return;
-	version = aString;
+	if (self.version == aString) return;
+	self.version = aString;
 	[self installGlassExtent];
 }
 
@@ -695,9 +693,9 @@
 	__block id me = self;		//	blocks get a COPY of referenced objects unless explicitly shared
 	StartCacheWarmer *cacheWarmer = [StartCacheWarmer forDatabase:self];
 	[cacheWarmer setCompletionBlock:^(){ [me startIsDone]; me = nil; }];
-	[cacheWarmer addDependency:statmonitor];
+	[cacheWarmer addDependency:self.statmonitor];
 	[appController addOperation:cacheWarmer];
-	[appController addOperation:statmonitor];
+	[appController addOperation:self.statmonitor];
 }
 
 //	starts statmonitor, but does not add it as an operation
@@ -705,7 +703,7 @@
 - (void)startDatabaseWithArgs:(NSArray *)args;
 {
 	if ([WaitStone isStoneRunningForDatabase: self]) {
-		isRunningCode = [NSNumber numberWithBool:YES];
+		_isRunning = YES;
 		NSAlert *alert = [[NSAlert alloc] init];
 		[alert setMessageText:@"Database is already running!"];
 		[alert setInformativeText:@"No need to start it again!"];
@@ -716,15 +714,15 @@
 	[appController ensureSharedMemory];
 	[self createConfigFiles];
 	[self createTopazIniFile];
-	statmonFiles = nil;
+	_statmonFiles = nil;
 
 	[appController taskStart:@"Starting NetLDI, Stone, and Statmonitor . . .\n\n"];
 	StartNetLDI *startNetLdi = [StartNetLDI forDatabase:self];
 	StartStone *startStone = [StartStone forDatabase:self];
 	[startStone setArgs:args];
 	[startStone addDependency:startNetLdi];
-	statmonitor = [Statmonitor forDatabase:self];
-	[statmonitor addDependency:startStone];
+	self.statmonitor = [Statmonitor forDatabase:self];
+	[self.statmonitor addDependency:startStone];
 	
 	[appController addOperation:startNetLdi];
 	[appController addOperation:startStone];
@@ -751,9 +749,9 @@
 
 - (NSArray *)statmonFiles;
 {
-	if (statmonFiles) return statmonFiles;
+	if (self.statmonFiles) return self.statmonFiles;
 	NSMutableArray *list = [NSMutableArray array];
-	statmonFiles = list;
+	_statmonFiles = list;
 	NSString *path = [NSString stringWithFormat:@"%@/stat", [self directory]];
 	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:path];
 	NSString *file;
@@ -771,10 +769,10 @@
 		[statmon setValue:gemstone forKey:@"gemstone"];
 		[list addObject:statmon];
 	}
-	statmonFiles = [statmonFiles sortedArrayUsingComparator:^NSComparisonResult(id a, id b) {
+	_statmonFiles = [self.statmonFiles sortedArrayUsingComparator:^NSComparisonResult(id a, id b) {
 		return [[a valueForKey:NSFileCreationDate] compare:[b valueForKey:NSFileCreationDate]];
 	}];
-	return statmonFiles;
+	return self.statmonFiles;
 }
 
 - (void)stopDatabase;
@@ -783,8 +781,8 @@
 	StopNetLDI *stopNetLdi = [StopNetLDI forDatabase:self];
 	StopStone *stopStone = [StopStone forDatabase:self];
 	[stopStone addDependency:stopNetLdi];
-	[statmonitor cancel];
-	statmonitor = nil;
+	[self.statmonitor cancel];
+	self.statmonitor = nil;
 	__block id me = self;		//	blocks get a COPY of referenced objects unless explicitly shared
 	[stopStone setCompletionBlock:^(){ [me stopIsDone]; me = nil; }];
 	
@@ -858,8 +856,11 @@
 
 - (NSString *)version;
 {
-	if (![version length]) return nil;
-	return version;
+	[self willAccessValueForKey:@"version"];
+	NSString *myVersion = [self primitiveValueForKey:@"version"];
+	[self didAccessValueForKey:@"version"];
+	if (![myVersion length]) return nil;
+	return myVersion;
 }
 
 @end

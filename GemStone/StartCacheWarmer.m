@@ -12,7 +12,7 @@
 
 - (NSArray *)arguments;
 {
-	NSString *stoneName = [database name];
+	NSString *stoneName = [self.database name];
 	return [NSArray arrayWithObjects:
 			@"-d",
 			@"-L",

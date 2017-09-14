@@ -13,7 +13,7 @@
 
 @implementation DownloadVersionList
 
-@synthesize versions;
+@synthesize versions = _versions;
 
 - (NSArray *)arguments;
 {
@@ -24,13 +24,13 @@
 
 - (void)dataString:(NSString *)aString;
 {
-	[standardOutput appendString:aString];
+	[self.standardOutput appendString:aString];
 }
 
 - (void)done;
 {
-	NSString *string = standardOutput;
-	standardOutput = nil;
+	NSString *string = self.standardOutput;
+	self.standardOutput = nil;
 	NSUInteger loc = [string rangeOfString:@">"].location;
 	if (NSNotFound == loc) {
 		AppError(@"invalid data returned from version list");
@@ -53,7 +53,7 @@
 	[inFormatter setDateFormat:@"yyyy-MMM-dd hh:mm:ss"];
 	NSDateFormatter *outFormatter = [NSDateFormatter new];
 	[outFormatter setDateFormat:@"yyyy-mm-dd"];
-	versions = [NSMutableArray arrayWithCapacity:[nodes count]];
+	_versions = [NSMutableArray arrayWithCapacity:[nodes count]];
 	for (id node in nodes) {
 		NSArray *fields = [node nodesForXPath:@"td" error:&error];
 		NSString *name = [[fields objectAtIndex:0] stringValue];
@@ -63,7 +63,7 @@
 		NSDictionary *version = [NSMutableDictionary dictionaryWithCapacity:3];
 		[version setValue:name forKey:@"name"];
 		[version setValue:date forKey:@"date"];
-		[versions addObject:version];
+		[self.versions addObject:version];
 	}
 	[super done];
 }

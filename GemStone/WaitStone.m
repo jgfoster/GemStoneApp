@@ -10,7 +10,7 @@
 
 @implementation WaitStone
 
-@synthesize isReady;
+@synthesize isReady = _isReady;
 
 + (BOOL)isStoneRunningForDatabase:(Database *)database;
 {
@@ -30,7 +30,7 @@
 - (NSArray *)arguments;
 { 
 	return [NSArray arrayWithObjects: 
-			[database name],
+			[self.database name],
 			@"-1",
 			nil];
 }
@@ -42,13 +42,13 @@
 
 - (void)done;
 {
-	isReady = YES;
+	_isReady = YES;
 	[super done];
 }
 
 - (void)doneWithError:(int)statusCode;
 {
-	isReady = NO;
+	_isReady = NO;
 	[super doneWithError:0];
 }
 

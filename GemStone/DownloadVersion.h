@@ -9,13 +9,9 @@
 #import "Download.h"
 #import "Version.h"
 
-@interface DownloadVersion : Download {
-	Version			*version;
-	NSString		*zipFilePath;
-	NSFileHandle	*zipFile;
-}
+@interface DownloadVersion : Download { }
 
-@property (nonatomic, retain)	Version		*version;
-@property (readonly)			NSString	*zipFilePath;
+@property				Version		*version;
+@property (readonly)	NSString	*zipFilePath;
 
 @end

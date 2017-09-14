@@ -21,15 +21,15 @@
 { 
 	return [NSArray arrayWithObjects: 
 			@"-I",
-			path,
+			self.path,
 			nil];
 }
 
 - (NSString *)infoForPath:(NSString *)aString;
 {
-	path = aString;
+	self.path = aString;
 	[self main];
-	return allOutput;
+	return self.allOutput;
 }
 
 - (NSString *)binName;

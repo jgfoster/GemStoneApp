@@ -16,7 +16,7 @@
 
 - (NSArray *)arguments;
 {
-	NSString *netLDI = [database netLDI];
+	NSString *netLDI = [self.database netLDI];
 	return [NSArray arrayWithObjects: 
 			@"-g",
 			@"-a",

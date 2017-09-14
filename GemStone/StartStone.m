@@ -11,13 +11,11 @@
 
 @implementation StartStone
 
-@synthesize args;
-
 - (NSArray *)arguments;
 { 
-	NSMutableArray *list = [NSMutableArray arrayWithObject:[database name]];
-	if (args) {
-		[list addObjectsFromArray:args];
+	NSMutableArray *list = [NSMutableArray arrayWithObject:[self.database name]];
+	if (self.args) {
+		[list addObjectsFromArray:self.args];
 	}
 	return list;
 }
@@ -29,7 +27,7 @@
 
 - (void)done;
 {
-	[database setIsRunning:YES];
+	[self.database setIsRunning:YES];
 //	[self delayFor:2.0];	//	give time for output so it isn't intermixed with other output
 	[super done];
  }

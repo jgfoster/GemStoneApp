@@ -16,9 +16,9 @@
 	NSDateFormatter *formatter = [NSDateFormatter new];
 	[formatter setDateFormat:@"yyyy-MM-dd-HH-mm-ss"];
 	NSString *dateString = [formatter stringFromDate:[NSDate date]];
-	NSString *path = [NSString stringWithFormat:@"%@/stat/statmon_%@",[database directory], dateString];
+	NSString *path = [NSString stringWithFormat:@"%@/stat/statmon_%@",[self.database directory], dateString];
 	return [NSArray arrayWithObjects: 
-			[database name],
+			[self.database name],
 			@"-f",
 			path,
 			@"-h",

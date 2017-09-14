@@ -12,12 +12,7 @@
 
 typedef void(^block_t)(Topaz *);
 
-@interface Topaz : DatabaseTask {
-	NSInteger	 session;
-	block_t		 block;
-}
-
-@property (nonatomic, copy)		block_t	 block;
+@interface Topaz : DatabaseTask { }
 
 + (id)database:(Database *)aDatabase do:(block_t)aBlock;
 

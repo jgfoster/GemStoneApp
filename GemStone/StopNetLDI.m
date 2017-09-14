@@ -14,7 +14,7 @@
 - (NSArray *)arguments;
 { 
 	return [NSArray arrayWithObjects: 
-			[database netLDI],
+			[self.database netLDI],
 			nil];
 }
 

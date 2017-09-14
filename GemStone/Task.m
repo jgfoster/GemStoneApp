@@ -9,6 +9,13 @@
 #import "Task.h"
 #import "Utilities.h"
 
+@interface Task ()
+
+@property	int		doneCount;
+@property	BOOL	didLaunch;
+
+@end
+
 @implementation Task
 
 - (NSArray *)arguments {
@@ -19,9 +26,9 @@
 - (void)cancel;
 {
 	[self removeReadCompletionNotifications];
-	if (task) {
-		NSTask *myTask = task;
-		task = nil;
+	if (self.task) {
+		NSTask *myTask = self.task;
+		self.task = nil;
 		[myTask terminate];
 	}
 	[super cancel];
@@ -41,8 +48,8 @@
 - (void)dataString:(NSString *)aString;
 {
 	[self progress:aString];
-	[allOutput appendString:aString];
-	[standardOutput appendString:aString];
+	[self.allOutput appendString:aString];
+	[self.standardOutput appendString:aString];
 }
 
 - (void)delayFor:(NSTimeInterval)seconds;
@@ -60,10 +67,10 @@
 {
 //	NSLog(@"done %@ with error (%i)", NSStringFromClass([self class]), statusCode);
 	if (statusCode) {
-		if (![errorOutput length]) {
-			errorOutput = [NSMutableString stringWithFormat:@"Task returned status code %i", statusCode];
+		if (![self.errorOutput length]) {
+			self.errorOutput = [NSMutableString stringWithFormat:@"Task returned status code %i", statusCode];
 		}
-		[appController taskError:errorOutput];
+		[appController taskError:self.errorOutput];
 	}
 	if (![self isCancelled]) {
 		[self cancel];
@@ -81,7 +88,7 @@
 
 - (void)errorOutput:(NSNotification *)inNotification;
 {
-	if (!task) return;
+	if (!self.task) return;
 	NSData *data = [[inNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
 	if ([data length]) {
 		NSString *string = [[NSString alloc] 
@@ -97,13 +104,13 @@
 - (void)errorOutputString:(NSString *)aString;
 {
 	[self progress:aString];
-	[allOutput appendString:aString];
-	[errorOutput appendString:aString];
+	[self.allOutput appendString:aString];
+	[self.errorOutput appendString:aString];
 }
 
 - (BOOL)isRunning;
 {
-	return [task isRunning];
+	return [self.task isRunning];
 }
 
 - (NSString *)launchPath {
@@ -119,24 +126,24 @@
 			return;
 		}
 	}
-	didLaunch = NO;
+	self.didLaunch = NO;
 	@try {
 		[self startTask];
-		[task waitUntilExit];
+		[self.task waitUntilExit];
 		// give a bit of time for output notifications
-		for (NSUInteger i = 1; doneCount < 2 && i <= 20; ++i) {
+		for (NSUInteger i = 1; self.doneCount < 2 && i <= 20; ++i) {
 			[self delayFor:0.01 * i];
 		}
 	}
 	@catch (NSException *exception) {
 		NSLog(@"Exception in task: %@", exception);
-		if (didLaunch) {
+		if (self.didLaunch) {
 			[self cancel];
 		}
 	}
 	@finally {
 		// force things to finish without all the output
-		while (doneCount < 2) {
+		while (self.doneCount < 2) {
 			[self mightBeDone];
 		}
 	}
@@ -144,19 +151,19 @@
 
 - (void)mightBeDone;
 {
-	if (++doneCount < 2) return;	//	look for stderr and stdout notifications
+	if (++_doneCount < 2) return;	//	look for stderr and stdout notifications
 	[self removeReadCompletionNotifications];
-	if (!task) return;				//	terminated by user, so no need to report error
-	for (NSUInteger i = 0; i < 100 && [task isRunning]; ++i) {
+	if (!self.task) return;				//	terminated by user, so no need to report error
+	for (NSUInteger i = 0; i < 100 && [self.task isRunning]; ++i) {
 		[self delayFor:0.001 * i];
 	}
 	int status;
-	if (didLaunch) {
-		status = [task terminationStatus];
+	if (self.didLaunch) {
+		status = [self.task terminationStatus];
 	} else {
 		status = 1;
 	}
-	task = nil;
+	self.task = nil;
 	if (status) {
 		[self doneWithError:status];
 	} else {
@@ -179,7 +186,7 @@
 
 - (void)standardOutput:(NSNotification *)inNotification;
 {
-	if (!task) return;
+	if (!self.task) return;
 	NSData *data = [[inNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
 	if ([data length]) {
 		[self data:data];
@@ -192,16 +199,16 @@
 - (void)startTask;
 {
 //	NSLog(@"starting %@ in %@", [self className], [NSThread currentThread]);
-	task = [NSTask new];
-	[task setCurrentDirectoryPath:[self currentDirectoryPath]];
-	[task setLaunchPath:[self launchPath]];
-	[task setEnvironment:[self environment]];
-	[task setArguments:[self arguments]];
-	[task setStandardOutput:[NSPipe pipe]];
-	[task setStandardError: [NSPipe pipe]];
-	[task setStandardInput:[NSPipe pipe]];
-	NSFileHandle *taskOut = [[task standardOutput] fileHandleForReading];
-	NSFileHandle *taskErr = [[task standardError]  fileHandleForReading];
+	self.task = [NSTask new];
+	[self.task setCurrentDirectoryPath:[self currentDirectoryPath]];
+	[self.task setLaunchPath:[self launchPath]];
+	[self.task setEnvironment:[self environment]];
+	[self.task setArguments:[self arguments]];
+	[self.task setStandardOutput:[NSPipe pipe]];
+	[self.task setStandardError: [NSPipe pipe]];
+	[self.task setStandardInput:[NSPipe pipe]];
+	NSFileHandle *taskOut = [[self.task standardOutput] fileHandleForReading];
+	NSFileHandle *taskErr = [[self.task standardError]  fileHandleForReading];
 	
 	[notificationCenter
 	 addObserver:self 
@@ -217,12 +224,12 @@
 	 object:taskOut];
 	[taskOut readInBackgroundAndNotify];
 	
-	doneCount = 0;
-	allOutput = [NSMutableString new];
-	errorOutput = [NSMutableString new];
-	standardOutput = [NSMutableString new];
-	[task launch];
-	didLaunch = YES;
+	self.doneCount = 0;
+	self.allOutput = [NSMutableString new];
+	self.errorOutput = [NSMutableString new];
+	self.standardOutput = [NSMutableString new];
+	[self.task launch];
+	self.didLaunch = YES;
 }
 
 @end

@@ -11,17 +11,15 @@
 #define kDownloadSite "http://seaside.gemtalksystems.com/downloads/i386.Darwin/"
 
 @interface Version : NSManagedObject {
-	NSNumber	*isInstalledCode;
-	NSString	*name;
-	NSDate		*date;
-	
+	NSNumber	*_isInstalledCode;
 	NSTask		*task;
 }
 
-@property (nonatomic, retain) NSNumber	*isInstalledCode;
-@property (nonatomic, retain) NSString	*name;
-@property (nonatomic, retain) NSDate	*date;
-@property (nonatomic, retain) NSNumber	*indexInArray;  
+@property (readonly)	BOOL		isInstalled;
+@property				NSNumber	*isInstalledCode;
+@property				NSString	*name;
+@property				NSDate		*date;
+@property				NSNumber	*indexInArray;
 
 + (void)removeVersionAtPath:(NSString *)productPath;
 - (BOOL)isInstalled;
