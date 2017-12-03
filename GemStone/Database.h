@@ -25,6 +25,10 @@
 @property (readonly)	NSArray	 *statmonFiles;
 @property				Task	 *statmonitor;
 
+- (IBAction)openTerminal:(id)sender;
+- (IBAction)openTopaz:(id)sender;
+- (IBAction)openWebTools:(id)sender;
+
 - (void)archiveCurrentLogFiles;
 - (void)archiveCurrentTransactionLogs;
 - (void)createConfigFiles;
@@ -50,9 +54,6 @@
 - (void)openStoneConfigFile;
 - (void)openSystemConfigFile;
 - (void)openStatmonFilesAtIndexes:(NSIndexSet *)indexes;
-- (IBAction)openTerminal:(id)sender;
-- (IBAction)openTopaz:(id)sender;
-- (IBAction)openWebTools:(id)sender;
 - (void)refreshStatmonFiles;
 - (void)restore;
 - (void)setIsRunning:(BOOL)aBool;

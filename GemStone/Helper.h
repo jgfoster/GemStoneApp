@@ -8,10 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface Helper : NSObject {
-	__weak Helper * anotherHelper;
-	char x[10];
-}
+@interface Helper : NSObject { }
 
 @property (readonly)	BOOL		hasDNS;
 @property (readonly)	NSString	*ipAddress;

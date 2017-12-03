@@ -16,21 +16,14 @@
 @interface AppController : NSObject <NSTabViewDelegate> { }
 
 - (IBAction)addDatabase:(id)sender;
-- (void)addOperation:(NSOperation *)anOperation;
 - (IBAction)addToEtcHosts:(id)sender;
 - (IBAction)cancelTask:(id)sender;
 - (IBAction)clickedDataFile:(id)sender;
 - (IBAction)closeInfoPanel:(id)sender;
-- (Boolean)databaseExistsForVersion:(Version *)version;
-- (void)databaseStartDone:(Database *)aDatabase;
-- (void)databaseStopDone:(Database *)aDatabase;
 - (IBAction)deleteStatmonFiles:(id)sender;
 - (IBAction)doUpgrade:(id)sender;
-- (void)ensureSharedMemory;
 - (IBAction)gemToolsSession:(id)sender;
 - (IBAction)installHelperTool:(id)sender;
-- (NSString *)mostAdvancedVersion;
-- (NSNumber *)nextDatabaseIdentifier;
 - (IBAction)openBrowserOnAvailableVersions:(id)sender;
 - (IBAction)openGemConfigFile:(id)sender;
 - (IBAction)openDefaultConfigFile:(id)sender;
@@ -39,20 +32,28 @@
 - (IBAction)openSystemConfigFile:(id)sender;
 - (IBAction)removeDatabase:(id)sender;
 - (IBAction)removeHelperTool:(id)sender;
+- (IBAction)showHelperToolInfo:(id)sender;
+- (IBAction)taskCloseWhenDone:(id)sender;
+- (IBAction)versionListDownloadRequest:(id)sender;
+- (IBAction)versionUnzipRequest:(id)sender;
+
+- (void)addOperation:(NSOperation *)anOperation;
+- (Boolean)databaseExistsForVersion:(Version *)version;
+- (void)databaseStartDone:(Database *)aDatabase;
+- (void)databaseStopDone:(Database *)aDatabase;
+- (void)ensureSharedMemory;
+- (NSString *)mostAdvancedVersion;
+- (NSNumber *)nextDatabaseIdentifier;
 - (void)removeVersionDone;
 - (void)setIsStatmonFileSelected:(BOOL)flag;
-- (IBAction)showHelperToolInfo:(id)sender;
 - (NSTableView *)statmonTableView;
 - (void)taskStart:(NSString *)aString;
-- (IBAction)taskCloseWhenDone:(id)sender;
 - (void)taskError:(NSString *)aString;
 - (void)taskFinishedAfterDelay;
 - (void)taskProgress:(NSString *)aString;
 - (void)updateDatabaseList:(id)sender;
 - (void)updateSetupState;
 - (NSArray *)versionList;
-- (IBAction)versionListDownloadRequest:(id)sender;
 - (void)versionUnzipDone:(UnzipVersion *)unzipTask;
-- (IBAction)versionUnzipRequest:(id)sender;
 
 @end
