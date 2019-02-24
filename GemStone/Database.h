@@ -45,7 +45,7 @@
 - (NSString *)gemToolsLogin;
 - (void)gsList:(NSArray *)list;
 - (NSString *)infoForDataFile:(NSString *)file;
-- (BOOL)isRunning;
+- (BOOL)isRunningCode;
 - (NSString *)isRunningString;
 - (NSArray *)logFiles;
 - (void)open;

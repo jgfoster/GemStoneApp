@@ -375,7 +375,7 @@
 }
 
 - (void)gsList:(NSArray *)list {
-	self.isRunning = NO;
+	_isRunning = NO;
 	for (NSDictionary *process in list) {
 		NSString *string = [process valueForKey:@"version"];
 		if ([string isEqualToString:self.version]) {
@@ -387,7 +387,7 @@
 				if (range.location == 0) {
 					string = [process valueForKey:@"type"];
 					if ([string isEqualToString:@"Stone"]) {
-						self.isRunning = YES;
+						_isRunning = YES;
 						return;
 					}
 				}
@@ -465,8 +465,12 @@
 	[self installExtent:@"extent0.seaside.dbf"];
 }
 
+- (BOOL)isRunningCode {
+	return _isRunning;
+}
+
 - (NSString *)isRunningString {
-	return [self isRunning] ? @"yes" : @"no";
+	return _isRunning ? @"yes" : @"no";
 }
 
 - (NSArray *)logFiles {
