@@ -357,23 +357,6 @@
 	return path;
 }
 
-- (NSString *)gemToolsLogin {
-	NSString *string = [NSString stringWithFormat:
-@"Copy the following and use it to define a new session in the GemTools Launcher:\n\n"
-"OGStandardSessionDescription new\n"
-	"\tname: \'%@\';\n"
-	"\tstoneHost: \'localhost\';\n"
-	"\tstoneName: \'%@\';\n"
-	"\tgemHost: \'localhost\';\n"
-	"\tnetLDI: \'%@\';\n"
-	"\tuserId: \'DataCurator\';\n"
-	"\tpassword: \'swordfish\';\n"
-	"\tbackupDirectory: \'\';\n"
-	"\tyourself.\n", 
-	[self name], [self name], [self netLDI]];
-	return string;
-}
-
 - (void)gsList:(NSArray *)list {
 	_isRunning = NO;
 	for (NSDictionary *process in list) {
@@ -543,10 +526,6 @@
 
 - (IBAction)openTopaz:(id)sender {
 	[Terminal doScript:@"topaz -l" forDatabase:self];
-}
-
-- (IBAction)openWebTools:(id)sender {
-	[Terminal doScript:@"(cd ../webtools; ./start)" forDatabase:self];
 }
 
 - (NSString *)pathToGemConfigFile {

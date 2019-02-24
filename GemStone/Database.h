@@ -27,7 +27,6 @@
 
 - (IBAction)openTerminal:(id)sender;
 - (IBAction)openTopaz:(id)sender;
-- (IBAction)openWebTools:(id)sender;
 
 - (void)archiveCurrentLogFiles;
 - (void)archiveCurrentTransactionLogs;
@@ -42,7 +41,6 @@
 - (NSString *)directory;
 - (void)doubleClickStatmon:(id)sender;
 - (NSString *)gemstone;
-- (NSString *)gemToolsLogin;
 - (void)gsList:(NSArray *)list;
 - (NSString *)infoForDataFile:(NSString *)file;
 - (BOOL)isRunningCode;

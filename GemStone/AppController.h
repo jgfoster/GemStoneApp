@@ -22,7 +22,6 @@
 - (IBAction)closeInfoPanel:(id)sender;
 - (IBAction)deleteStatmonFiles:(id)sender;
 - (IBAction)doUpgrade:(id)sender;
-- (IBAction)gemToolsSession:(id)sender;
 - (IBAction)installHelperTool:(id)sender;
 - (IBAction)openBrowserOnAvailableVersions:(id)sender;
 - (IBAction)openGemConfigFile:(id)sender;

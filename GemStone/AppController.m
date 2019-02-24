@@ -266,15 +266,6 @@
 	return YES;
 }
 
-- (IBAction)gemToolsSession:(id)sender {
-	Database *database = [self selectedDatabase];
-	NSString *string = [database gemToolsLogin];
-	[self.infoPanelTextView setString:string];
-    [[NSApp mainWindow]beginSheet:self.infoPanel completionHandler:^(NSModalResponse returnCode) {
-        return;
-    }];
-}
-
 - (id)init {
 	if (self = [super init]) {
 		[[Utilities new] setupGlobals:self];
