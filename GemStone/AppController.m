@@ -203,7 +203,7 @@
 	NSString *textString = [args objectAtIndex:0];
 	NSString *detailsString = [args objectAtIndex:1];
 	NSAlert *alert = [[NSAlert alloc] init];
-	[alert setAlertStyle:NSCriticalAlertStyle];
+	[alert setAlertStyle:NSAlertStyleCritical];
 	[alert setMessageText:textString];
 	[alert setInformativeText:detailsString];
 	[alert addButtonWithTitle:@"Dismiss"];
@@ -288,7 +288,7 @@
 }
 
 - (void) initManagedObjectContext {
-    managedObjectContext = [[NSManagedObjectContext alloc] init];
+	managedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
 	NSManagedObjectModel *model = [NSManagedObjectModel mergedModelFromBundles:nil];
 	NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc]
 												 initWithManagedObjectModel: model];
