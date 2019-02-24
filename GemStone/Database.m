@@ -421,7 +421,7 @@
 	if ([fileManager fileExistsAtPath:target]) {
 		if (self.lastStartDate) {
 			NSAlert *alert = [[NSAlert alloc] init];
-			[alert setAlertStyle:NSCriticalAlertStyle];
+			[alert setAlertStyle:NSAlertStyleCritical];
 			[alert setMessageText:@"Replace existing repository?"];
 			[alert setInformativeText:@"All data in the existing repository will be lost!"];
 			[alert addButtonWithTitle:@"Cancel"];
