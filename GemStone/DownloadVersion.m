@@ -29,8 +29,7 @@
 	return [NSArray arrayWithObjects: @"--raw", http, nil];
 }
 
-- (void)cancel;
-{
+- (void)cancel {
 	[appController taskProgress:@"\n\nCancel request received.\nDeleting zip file . . .\n"];
 	[self.zipFile closeFile];
 	self.zipFile = nil;
@@ -40,8 +39,7 @@
 	[appController taskProgress:@"Download cancel completed!\n"];
 }
 
-- (void)createZipFile;
-{
+- (void)createZipFile {
 	BOOL exists, isDirectory = NO, success;
 	exists = [fileManager fileExistsAtPath:self.zipFilePath isDirectory:&isDirectory];
 	if (exists) {
@@ -87,8 +85,7 @@
 	[super done];
 }
 
-- (void)doneWithError:(int)statusCode;
-{
+- (void)doneWithError:(int)statusCode {
 	[self.zipFile closeFile];
 	self.zipFile = nil;
 	[fileManager removeItemAtPath:self.zipFilePath error:nil];
@@ -96,20 +93,17 @@
 	[super doneWithError:statusCode];
 }
 
-- (void)setVersion:(Version *)aVersion;
-{
+- (void)setVersion:(Version *)aVersion {
 	self.version = aVersion;
 	_zipFilePath = [NSMutableString stringWithFormat:@"%@/%@", basePath, [self.version zippedFileName]];
 }
 
-- (void)startTask;
-{
+- (void)startTask {
 	[self createZipFile];
 	[super startTask];
 }
 
-- (Version *)version;
-{
+- (Version *)version {
 	return _version;
 }
 

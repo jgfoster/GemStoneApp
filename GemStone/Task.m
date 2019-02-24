@@ -23,8 +23,7 @@
 }
 
 //	override NSOperation to do our own stuff
-- (void)cancel;
-{
+- (void)cancel {
 	[self removeReadCompletionNotifications];
 	if (self.task) {
 		NSTask *myTask = self.task;
@@ -35,8 +34,7 @@
 }
 
 //	DatabaseTask has an override for this method
-- (NSString *)currentDirectoryPath;
-{
+- (NSString *)currentDirectoryPath {
 	return basePath;
 }
 
@@ -45,20 +43,17 @@
 	[self dataString:string];
 }
 
-- (void)dataString:(NSString *)aString;
-{
+- (void)dataString:(NSString *)aString {
 	[self progress:aString];
 	[self.allOutput appendString:aString];
 	[self.standardOutput appendString:aString];
 }
 
-- (void)delayFor:(NSTimeInterval)seconds;
-{
+- (void)delayFor:(NSTimeInterval)seconds {
 	[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:seconds]];
 }
 
-- (void)done;
-{
+- (void)done {
 	[self removeReadCompletionNotifications];
 //	NSLog(@"done %@", NSStringFromClass([self class]));
 }
@@ -77,8 +72,7 @@
 	}
 }
 
-- (NSMutableDictionary *)environment;
-{
+- (NSMutableDictionary *)environment {
 	NSDictionary *myEnvironment = [[NSProcessInfo processInfo] environment];
 	NSMutableDictionary *taskEnvironment = [NSMutableDictionary new];
 	[taskEnvironment addEntriesFromDictionary:myEnvironment];
@@ -86,8 +80,7 @@
 	return taskEnvironment;
 }
 
-- (void)errorOutput:(NSNotification *)inNotification;
-{
+- (void)errorOutput:(NSNotification *)inNotification {
 	if (!self.task) return;
 	NSData *data = [[inNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
 	if ([data length]) {
@@ -101,15 +94,13 @@
 	}
 }
 
-- (void)errorOutputString:(NSString *)aString;
-{
+- (void)errorOutputString:(NSString *)aString {
 	[self progress:aString];
 	[self.allOutput appendString:aString];
 	[self.errorOutput appendString:aString];
 }
 
-- (BOOL)isRunning;
-{
+- (BOOL)isRunning {
 	return [self.task isRunning];
 }
 
@@ -119,8 +110,7 @@
 }
 
 //	override NSOperation to do our work; do not return until done!
-- (void)main;
-{
+- (void)main {
 	for (NSOperation *priorTask in [self dependencies]) {
 		if ([priorTask isCancelled]) {
 			return;
@@ -149,8 +139,7 @@
 	}
 }
 
-- (void)mightBeDone;
-{
+- (void)mightBeDone {
 	if (++_doneCount < 2) return;	//	look for stderr and stdout notifications
 	[self removeReadCompletionNotifications];
 	if (!self.task) return;				//	terminated by user, so no need to report error
@@ -171,21 +160,18 @@
 	}
 }
 
-- (void)progress:(NSString *)aString;
-{
+- (void)progress:(NSString *)aString {
 	[appController taskProgress:aString];
 }
 
-- (void)removeReadCompletionNotifications;
-{
+- (void)removeReadCompletionNotifications {
 	[notificationCenter
 	 removeObserver:self
 	 name:NSFileHandleReadCompletionNotification
 	 object:nil];
 }
 
-- (void)standardOutput:(NSNotification *)inNotification;
-{
+- (void)standardOutput:(NSNotification *)inNotification {
 	if (!self.task) return;
 	NSData *data = [[inNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
 	if ([data length]) {

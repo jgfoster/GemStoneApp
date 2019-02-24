@@ -10,15 +10,13 @@
 
 @implementation LogFile
 
-+ (LogFile *)logFileFromDictionary:(NSDictionary *)aDictionary;
-{
++ (LogFile *)logFileFromDictionary:(NSDictionary *)aDictionary {
 	LogFile *logFile = [self new];
 	[logFile initializeFromDictionary:aDictionary];
 	return logFile;
 }
 
-- (void)initializeFromDictionary:(NSDictionary *)aDictionary;
-{
+- (void)initializeFromDictionary:(NSDictionary *)aDictionary {
 	_date = [aDictionary valueForKey:NSFileModificationDate];
 	_path = [aDictionary valueForKey:@"path"];
 	NSString *name = [aDictionary valueForKey:@"name"];
@@ -42,8 +40,7 @@
 	_type = [_type substringFromIndex:index + 1];
 }
 
-- (void)open;
-{
+- (void)open {
 	[[NSWorkspace sharedWorkspace] openFile:self.path];
 }
 

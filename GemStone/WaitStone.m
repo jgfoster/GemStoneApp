@@ -12,15 +12,13 @@
 
 @synthesize isReady = _isReady;
 
-+ (BOOL)isStoneRunningForDatabase:(Database *)database;
-{
++ (BOOL)isStoneRunningForDatabase:(Database *)database {
 	WaitStone *task = [self forDatabase:database];
 	[task main];
 	return [task isReady];
 }
 
-+ (BOOL)isNetLdiRunningForDatabase:(Database *)database;
-{
++ (BOOL)isNetLdiRunningForDatabase:(Database *)database {
 	WaitStone *task = [self forDatabase:database];
 	[task setName:[database netLDI]];
 	[task main];
@@ -35,30 +33,25 @@
 			nil];
 }
 
-- (NSString *)binName;
-{
+- (NSString *)binName {
 	return @"waitstone";
 }
 
-- (void)done;
-{
+- (void)done {
 	_isReady = YES;
 	[super done];
 }
 
-- (void)doneWithError:(int)statusCode;
-{
+- (void)doneWithError:(int)statusCode {
 	_isReady = NO;
 	[super doneWithError:0];
 }
 
-- (void)progress:(NSString *)aString;
-{
+- (void)progress:(NSString *)aString {
 	//	override to prevent reporting
 }
 
-- (void)setDatabase:(Database *)aDatabase;
-{
+- (void)setDatabase:(Database *)aDatabase {
 	[super setDatabase:aDatabase];
 }
 

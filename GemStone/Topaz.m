@@ -20,8 +20,7 @@
 
 // @synthesize block;
 
-+ (id)database:(Database *)aDatabase do:(block_t)aBlock;
-{
++ (id)database:(Database *)aDatabase do:(block_t)aBlock {
 	Topaz *instance = [super forDatabase:aDatabase];
 	[instance setBlock:aBlock];
 	return instance;
@@ -34,13 +33,11 @@
 			nil];
 }
 
-- (NSString *)binName;
-{
+- (NSString *)binName {
 	return @"topaz";
 }
 
-- (void)cancel;
-{
+- (void)cancel {
 	if (self.session) {
 		[self.task interrupt];	// sends SIGINT, equivalent of <Ctrl>+<C>
 		[self send:@"logout\n"];
@@ -51,8 +48,7 @@
 	[self doneWithError:0];
 }
 
-- (void)fullBackupTo:(NSString *)aString;
-{
+- (void)fullBackupTo:(NSString *)aString {
 	if ([fileManager fileExistsAtPath:aString]) {
 		NSError *error;
 		[appController taskProgress:[NSString stringWithFormat:@"\nDeleting existing file at '%@'\n", aString]];
@@ -80,8 +76,7 @@
 	[appController taskFinishedAfterDelay];
 }
 
-- (NSString *)outputUpToPrompt;
-{
+- (NSString *)outputUpToPrompt {
 	NSRange range0, range1, range2, range3;
 	if ([[self.database version] isEqualTo:@"3.2.0"]) {
 		[self send:@"\n"];
@@ -112,15 +107,13 @@
 	return string;
 }
 
-- (NSString *)responseFrom:(NSString *)inString;
-{
+- (NSString *)responseFrom:(NSString *)inString {
 	[self send:inString];
 	[self delayFor:1.0];
 	return [self outputUpToPrompt];
 }
 
-- (void)restoreFromBackup:(NSString *)aString;
-{
+- (void)restoreFromBackup:(NSString *)aString {
 	NSString *inString = [NSString 
 						  stringWithFormat:@"run\nSystemRepository restoreFromBackup:'%@'\n%%\n", 
 						  aString];
@@ -161,15 +154,13 @@
 	[self send:@"exit 0\n"];
 }
 
-- (void)send:(NSString *)inString;
-{
+- (void)send:(NSString *)inString {
 	NSFileHandle *file = [[self.task standardInput] fileHandleForWriting];
 	NSData *data = [inString dataUsingEncoding:NSUTF8StringEncoding];
 	[file writeData:data];
 }
 
-- (void)startTask;
-{
+- (void)startTask {
 	[appController taskStart:[NSString stringWithFormat:@"Starting Topaz task...\n"]];
 	[super startTask];
 	[self outputUpToPrompt];

@@ -11,8 +11,7 @@
 
 @implementation Download
 
-- (void)errorOutputString:(NSString *)aString;
-{
+- (void)errorOutputString:(NSString *)aString {
 	[self progress:aString];
 	// no need to send super since we don't need to save output
 }

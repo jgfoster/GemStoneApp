@@ -17,15 +17,13 @@
 
 @implementation Terminal
 
-+ (void)doScript:(NSString *)script forDatabase:(Database *)aDatabase;
-{
++ (void)doScript:(NSString *)script forDatabase:(Database *)aDatabase {
 	Terminal *terminal = [super forDatabase:aDatabase];
 	[terminal setScript:script];
 	[appController addOperation:terminal];
 }
 
-- (NSArray *)arguments;
-{
+- (NSArray *)arguments {
 	NSMutableString *string = [NSMutableString new];
 	[string appendString:@"#!/bin/sh\n"];
 	[string appendString:@"# set environment variables for GemStone/S\n"];
@@ -75,8 +73,7 @@
 			nil];
 }
 
-- (NSMutableDictionary *)environment;
-{
+- (NSMutableDictionary *)environment {
 	NSMutableDictionary *environment = [super environment];
 	for (NSString* key in [environment allKeys]) {
 		if ([key rangeOfString:@"DYLD_"].location != NSNotFound) {
@@ -86,13 +83,11 @@
 	return environment;
 }
 
-- (NSString *)launchPath;
-{
+- (NSString *)launchPath {
 	return @"/usr/bin/osascript";
 }
 
-- (NSString *)scriptPath;
-{
+- (NSString *)scriptPath {
 	return [NSString stringWithFormat:@"%@/setEnv.sh", [self.database directory]];
 }
 

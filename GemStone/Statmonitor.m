@@ -34,8 +34,7 @@
 }
 
 //	override to leave task running
-- (void)main;
-{
+- (void)main {
 	@try {
 		[appController taskProgress:@"\nStarting Statmonitor . . .\n"];	
 		[self startTask];

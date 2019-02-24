@@ -17,8 +17,7 @@
 
 @implementation VSD
 
-+ (VSD *)openPath:(NSString *)path usingDatabase:(Database *)database;
-{
++ (VSD *)openPath:(NSString *)path usingDatabase:(Database *)database {
 	VSD *instance = [self forDatabase:database];
 	[instance openPath:path];
 	return instance;
@@ -31,23 +30,19 @@
 			nil];
 }
 
-- (NSString *)binName;
-{
+- (NSString *)binName {
 	return @"%vsd";
 }
 
-- (void)dataString:(NSString *)aString;
-{
+- (void)dataString:(NSString *)aString {
 	NSLog(@"VSD>>dataString:%@", aString);
 }
 
-- (void)errorOutputString:(NSString *)message;
-{
+- (void)errorOutputString:(NSString *)message {
 	NSLog(@"VSD>>errorOutputString:%@", message);
 }
 
-- (void)openPath:(NSString *)aString;
-{
+- (void)openPath:(NSString *)aString {
 	self.path = aString;
 	[self start];
 	[notificationCenter

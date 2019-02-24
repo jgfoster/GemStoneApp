@@ -21,21 +21,18 @@
 			nil];
 }
 
-- (NSString *)binName;
-{
+- (NSString *)binName {
 	return @"stopstone";
 }
 
-- (void)done;
-{
+- (void)done {
 	[self.database setIsRunning:NO];
 	[self.database archiveCurrentLogFiles];
 	[self.database archiveCurrentTransactionLogs];
 	[super done];
 }
 
-- (void)main;
-{
+- (void)main {
 	[appController taskProgress:@"\nStopping Stone . . .\n"];	
 	[super main];
 }

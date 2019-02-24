@@ -10,8 +10,7 @@
 
 @implementation StartCacheWarmer
 
-- (NSArray *)arguments;
-{
+- (NSArray *)arguments {
 	NSString *stoneName = [self.database name];
 	return [NSArray arrayWithObjects:
 			@"-d",
@@ -22,8 +21,7 @@
 			nil];
 }
 
-- (NSString *)binName;
-{
+- (NSString *)binName {
 	return @"startcachewarmer";
 }
 

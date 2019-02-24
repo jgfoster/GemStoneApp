@@ -20,8 +20,7 @@
 
 // @synthesize zipFilePath;
 
-- (NSArray *)arguments;
-{
+- (NSArray *)arguments {
 	if (!self.zipFilePath) AppError(@"Zip file path must be provided!");
 	return [NSArray arrayWithObjects:
 			self.zipFilePath,
@@ -30,8 +29,7 @@
 			nil];
 }
 
-- (void)cancel;
-{
+- (void)cancel {
 	[super cancel];
 	if (!self.directoryContents) return;
 	[appController taskProgress:@"\n\nCancel request received.\nDeleting unzipped items . . .\n"];
@@ -55,28 +53,24 @@
 	}
 }
 
-- (void)dataString:(NSString *)aString;
-{
+- (void)dataString:(NSString *)aString {
 	[self progress:aString];
 }
 
-- (void)done;
-{
+- (void)done {
 	if ([self.zipFilePath hasPrefix:basePath]) {
 		[fileManager removeItemAtPath:self.zipFilePath error:nil];
 	}
 	[super done];
 }
 
-- (void)errorOutputString:(NSString *)aString;
-{
+- (void)errorOutputString:(NSString *)aString {
 	[self performSelectorOnMainThread:@selector(errorOutputStringA:)
 						   withObject:aString
 						waitUntilDone:YES];
 }
 
-- (void)errorOutputStringA:(NSString *)aString;
-{
+- (void)errorOutputStringA:(NSString *)aString {
 	NSLog(@"%@", aString);
 	NSAlert *alert = [[NSAlert alloc] init];
 	[alert setMessageText:@"Unzip error!"];
@@ -86,13 +80,11 @@
 	[self cancel];
 }
 
-- (NSString *)launchPath;
-{
+- (NSString *)launchPath {
 	return @"/usr/bin/unzip";
 }
 
-- (void)main;
-{
+- (void)main {
 	NSError *error = nil;
 	self.directoryContents = [fileManager contentsOfDirectoryAtPath:basePath error:&error];
 	if (!self.directoryContents) {
@@ -103,8 +95,7 @@
 }
 
 //	NSOpenPanelDelegate method for file import
-- (BOOL)panel:(id)sender shouldEnableURL:(NSURL *)url;
-{
+- (BOOL)panel:(id)sender shouldEnableURL:(NSURL *)url {
 	NSString *path = [url path];
 	BOOL isDirectory;
 	[fileManager fileExistsAtPath:path isDirectory:&isDirectory];
@@ -117,8 +108,7 @@
 	return range.location + range.length == [path length];
 }
 
-- (void)unzip;
-{
+- (void)unzip {
 	NSOpenPanel *op = [NSOpenPanel openPanel];
     [op setCanChooseFiles:YES];
     [op setCanChooseDirectories:NO];

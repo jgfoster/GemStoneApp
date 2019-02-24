@@ -12,16 +12,14 @@
 
 @implementation Utilities
 
-- (void)setupGlobals:(AppController *)myApp;
-{
+- (void)setupGlobals:(AppController *)myApp {
 	appController = myApp;
 	fileManager = [NSFileManager defaultManager];
 	notificationCenter = [NSNotificationCenter defaultCenter];
 	[self setupBasePath];
 }
 
-- (void)setupBasePath;
-{
+- (void)setupBasePath {
 	basePath = [@"~/Library/GemStone" stringByExpandingTildeInPath];
 	
 	if ([fileManager fileExistsAtPath: basePath]) return;

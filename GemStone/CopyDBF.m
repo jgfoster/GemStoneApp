@@ -10,8 +10,7 @@
 
 @implementation CopyDBF
 
-+ (NSString *)infoForFile:(NSString *)aString in:(Database *)aDatabase;
-{
++ (NSString *)infoForFile:(NSString *)aString in:(Database *)aDatabase {
 	CopyDBF *instance = [self forDatabase:aDatabase];
 	NSString *path = [NSString stringWithFormat:@"%@/data/%@", [aDatabase directory], aString];
 	return [instance infoForPath:path];
@@ -25,8 +24,7 @@
 			nil];
 }
 
-- (NSString *)infoForPath:(NSString *)aString;
-{
+- (NSString *)infoForPath:(NSString *)aString {
 	self.path = aString;
 	[self main];
 	return self.allOutput;
@@ -37,8 +35,7 @@
 	return @"copydbf";
 }
 
-- (void)progress:(NSString *)aString;
-{
+- (void)progress:(NSString *)aString {
 	//	override to prevent reporting
 }
 

@@ -15,20 +15,17 @@
 
 @synthesize versions = _versions;
 
-- (NSArray *)arguments;
-{
+- (NSArray *)arguments {
 	return [NSArray arrayWithObjects:
 			@kDownloadSite,
 			nil];
 }
 
-- (void)dataString:(NSString *)aString;
-{
+- (void)dataString:(NSString *)aString {
 	[self.standardOutput appendString:aString];
 }
 
-- (void)done;
-{
+- (void)done {
 	NSString *string = self.standardOutput;
 	self.standardOutput = nil;
 	NSUInteger loc = [string rangeOfString:@">"].location;

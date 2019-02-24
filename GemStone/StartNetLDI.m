@@ -14,8 +14,7 @@
 
 @implementation StartNetLDI
 
-- (NSArray *)arguments;
-{
+- (NSArray *)arguments {
 	NSString *netLDI = [self.database netLDI];
 	return [NSArray arrayWithObjects: 
 			@"-g",

@@ -17,8 +17,7 @@
 
 @implementation GSList
 
-+ (NSArray *)processListUsingDatabase:(Database *)aDatabase;
-{
++ (NSArray *)processListUsingDatabase:(Database *)aDatabase {
 	GSList *instance = [self forDatabase:aDatabase];
 	return [instance processList];
 }
@@ -32,26 +31,22 @@
 			nil];
 }
 
-- (NSString *)binName;
-{
+- (NSString *)binName {
 	return @"gslist";
 }
 
-- (void)done;
-{
+- (void)done {
 	[super done];
 	if ([self.standardOutput length]) return;
 	NSLog(@"done with no output!?");
 }
 
-- (void)doneWithError:(int)statusCode;
-{
+- (void)doneWithError:(int)statusCode {
 	self.foundNoProcesses = YES;
 	[super doneWithError:0];	//	Not really an error to have no processes
 }
 
-- (NSArray *)processList;
-{
+- (NSArray *)processList {
 	NSMutableArray *list = [NSMutableArray new];
 	NSMutableDictionary *process = nil;
 	self.foundNoProcesses = NO;
@@ -84,8 +79,7 @@
 	return list;
 }
 
-- (void)progress:(NSString *)aString;
-{
+- (void)progress:(NSString *)aString {
 	//	override to prevent reporting
 }
 

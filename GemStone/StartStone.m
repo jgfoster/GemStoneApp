@@ -20,20 +20,17 @@
 	return list;
 }
 
-- (NSString *)binName;
-{
+- (NSString *)binName {
 	return @"startstone";
 }
 
-- (void)done;
-{
+- (void)done {
 	[self.database setIsRunning:YES];
 //	[self delayFor:2.0];	//	give time for output so it isn't intermixed with other output
 	[super done];
  }
 
-- (void)main;
-{
+- (void)main {
 	[appController taskProgress:@"\n"];	
 	[super main];
 }

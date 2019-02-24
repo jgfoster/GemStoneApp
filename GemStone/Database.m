@@ -41,8 +41,7 @@
 @dynamic spc_mb;
 @dynamic version;
 
-- (void)archiveCurrentLogFiles;
-{
+- (void)archiveCurrentLogFiles {
 	NSError  *error = nil;
 	NSString *path = [NSString stringWithFormat:@"%@/log", [self directory]];
 	NSArray  *baseList = [[self name] componentsSeparatedByString:@"_"];
@@ -71,8 +70,7 @@
 	}
 }
 
-- (void)archiveCurrentTransactionLogs;
-{
+- (void)archiveCurrentTransactionLogs {
 	NSError *error = nil;
 	NSString *dataPath = [NSString stringWithFormat:@"%@/data", [self directory]];
 	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:dataPath];
@@ -91,8 +89,7 @@
 	}
 }
 
-- (void)backup;
-{
+- (void)backup {
 	//	get path to backup
 	NSSavePanel *panel = [NSSavePanel savePanel];
 	[panel setAllowedFileTypes:[NSArray arrayWithObjects:@"bak",@"BAK",@"gz",@"GZ", nil]];
@@ -114,8 +111,7 @@
                   }];
 }
 
-- (void)createConfigFiles;
-{
+- (void)createConfigFiles {
 	NSError *error = nil;
 	NSString *inPath;
 	NSString *inString;
@@ -177,8 +173,7 @@
 	};
 }
 
-- (void)createDirectories;
-{
+- (void)createDirectories {
 	[self createDirectory:@"conf"];
 	[self createDirectory:@"data"];
 	[self createDirectory:@"data/archive"];
@@ -188,8 +183,7 @@
 	[self createLocksDirectory];
 }
 
-- (void)createDirectory:(NSString *)aString;
-{
+- (void)createDirectory:(NSString *)aString {
 	NSString *path = [NSString stringWithFormat:@"%@/%@", [self directory], aString];
 	NSError *error = nil;
 	if ([fileManager
@@ -200,8 +194,7 @@
 	AppError(@"Unable to create %@ because %@!", path, [error description]);
 }
 
-- (void)createLocksDirectory;
-{
+- (void)createLocksDirectory {
 	NSError *error;
 	// this needs to point to something
 	NSString *localLink = [NSString stringWithFormat:@"%@/locks", [self directory]];
@@ -246,8 +239,7 @@
 	AppError(@"unable to link %@ to %@ because %@", localLink, alternate, [error description]);
 }
 
-- (void)createTopazIniFile;
-{
+- (void)createTopazIniFile {
 	NSString *directory = [self directory];
 	NSString *path = [NSString stringWithFormat:@"%@/.topazini", directory];
 	NSMutableString *string = [NSMutableString new];
@@ -263,8 +255,7 @@
 	};
 }
 
-- (NSArray *)dataFiles;
-{
+- (NSArray *)dataFiles {
 	NSString *path = [NSString stringWithFormat:@"%@/data", [self directory]];
 	NSError *error = nil;
 	NSArray *fullList = [fileManager contentsOfDirectoryAtPath:path error:&error];
@@ -280,16 +271,14 @@
 	return list;
 }
 
-- (void)deleteAll;
-{
+- (void)deleteAll {
 	NSString *path = [self directory];
 	NSError *error = nil;
 	if ([fileManager removeItemAtPath:path error:&error]) return;
 	AppError(@"Unable to delete %@ because %@", path, [error description]);
 }
 
-- (void)deleteFilesIn:(NSString *)aString;
-{
+- (void)deleteFilesIn:(NSString *)aString {
 	NSString *path = [NSString stringWithFormat:@"%@/%@", [self directory], aString];
 	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:path];
 	NSString *file;
@@ -303,18 +292,15 @@
 	[appController updateDatabaseList:nil];
 }
 
-- (void)deleteOldLogFiles;
-{
+- (void)deleteOldLogFiles {
 	[self deleteFilesIn:@"log/archive"];
 }
 
-- (void)deleteOldTranLogs;
-{
+- (void)deleteOldTranLogs {
 	[self deleteFilesIn:@"data/archive"];
 }
 
-- (void)deleteStatmonFilesAtIndexes:(NSIndexSet *)indexes;
-{
+- (void)deleteStatmonFilesAtIndexes:(NSIndexSet *)indexes {
 	[indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
 		NSDictionary *statmon = [self.statmonFiles objectAtIndex:idx];
 		NSError *error = nil;
@@ -327,8 +313,7 @@
 	[[appController statmonTableView] reloadData];
 }
 
-- (NSString *)descriptionOfFilesIn:(NSString *)aString;
-{
+- (NSString *)descriptionOfFilesIn:(NSString *)aString {
 	NSString *path = [NSString stringWithFormat:@"%@/%@/archive", [self directory], aString];
 	NSUInteger count = 0;
 	NSUInteger size = 0;
@@ -352,33 +337,27 @@
 		[NSString stringWithFormat:@"%lu files, %lu KB", count, kbSize];
 }
 
-- (NSString *)descriptionOfOldLogFiles;
-{
+- (NSString *)descriptionOfOldLogFiles {
 	return [self descriptionOfFilesIn:@"log"];
 }
-- (NSString *)descriptionOfOldTranLogs;
-{
+- (NSString *)descriptionOfOldTranLogs {
 	return [self descriptionOfFilesIn:@"data"];
 }
 
-- (NSString *)directory;
-{
+- (NSString *)directory {
 	return [NSString stringWithFormat: @"%@/db%@", basePath, [self identifier]];
 }
 
-- (void)doubleClickStatmon:(id)sender;
-{
+- (void)doubleClickStatmon:(id)sender {
 	[self openStatmonFilesAtIndexes:[NSIndexSet indexSetWithIndex:[sender clickedRow]]];
 }
 
-- (NSString *)gemstone;
-{
+- (NSString *)gemstone {
 	NSString *path = [NSString stringWithFormat: @"%@/GemStone64Bit%@-i386.Darwin", basePath, [self version]];
 	return path;
 }
 
-- (NSString *)gemToolsLogin;
-{
+- (NSString *)gemToolsLogin {
 	NSString *string = [NSString stringWithFormat:
 @"Copy the following and use it to define a new session in the GemTools Launcher:\n\n"
 "OGStandardSessionDescription new\n"
@@ -395,8 +374,7 @@
 	return string;
 }
 
-- (void)gsList:(NSArray *)list;
-{
+- (void)gsList:(NSArray *)list {
 	self.isRunning = NO;
 	for (NSDictionary *process in list) {
 		NSString *string = [process valueForKey:@"version"];
@@ -418,8 +396,7 @@
 	}
 }
 
-- (NSNumber *)identifier;
-{
+- (NSNumber *)identifier {
 	if (![self.identifier intValue]) {
 		_identifier = [appController nextDatabaseIdentifier];
 		[self createDirectories];
@@ -430,18 +407,15 @@
 	return self.identifier;
 }
 
-- (NSString *)infoForDataFile:(NSString *)file;
-{
+- (NSString *)infoForDataFile:(NSString *)file {
 	return [CopyDBF infoForFile:file in:self];
 }
 
-- (void)installBaseExtent;
-{
+- (void)installBaseExtent {
 	[self installExtent:@"extent0.dbf"];
 }
 
-- (void)installExtent:(NSString *)aString;
-{
+- (void)installExtent:(NSString *)aString {
 	NSError *error = nil;
 	NSString *target = [NSString stringWithFormat:@"%@/data/extent0.dbf", [self directory]];
 	if ([fileManager fileExistsAtPath:target]) {
@@ -465,8 +439,7 @@
 						   withObject:aString];
 }
 
-- (void)installExtentA:(NSString *)aString;
-{
+- (void)installExtentA:(NSString *)aString {
 	NSError *error = nil;
 	NSString *target = [NSString stringWithFormat:@"%@/data/extent0.dbf", [self directory]];
 	[appController taskStart:[NSString stringWithFormat:@"Copying %@/bin/%@ . . .", [self gemstone], aString]];
@@ -488,18 +461,15 @@
 	[appController updateDatabaseList:nil];
 }
 
-- (void)installGlassExtent;
-{
+- (void)installGlassExtent {
 	[self installExtent:@"extent0.seaside.dbf"];
 }
 
-- (NSString *)isRunningString;
-{
+- (NSString *)isRunningString {
 	return [self isRunning] ? @"yes" : @"no";
 }
 
-- (NSArray *)logFiles;
-{
+- (NSArray *)logFiles {
 	NSMutableArray *list = [NSMutableArray array];
 	NSString *path = [NSString stringWithFormat:@"%@/log", [self directory]];
 	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:path];
@@ -526,54 +496,45 @@
 	return list;
 }
 
-- (NSString *)name;
-{
+- (NSString *)name {
 	if ([self.name length]) return self.name;
 	return [NSString stringWithFormat:@"gs64stone%@", self.identifier];
 }
 
-- (NSString *)netLDI;
-{
+- (NSString *)netLDI {
 	if ([self.netLDI length]) return self.netLDI;
 	return [NSString stringWithFormat:@"netldi%@", self.identifier];
 }
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView;
-{
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView {
 	if ([appController statmonTableView] == aTableView) {
 		return [self.statmonFiles count];
 	}
 	return 0;
 }
 
-- (void)open;
-{
+- (void)open {
 	[[NSWorkspace sharedWorkspace] openFile:[self directory]];
 }
 
-- (void)openDefaultConfigFile;
-{
+- (void)openDefaultConfigFileb {
 	NSString *path = [NSString stringWithFormat:@"%@/data/system.conf",[self gemstone]];
 	[[NSWorkspace sharedWorkspace] openFile:path];
 }
 
-- (void)openGemConfigFile;
-{
+- (void)openGemConfigFile {
 	[[NSWorkspace sharedWorkspace] openFile:[self pathToGemConfigFile]];
 }
 
-- (void)openStoneConfigFile;
-{
+- (void)openStoneConfigFile {
 	[[NSWorkspace sharedWorkspace] openFile:[self pathToStoneConfigFile]];
 }
 
-- (void)openSystemConfigFile;
-{
+- (void)openSystemConfigFile {
 	[[NSWorkspace sharedWorkspace] openFile:[self pathToSystemConfigFile]];
 }
 
-- (void)openStatmonFilesAtIndexes:(NSIndexSet *)indexes;
-{
+- (void)openStatmonFilesAtIndexes:(NSIndexSet *)indexes {
 	[indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
 		NSDictionary *statmon = [self.statmonFiles objectAtIndex:idx];
 		NSString *path = [statmon objectForKey:@"path"];
@@ -581,43 +542,35 @@
 	}];
 }
 
-- (IBAction)openTerminal:(id)sender;
-{
+- (IBAction)openTerminal:(id)sender {
 	[Terminal doScript:@"" forDatabase:self];
 }
 
-- (IBAction)openTopaz:(id)sender;
-{
+- (IBAction)openTopaz:(id)sender {
 	[Terminal doScript:@"topaz -l" forDatabase:self];
 }
 
-- (IBAction)openWebTools:(id)sender;
-{
+- (IBAction)openWebTools:(id)sender {
 	[Terminal doScript:@"(cd ../webtools; ./start)" forDatabase:self];
 }
 
-- (NSString *)pathToGemConfigFile;
-{
+- (NSString *)pathToGemConfigFile {
 	return [NSString stringWithFormat:@"%@/conf/gem.conf", [self directory]];
 }
 
-- (NSString *)pathToStoneConfigFile;
-{
+- (NSString *)pathToStoneConfigFile {
 	return [NSString stringWithFormat:@"%@/conf/%@.conf", [self directory], [self name]];
 }
 
-- (NSString *)pathToSystemConfigFile;
-{
+- (NSString *)pathToSystemConfigFile {
 	return [NSString stringWithFormat:@"%@/conf/system.conf", [self directory]];
 }
 
-- (void)refreshStatmonFiles;
-{
+- (void)refreshStatmonFiles {
 	_statmonFiles = nil;
 }
 
-- (void)restore;
-{
+- (void)restore {
 	//	get path to backup
 	NSOpenPanel *panel = [NSOpenPanel openPanel];
     [panel setCanChooseFiles:YES];
@@ -648,23 +601,20 @@
                }];
  }
 
-- (void)setIsRunning:(BOOL)aBool;
-{
+- (void)setIsRunning:(BOOL)aBool {
 	_isRunning = aBool;
 	if (aBool) {
 		self.lastStartDate = [NSDate date];
 	}
 }
 
-- (void)setVersion:(NSString *)aString;
-{
+- (void)setVersion:(NSString *)aString {
 	if (self.version == aString) return;
 	self.version = aString;
 	[self installGlassExtent];
 }
 
-- (NSString *)sizeForDataFile:(NSString *)file;
-{
+- (NSString *)sizeForDataFile:(NSString *)file {
 	NSString *path = [NSString stringWithFormat:@"%@/data/%@", [self directory], file];
 	NSError *error = nil;
 	NSDictionary *attributes = [fileManager attributesOfItemAtPath:path error:&error];
@@ -687,8 +637,7 @@
 	return [NSString stringWithFormat:@"%@ %@", formatted, units];
 }
 
-- (void)startDatabase;
-{
+- (void)startDatabase {
 	[self startDatabaseWithArgs:nil];
 	__block id me = self;		//	blocks get a COPY of referenced objects unless explicitly shared
 	StartCacheWarmer *cacheWarmer = [StartCacheWarmer forDatabase:self];
@@ -700,8 +649,7 @@
 
 //	starts statmonitor, but does not add it as an operation
 //	called directly by restore since it has other things to do after stone starts
-- (void)startDatabaseWithArgs:(NSArray *)args;
-{
+- (void)startDatabaseWithArgs:(NSArray *)args {
 	if ([WaitStone isStoneRunningForDatabase: self]) {
 		_isRunning = YES;
 		NSAlert *alert = [[NSAlert alloc] init];
@@ -728,8 +676,7 @@
 	[appController addOperation:startStone];
 }
 
-- (void)startIsDone;
-{
+- (void)startIsDone {
 	[self performSelector:@selector(refreshStatmonFiles)
 			   withObject:nil
 			   afterDelay:0.4];
@@ -738,8 +685,7 @@
 								 waitUntilDone:NO];
 }
 
-- (void)startStop;
-{
+- (void)startStop {
 	if ([self isRunning]) {
 		[self stopDatabase];
 	} else {
@@ -747,8 +693,7 @@
 	}
 }
 
-- (NSArray *)statmonFiles;
-{
+- (NSArray *)statmonFiles {
 	if (self.statmonFiles) return self.statmonFiles;
 	NSMutableArray *list = [NSMutableArray array];
 	_statmonFiles = list;
@@ -775,8 +720,7 @@
 	return self.statmonFiles;
 }
 
-- (void)stopDatabase;
-{
+- (void)stopDatabase {
 	[appController taskStart:@"Stopping NetLDI and Stone . . .\n\n"];
 	StopNetLDI *stopNetLdi = [StopNetLDI forDatabase:self];
 	StopStone *stopStone = [StopStone forDatabase:self];
@@ -790,8 +734,7 @@
 	[appController addOperation:stopStone];
 }
 
-- (void)stopIsDone;
-{
+- (void)stopIsDone {
 	[self archiveCurrentLogFiles];
 	[self	performSelector:@selector(refreshStatmonFiles)
 				 withObject:nil 
@@ -801,8 +744,7 @@
 								 waitUntilDone:NO];
 }
 
-- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex;
-{
+- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex {
 	if ([appController statmonTableView] == aTableView) {
 		NSDictionary *row = [[self statmonFiles] objectAtIndex:rowIndex];
 		NSString *key = [aTableColumn identifier];
@@ -845,8 +787,7 @@
 	return nil;
 }
 
-- (void)tableViewSelectionDidChange:(NSNotification *)aNotification;
-{
+- (void)tableViewSelectionDidChange:(NSNotification *)aNotification {
 	NSTableView *tableView = [aNotification object];
 	if ([appController statmonTableView] == tableView) {
 		[appController setIsStatmonFileSelected:0 < [[tableView selectedRowIndexes] count]];
@@ -854,8 +795,7 @@
 	}
 }
 
-- (NSString *)version;
-{
+- (NSString *)version {
 	[self willAccessValueForKey:@"version"];
 	NSString *myVersion = [self primitiveValueForKey:@"version"];
 	[self didAccessValueForKey:@"version"];

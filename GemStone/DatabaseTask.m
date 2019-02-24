@@ -11,26 +11,22 @@
 
 @implementation DatabaseTask
 
-+ (id)forDatabase:(Database *)aDatabase;
-{
++ (id)forDatabase:(Database *)aDatabase {
 	DatabaseTask *instance = [self new];
 	[instance setDatabase:aDatabase];
 	return instance;
 }
 
-- (NSString *)binName;
-{
+- (NSString *)binName {
 	mustOverride();
 	return @"";
 }
 
-- (NSString *)currentDirectoryPath;
-{
+- (NSString *)currentDirectoryPath {
 	return [self.database directory];
 }
 
-- (NSMutableDictionary *)environment;
-{
+- (NSMutableDictionary *)environment {
 	NSString *directory = [self.database directory];
 	NSString *config    = [NSString stringWithFormat:@"%@/conf", directory];
 	NSString *stoneLog  = [NSString stringWithFormat:@"%@/log/%@.log", directory, [self.database name]];
@@ -48,8 +44,7 @@
 	return environment;
 }
 
-- (NSString *)launchPath;
-{
+- (NSString *)launchPath {
 	return [NSString stringWithFormat:@"%@/bin/%@", [self.database gemstone], [self binName]];
 }
 

@@ -27,22 +27,19 @@
 @implementation Helper
 
 
-- (void)addToEtcHosts;
-{
+- (void)addToEtcHosts {
 	xpc_object_t message = [self xpcRequest: GS_HELPER_SYSTEM];
 	NSString *command = [NSString stringWithFormat:@"sed -i '.bak' \"/127\\.0\\.0\\.1/ s/$/ %@/\" /etc/hosts", [self hostName]];
 	xpc_dictionary_set_string(message, "command", [command UTF8String]);
 	[self xpcSendMessage:message];
 }
 
-- (void)checkDNS;
-{
+- (void)checkDNS {
 	[self performSelectorInBackground:@selector(_checkDNS) withObject:nil];
 }
 
 // see also http://stackoverflow.com/questions/11240196/notification-when-wifi-connected-os-x
-- (void)_checkDNS;
-{
+- (void)_checkDNS {
 	BOOL oldValue = _hasDNS;
 	const char *hostname = [[self hostName] UTF8String];
 	struct addrinfo hints;
@@ -71,8 +68,7 @@
 }
 
 //	allow use of max available memory
-- (void)ensureSharedMemory;
-{
+- (void)ensureSharedMemory {
 	xpc_object_t message = [self xpcRequest:GS_HELPER_MEMORY];
 	unsigned long physicalMemory = [[NSProcessInfo processInfo] physicalMemory];
 	xpc_dictionary_set_uint64(message, "shmmax", physicalMemory);
@@ -80,8 +76,7 @@
 	[self xpcSendMessage:message];
 }
 
-- (NSString*) hostName;
-{
+- (NSString*) hostName {
 	return [self systemInfoString:"kern.hostname"];
 }
 
@@ -133,8 +128,7 @@
 	[self xpcSendMessage:[self xpcRequest:GS_HELPER_REMOVE]];
 }
 
-- (NSString *)shmall;
-{
+- (NSString *)shmall {
 	unsigned long	current = 0;
 	size_t			mySize = sizeof(NSUInteger);
 	int				result;
@@ -142,8 +136,7 @@
 	return [self shmString:current * 4096];
 }
 
-- (NSString *)shmmax;
-{
+- (NSString *)shmmax {
 	unsigned long	current = 0;
 	size_t			mySize = sizeof(NSUInteger);
 	int				result;
@@ -151,8 +144,7 @@
 	return [self shmString:current];
 }
 
-- (NSString *)shmString:(unsigned long)current;
-{
+- (NSString *)shmString:(unsigned long)current {
 	if (!(current & 0x3FFFFFFF)) {
 		return [NSString stringWithFormat:@"%lu GB", current / 0x3FFFFFFF];
 	} else if (!(current & 0xFFFFF)) {
@@ -163,8 +155,7 @@
 	return [NSString stringWithFormat:@"%lu bytes", current];;
 }
 
-- (NSString *)system:(NSString *)command;
-{
+- (NSString *)system:(NSString *)command {
 	NSPipe *inPipe = [NSPipe pipe];
 	NSFileHandle *inFile = inPipe.fileHandleForWriting;
 	NSPipe *outPipe = [NSPipe pipe];
@@ -181,8 +172,7 @@
 	return [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
 }
 
-- (NSString*) systemInfoString:(const char*)attributeName
-{
+- (NSString*) systemInfoString:(const char*)attributeName {
 	size_t size;
 	sysctlbyname(attributeName, NULL, &size, NULL, 0); // Get the size of the data.
 	char* attributeValue = malloc(size);
@@ -203,8 +193,7 @@
     self.connection = nil;
 }
 
-- (void)updateSetupState;
-{
+- (void)updateSetupState {
 	[appController performSelectorOnMainThread:@selector(updateSetupState) withObject:nil waitUntilDone:NO];
 }
 
@@ -268,8 +257,7 @@
 	[self updateSetupState];		// if no helper tool, then we don't get a response to the request!
 }
 
-- (xpc_object_t)xpcRequest:(gs_helper_t) request;
-{
+- (xpc_object_t)xpcRequest:(gs_helper_t) request {
 	xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
 	xpc_dictionary_set_uint64(message, "request", request);
 	NSString *versionString = NSBundle.mainBundle.infoDictionary[@"CFBundleShortVersionString"];
@@ -277,8 +265,7 @@
 	return message;
 }
 
-- (void)xpcSendMessage:(xpc_object_t) message;
-{
+- (void)xpcSendMessage:(xpc_object_t) message {
 	xpc_connection_send_message_with_reply(self.connection,
 										   message,
 										   dispatch_get_main_queue(),

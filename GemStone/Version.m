@@ -18,8 +18,7 @@
 @dynamic date;
 @dynamic indexInArray;
 
-+ (void)removeVersionAtPath:(NSString *)productPath;
-{
++ (void)removeVersionAtPath:(NSString *)productPath {
 	NSError *error = nil;
 	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:productPath];
 	NSString *file;
@@ -44,11 +43,10 @@
 	[appController taskProgress:@"Finish delete . . .\n"];
 }
 
-- (void)download;
-{
+- (void)download {
 	[appController taskStart:[NSString stringWithFormat:@"Downloading %@ . . .\n", self.name]];
 	DownloadVersion *download = [DownloadVersion new];
-	[download setVersion:self];
+	[download setVersionTo:self];
 	
 	UnzipVersion *unzip = [UnzipVersion new];
 	[unzip setZipFilePath: [download zipFilePath]];
@@ -64,8 +62,7 @@
 	[appController addOperation:unzip];
 }
 
-- (BOOL)isActuallyInstalled;
-{
+- (BOOL)isActuallyInstalled {
 	BOOL isDirectory;
 	BOOL exists = [fileManager
 				   fileExistsAtPath:[self productPath] 
@@ -73,18 +70,15 @@
 	return exists && isDirectory;
 }
 
-- (BOOL)isInstalled;
-{
+- (BOOL)isInstalled {
 	return [self.isInstalledCode boolValue];
 }
 
-- (NSString *)productPath;
-{
+- (NSString *)productPath {
 	return [NSString stringWithFormat:@"%@/GemStone64Bit%@-i386.Darwin", basePath, self.name];
 }
 
-- (void)remove;
-{
+- (void)remove {
 	if ([appController databaseExistsForVersion:self]) {
 		NSAlert *alert = [[NSAlert alloc] init];
 		[alert setMessageText:@"Database(s) exist for Version!"];
@@ -98,8 +92,7 @@
 	[appController removeVersionDone];
 }
 
-- (void)setIsInstalledCode:(NSNumber *)aNumber;
-{
+- (void)setIsInstalledCode:(NSNumber *)aNumber {
 	if (self.isInstalledCode == aNumber) return;
 	if ([self isActuallyInstalled] == [aNumber boolValue]) {
 		_isInstalledCode = aNumber;
@@ -112,16 +105,14 @@
 	}
 }
 
-- (void)updateIsInstalled;
-{
+- (void)updateIsInstalled {
 	NSNumber *code = [NSNumber numberWithBool:[self isActuallyInstalled]];
 	if (code != self.isInstalledCode) {
 		_isInstalledCode = code;
 	}
 }
 
-- (NSString *)zippedFileName;
-{
+- (NSString *)zippedFileName {
 	NSMutableString *string = [NSMutableString new];
 	[string appendString:@"GemStone64Bit"];
 	[string appendString:self.name];
