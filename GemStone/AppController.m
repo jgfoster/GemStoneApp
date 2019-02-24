@@ -314,6 +314,10 @@
 
 - (void)loadRequestForDatabase {
 	[self loadRequest:@"Database" toController:self.databaseListController];
+	// We used to have default values in an accessor, but the accessor was removed
+	for (Database *eachDatabase in [self.databaseListController arrangedObjects]) {
+		[eachDatabase setDefaults];
+	}
 }
 
 - (void)loadRequestForSetup {
