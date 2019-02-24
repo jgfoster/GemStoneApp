@@ -474,7 +474,7 @@
 - (void)removeVersionDone {
 	[self refreshInstalledVersionsList];
 	[self refreshUpgradeVersionsList];
-	[self.taskProgressText insertText:@" . . . Done!"];
+	[self taskProgress:@" . . . Done!"];
 	[self taskFinishedAfterDelay];
 }
 
@@ -653,7 +653,7 @@
 
 - (void)taskProgress:(NSString *)aString {
 	Boolean isVisible = [self.taskProgressPanel isVisible];
-    NSUInteger length =[aString length];
+    NSUInteger length = [aString length];
 	Boolean hasLength = 0 < length;
 	if (isVisible && hasLength) {
 		[self performSelectorOnMainThread:@selector(taskProgressA:)
@@ -666,7 +666,8 @@
 
 - (void)taskProgressA:(NSString *)aString {
 	NSArray *array = [aString componentsSeparatedByString:@"\r"];
-	[self.taskProgressText insertText:[array objectAtIndex:0]];
+	NSRange range = {self.taskProgressText.string.length, 0};
+	[self.taskProgressText insertText:[array objectAtIndex:0] replacementRange:range];
 	for (int i = 1; i < [array count]; ++i) {
 		NSString *string = [self.taskProgressText string];
 		NSString *nextLine = [array objectAtIndex:i];
@@ -677,15 +678,17 @@
 			}
 		}
 		if (0 < lastLF) {
-			NSRange range = {lastLF + 1, [string length] - 1};
+			range = NSMakeRange(lastLF + 1, [string length] - 1);
 			[self.taskProgressText setSelectedRange:range];
 			double value = [nextLine doubleValue];
 			if (value) {
 				[self.taskProgressIndicator setIndeterminate:NO];
 				[self.taskProgressIndicator setDoubleValue:value];
 			}
+		} else {
+			range = NSMakeRange(self.taskProgressText.string.length, 0);
 		}
-		[self.taskProgressText insertText:nextLine];
+		[self.taskProgressText insertText:nextLine replacementRange:range];
 	}
 	[self doRunLoopFor:0.01];	//	ensure that it happens
 }

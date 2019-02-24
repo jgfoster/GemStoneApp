@@ -82,6 +82,7 @@
 
 - (void)errorOutput:(NSNotification *)inNotification {
 	if (!self.task) return;
+	if ([self isCancelled]) return;
 	NSData *data = [[inNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
 	if ([data length]) {
 		NSString *string = [[NSString alloc] 

@@ -85,6 +85,9 @@
 }
 
 - (void)main {
+	for (id dependency in [self dependencies]) {
+		if ([dependency isCancelled]) return;
+	}
 	NSError *error = nil;
 	self.directoryContents = [fileManager contentsOfDirectoryAtPath:basePath error:&error];
 	if (!self.directoryContents) {
