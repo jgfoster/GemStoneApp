@@ -56,6 +56,7 @@
 - (void)openStatmonFilesAtIndexes:(NSIndexSet *)indexes;
 - (void)refreshStatmonFiles;
 - (void)restore;
+- (void)setDefaults;
 - (void)setIsRunning:(BOOL)aBool;
 - (NSString *)sizeForDataFile:(NSString *)file;
 - (void)stopDatabase;

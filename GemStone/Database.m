@@ -397,14 +397,15 @@
 }
 
 - (NSNumber *)identifier {
-	if (![self.identifier intValue]) {
+	if (![_identifier intValue]) {
 		_identifier = [appController nextDatabaseIdentifier];
 		[self createDirectories];
 		self.version = [appController mostAdvancedVersion];
-		[self installGlassExtent];
+		[self installBaseExtent];
 		[self createConfigFiles];
+		[self setDefaults];
 	}
-	return self.identifier;
+	return _identifier;
 }
 
 - (NSString *)infoForDataFile:(NSString *)file {
@@ -498,16 +499,6 @@
 		}
 	}
 	return list;
-}
-
-- (NSString *)name {
-	if ([self.name length]) return self.name;
-	return [NSString stringWithFormat:@"gs64stone%@", self.identifier];
-}
-
-- (NSString *)netLDI {
-	if ([self.netLDI length]) return self.netLDI;
-	return [NSString stringWithFormat:@"netldi%@", self.identifier];
 }
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView {
@@ -604,6 +595,15 @@
                    [appController addOperation:topaz];
                }];
  }
+
+- (void)setDefaults {
+	if ([[self valueForKey:@"name"] length] == 0) {
+		[self setValue: [NSString stringWithFormat:@"gs64stone%@", self.identifier] forKey:@"name"];
+	}
+	if ([[self valueForKey:@"netLDI"] length] == 0) {
+		[self setValue: [NSString stringWithFormat:@"netldi%@", self.identifier] forKey:@"netLDI"];
+	}
+}
 
 - (void)setIsRunning:(BOOL)aBool {
 	_isRunning = aBool;
