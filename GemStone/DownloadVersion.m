@@ -93,7 +93,7 @@
 	[super doneWithError:statusCode];
 }
 
-- (void)setVersion:(Version *)aVersion {
+- (void)setVersionTo:(Version *)aVersion {
 	self.version = aVersion;
 	_zipFilePath = [NSMutableString stringWithFormat:@"%@/%@", basePath, [self.version zippedFileName]];
 }
@@ -101,10 +101,6 @@
 - (void)startTask {
 	[self createZipFile];
 	[super startTask];
-}
-
-- (Version *)version {
-	return _version;
 }
 
 @end

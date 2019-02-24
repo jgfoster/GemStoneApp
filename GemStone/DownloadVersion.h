@@ -14,4 +14,6 @@
 @property				Version		*version;
 @property (readonly)	NSString	*zipFilePath;
 
+- (void)setVersionTo:(Version *)version;
+
 @end
