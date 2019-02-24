@@ -512,7 +512,7 @@
 	[[NSWorkspace sharedWorkspace] openFile:[self directory]];
 }
 
-- (void)openDefaultConfigFileb {
+- (void)openDefaultConfigFile {
 	NSString *path = [NSString stringWithFormat:@"%@/data/system.conf",[self gemstone]];
 	[[NSWorkspace sharedWorkspace] openFile:path];
 }
@@ -698,7 +698,7 @@
 }
 
 - (NSArray *)statmonFiles {
-	if (self.statmonFiles) return self.statmonFiles;
+	if (_statmonFiles) return _statmonFiles;
 	NSMutableArray *list = [NSMutableArray array];
 	_statmonFiles = list;
 	NSString *path = [NSString stringWithFormat:@"%@/stat", [self directory]];
@@ -718,10 +718,10 @@
 		[statmon setValue:gemstone forKey:@"gemstone"];
 		[list addObject:statmon];
 	}
-	_statmonFiles = [self.statmonFiles sortedArrayUsingComparator:^NSComparisonResult(id a, id b) {
+	_statmonFiles = [_statmonFiles sortedArrayUsingComparator:^NSComparisonResult(id a, id b) {
 		return [[a valueForKey:NSFileCreationDate] compare:[b valueForKey:NSFileCreationDate]];
 	}];
-	return self.statmonFiles;
+	return _statmonFiles;
 }
 
 - (void)stopDatabase {
