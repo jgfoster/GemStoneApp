@@ -24,9 +24,6 @@
 #import "Utilities.h"
 #import "Version.h"
 
-#define NotifyMe(aString, aSymbol) \
-[notificationCenter addObserver:self selector:@selector(aSymbol:) name:aString object:nil]
-
 @interface NSManagedObject (Setup)
 @property NSNumber *lastDatabaseIdentifier;
 @property NSNumber *taskCloseWhenDoneCode;
@@ -86,14 +83,12 @@
 
 @implementation AppController
 
-@synthesize managedObjectContext;
-
 - (IBAction)addDatabase:(id)sender {
-	NSManagedObjectModel *managedObjectModel = [[managedObjectContext persistentStoreCoordinator] managedObjectModel];
+	NSManagedObjectModel *managedObjectModel = [[[self managedObjectContext] persistentStoreCoordinator] managedObjectModel];
 	NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Database"];
 	Database *database = [[Database alloc]
 						initWithEntity:entity
-						insertIntoManagedObjectContext:managedObjectContext];
+						insertIntoManagedObjectContext:[self managedObjectContext]];
 	[self.databaseListController addObject:database];
 }
 
@@ -279,11 +274,11 @@
 }
 
 - (void) initManagedObjectContext {
-	managedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+	_managedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
 	NSManagedObjectModel *model = [NSManagedObjectModel mergedModelFromBundles:nil];
 	NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc]
 												 initWithManagedObjectModel: model];
-    [managedObjectContext setPersistentStoreCoordinator: coordinator];
+    [[self managedObjectContext] setPersistentStoreCoordinator: coordinator];
 	NSURL *url = [NSURL 
 				  fileURLWithPath:[self pathToDataFile]
 				  isDirectory:NO];
@@ -312,13 +307,13 @@
 }
 
 - (void)loadRequestForSetup {
-	NSEntityDescription *entity = [NSEntityDescription entityForName:@"Setup" inManagedObjectContext:managedObjectContext];
+	NSEntityDescription *entity = [NSEntityDescription entityForName:@"Setup" inManagedObjectContext:[self managedObjectContext]];
 	NSFetchRequest *request = [NSFetchRequest new];
 	[request setEntity:entity];
 	NSError *error = nil;
-	NSArray *list = [managedObjectContext executeFetchRequest:request error:&error];
+	NSArray *list = [[self managedObjectContext] executeFetchRequest:request error:&error];
 	if (!list || ![list count]) {
-		self.mySetup = [NSEntityDescription insertNewObjectForEntityForName:@"Setup" inManagedObjectContext:managedObjectContext];
+		self.mySetup = [NSEntityDescription insertNewObjectForEntityForName:@"Setup" inManagedObjectContext:[self managedObjectContext]];
 	} else {
 		self.mySetup = [list objectAtIndex:0];
 	}
@@ -335,7 +330,7 @@
 	NSError *error = nil;
 	
 	NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:requestName];
-	NSArray *list = [managedObjectContext executeFetchRequest:request error:&error];
+	NSArray *list = [[self managedObjectContext] executeFetchRequest:request error:&error];
 	if (!list) {
 		NSString *myString = ([error localizedDescription] != nil) ? [error localizedDescription] : @"Unknown Error";
         AppError(@"Data load failed\n%@",myString);
@@ -376,6 +371,18 @@
 
 - (NSNumber *)nextDatabaseIdentifier {
 	NSNumber *identifier = [self.mySetup lastDatabaseIdentifier];
+	for (int i = 1; i < [identifier intValue]; ++i) {
+		BOOL found = NO;
+		for (Database *eachDatabase in [self.databaseListController arrangedObjects]) {
+			if ([eachDatabase hasIdentifier] && [[eachDatabase identifier] intValue] == i) {
+				found = YES;
+				break;
+			}
+		}
+		if (!found) {
+			return [NSNumber numberWithInt:i];
+		}
+	}
 	identifier = [NSNumber numberWithInt:[identifier intValue] + 1];
 	[self.mySetup setLastDatabaseIdentifier:identifier];
 	return identifier;
@@ -454,7 +461,7 @@
 	}
 	[database deleteAll];
 	[self.databaseListController remove:sender];
-	[managedObjectContext deleteObject:database];
+	[[self managedObjectContext] deleteObject:database];
 	[self saveData];
 }
 
@@ -495,11 +502,11 @@
 }
 
 - (void)saveData {
-	BOOL hasChanges = [managedObjectContext hasChanges];
+	BOOL hasChanges = [[self managedObjectContext] hasChanges];
 	if (!hasChanges) { return; }
 	
 	NSError *error = nil;
-	BOOL saveWasSuccessful = [managedObjectContext save:&error];
+	BOOL saveWasSuccessful = [[self managedObjectContext] save:&error];
 	if (!saveWasSuccessful) {
 		NSString *myString = [error localizedDescription] != nil ? [error localizedDescription] : @"Unknown Error";
         AppError(@"Data save failed\n%@",myString);
@@ -762,7 +769,7 @@
 
 - (void)versionListDownloadDone:(DownloadVersionList *)download {
 	if (![download isCancelled]) {
-		NSManagedObjectModel *managedObjectModel = [[managedObjectContext persistentStoreCoordinator] managedObjectModel];
+		NSManagedObjectModel *managedObjectModel = [[[self managedObjectContext] persistentStoreCoordinator] managedObjectModel];
 		NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Version"];
 		
 		NSMutableArray *oldVersions = [NSMutableArray arrayWithArray:[self.versionListController arrangedObjects]];
@@ -781,7 +788,7 @@
 			} else {
 				Version *version = [[Version alloc]
 									initWithEntity:entity 
-									insertIntoManagedObjectContext:managedObjectContext];
+									insertIntoManagedObjectContext:[self managedObjectContext]];
 				[version setName:[dict objectForKey:@"name"]];
 				[version setDate:[dict objectForKey:@"date"]];
 				[self.versionListController addObject:version];
@@ -792,7 +799,7 @@
 			if (![eachVersion isInstalled]) {
 				if (![self databaseExistsForVersion:eachVersion]) {
 					[self.versionListController removeObject:eachVersion];
-					[managedObjectContext deleteObject:eachVersion];
+					[[self managedObjectContext] deleteObject:eachVersion];
 				}
 			}
 		}
@@ -821,7 +828,7 @@
 
 - (void)versionUnzipDone:(UnzipVersion *)unzipTask {
 	if (![unzipTask isCancelled]) {
-		NSManagedObjectModel *managedObjectModel = [[managedObjectContext persistentStoreCoordinator] managedObjectModel];
+		NSManagedObjectModel *managedObjectModel = [[[self managedObjectContext] persistentStoreCoordinator] managedObjectModel];
 		NSString *path = [unzipTask zipFilePath];
 		NSInteger lastSlash = -1, lastDash = -1;
 		for (NSUInteger i = 0; i < [path length]; ++i) {
@@ -838,7 +845,7 @@
 			NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Version"];
 			Version *version = [[Version alloc]
 								initWithEntity:entity 
-								insertIntoManagedObjectContext:managedObjectContext];
+								insertIntoManagedObjectContext:[self managedObjectContext]];
 			[version setName:name];
 			[version setDate:[NSDate date]];
 			[self.versionListController addObject:version];

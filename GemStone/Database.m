@@ -28,6 +28,7 @@
 
 @implementation Database
 
+// https://stackoverflow.com/questions/12510849/automatic-property-synthesize-not-working-on-nsmanagedobject-subclass
 @synthesize identifier		= _identifier;
 @synthesize isRunning		= _isRunning;
 @synthesize statmonFiles	= _statmonFiles;
@@ -272,6 +273,9 @@
 }
 
 - (void)deleteAll {
+	[self
+	 removeObserver:self
+	 forKeyPath:NSStringFromSelector(@selector(version))];
 	NSString *path = [self directory];
 	NSError *error = nil;
 	if ([fileManager removeItemAtPath:path error:&error]) return;
@@ -379,14 +383,18 @@
 	}
 }
 
+- (BOOL)hasIdentifier {
+	return [_identifier intValue] > 0;
+}
+
 - (NSNumber *)identifier {
 	if (![_identifier intValue]) {
 		_identifier = [appController nextDatabaseIdentifier];
 		[self createDirectories];
 		self.version = [appController mostAdvancedVersion];
+		[self setDefaults];
 		[self installBaseExtent];
 		[self createConfigFiles];
-		[self setDefaults];
 	}
 	return _identifier;
 }
@@ -491,6 +499,19 @@
 	return 0;
 }
 
+- (void)observeValueForKeyPath:(NSString *)keyPath
+					  ofObject:(id)object
+						change:(NSDictionary *)change
+					   context:(void *)context {
+	if ([keyPath isEqualToString:NSStringFromSelector(@selector(version))]) {
+		NSString * oldValue = [change objectForKey:NSKeyValueChangeOldKey];
+		NSString * newValue = [change objectForKey:NSKeyValueChangeNewKey];
+		if (![oldValue isEqualToString:newValue]) {
+			[self installBaseExtent];
+		}
+	}
+}
+
 - (void)open {
 	[[NSWorkspace sharedWorkspace] openFile:[self directory]];
 }
@@ -575,13 +596,21 @@
                }];
  }
 
+// called when loaded from the managed object context and when newly created
 - (void)setDefaults {
+	// set default stone name and netldi name
 	if ([[self valueForKey:@"name"] length] == 0) {
 		[self setValue: [NSString stringWithFormat:@"gs64stone%@", self.identifier] forKey:@"name"];
 	}
 	if ([[self valueForKey:@"netLDI"] length] == 0) {
 		[self setValue: [NSString stringWithFormat:@"netldi%@", self.identifier] forKey:@"netLDI"];
 	}
+	// set observer for change in version so we can install a new extent
+	[self
+	 addObserver:self
+	 forKeyPath:NSStringFromSelector(@selector(version))
+	 options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
+	 context:nil];
 }
 
 - (void)setIsRunning:(BOOL)aBool {
@@ -589,12 +618,6 @@
 	if (aBool) {
 		self.lastStartDate = [NSDate date];
 	}
-}
-
-- (void)setVersion:(NSString *)aString {
-	if (self.version == aString) return;
-	self.version = aString;
-	[self installGlassExtent];
 }
 
 - (NSString *)sizeForDataFile:(NSString *)file {

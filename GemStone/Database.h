@@ -42,10 +42,12 @@
 - (void)doubleClickStatmon:(id)sender;
 - (NSString *)gemstone;
 - (void)gsList:(NSArray *)list;
+- (BOOL)hasIdentifier;
 - (NSString *)infoForDataFile:(NSString *)file;
 - (BOOL)isRunningCode;
 - (NSString *)isRunningString;
 - (NSArray *)logFiles;
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context;
 - (void)open;
 - (void)openDefaultConfigFile;
 - (void)openGemConfigFile;
