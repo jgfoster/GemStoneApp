@@ -145,7 +145,6 @@
 		E593F5851540C1CA00CA44CE /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		E593F5871540C1CA00CA44CE /* GemStone-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GemStone-Prefix.pch"; sourceTree = "<group>"; };
 		E593F5891540C1CA00CA44CE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
-		E593F5921540C1CA00CA44CE /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		E593F59C1540C1CB00CA44CE /* GemStoneTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GemStoneTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E593F5A41540C1CB00CA44CE /* GemStoneTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GemStoneTests-Info.plist"; sourceTree = "<group>"; };
 		E593F5A61540C1CB00CA44CE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -170,6 +169,7 @@
 		E5F05E5615A39EAB00D6FCC7 /* StartStone.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StartStone.m; sourceTree = "<group>"; };
 		E5FD0F021565ECA300045B4D /* Database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Database.h; sourceTree = "<group>"; };
 		E5FD0F031565ECA300045B4D /* Database.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Database.m; sourceTree = "<group>"; };
+		E5FF6FD4238A33C20005F806 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -463,10 +463,11 @@
 			};
 			buildConfigurationList = E593F56F1540C1CA00CA44CE /* Build configuration list for PBXProject "GemStone" */;
 			compatibilityVersion = "Xcode 8.0";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = E593F56A1540C1CA00CA44CE;
 			productRefGroup = E593F5761540C1CA00CA44CE /* Products */;
@@ -614,7 +615,7 @@
 		E593F5911540C1CA00CA44CE /* MainMenu.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E593F5921540C1CA00CA44CE /* en */,
+				E5FF6FD4238A33C20005F806 /* Base */,
 			);
 			name = MainMenu.xib;
 			sourceTree = "<group>";
@@ -743,7 +744,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				ONLY_ACTIVE_ARCH = YES;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
@@ -790,7 +791,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				ONLY_ACTIVE_ARCH = YES;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;

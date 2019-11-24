@@ -104,7 +104,7 @@
     [panel beginSheetModalForWindow:[NSApp mainWindow]
                   completionHandler:^(NSInteger result) {
 					  [panel orderOut:nil];
-                      if (result != NSFileHandlingPanelOKButton) return;
+                      if (result != NSModalResponseOK) return;
                       NSString *path = [[panel URL] path];
                       Topaz *topaz = [Topaz database:self
                                       do:^(Topaz *aTopaz){ [aTopaz fullBackupTo:path]; }];

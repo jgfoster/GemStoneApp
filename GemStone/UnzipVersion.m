@@ -127,7 +127,7 @@
     [op beginSheetModalForWindow:[NSApp mainWindow]
                completionHandler:^(NSInteger result) {
 				   [op orderOut:nil];
-                   if (result != NSFileHandlingPanelOKButton) return;
+                   if (result != NSModalResponseOK) return;
                    __block id me = self;		//	blocks get a COPY of referenced objects unless explicitly shared
                    self.zipFilePath = [[[op URLs] objectAtIndex:0] path];
                    [self setCompletionBlock:^(){
