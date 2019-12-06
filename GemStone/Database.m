@@ -582,7 +582,7 @@
     [panel beginSheetModalForWindow:[NSApp mainWindow]
                completionHandler:^(NSInteger result) {
 				   [panel orderOut:nil];
-                   if (result != NSFileHandlingPanelOKButton) return;
+                   if (result != NSModalResponseOK) return;
                    __block id me = self;		//	blocks get a COPY of referenced objects unless explicitly shared
                    NSString *path = [[[panel URLs] objectAtIndex:0] path];
                    //	defines statmonitor, but does not add it as an operation
