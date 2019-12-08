@@ -185,8 +185,11 @@
 }
 
 - (IBAction)closeInfoPanel:(id)sender {
-	[self.infoPanel orderOut:nil];
-	[[NSApp mainWindow] endSheet:self.infoPanel];
+	[self.taskProgressText setString:[NSMutableString new]];
+	dispatch_async(dispatch_get_main_queue(), ^{
+		[self.infoPanel orderOut:nil];
+		[[NSApp mainWindow] endSheet:self.infoPanel];
+	});
 }
 
 - (void)criticalAlert:(NSString *)textString details:(NSString *)detailsString {
@@ -578,10 +581,6 @@
 		"you can enable File Sharing in System Preferences or add the hostname to /etc/hosts.\n\n"
 	
 		"";
-	/*
-	. If the helper tool is installed, we will set these automatically.\n"
-		This can be done manually in a Terminal as follows:\n$ sudo sysctl -w kern.sysv.shmall=614400\n$ sudo sysctl -w kern.sysv.shmmax=2516582400\nAlternatively, we can install a \"helper tool\" that is managed by launchd and updates the kernel settings (if necessary) when starting a local database.\n\nIf you have manually configured the kernel settings (as above) then this should not be necessary. Also, if your only use of this application is to access databases running on another host, then you don't need to install the helper tool.\n\nIn any case, you may skip this step for now and we will ask for permission if the tool is needed.";
-	 */
 	[self.infoPanelTextView setString:string];
     [[NSApp mainWindow]beginSheet:self.infoPanel completionHandler:^(NSModalResponse returnCode) {
         return;
@@ -618,15 +617,7 @@
 }
 
 - (void)taskFinished {
-	[self performSelectorOnMainThread:@selector(taskFinishedA)
-						   withObject:nil
-						waitUntilDone:NO];
-}
-
-- (void)taskFinishedA {
-	[self.taskProgressText setString:[NSMutableString new]];
-	[self.taskProgressPanel orderOut:nil];
-	[[NSApp mainWindow] endSheet:self.taskProgressPanel];
+	[self closeInfoPanel:self];
 }
 
 - (void)taskFinishedAfterDelay {
