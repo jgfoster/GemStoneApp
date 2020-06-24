@@ -11,6 +11,7 @@
 		E51317D615AF8F44007ADCFF /* CopyDBF.m in Sources */ = {isa = PBXBuildFile; fileRef = E51317D515AF8F44007ADCFF /* CopyDBF.m */; };
 		E5143A4215ADE28B00DDAD01 /* LogFile.m in Sources */ = {isa = PBXBuildFile; fileRef = E5143A4115ADE28B00DDAD01 /* LogFile.m */; };
 		E51C7D1B1E2D651C00C37ACC /* com.GemTalk.GemStone.Helper in CopyFiles */ = {isa = PBXBuildFile; fileRef = E51C7D0E1E2D437A00C37ACC /* com.GemTalk.GemStone.Helper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		E526074624A2E35200790CF9 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E526074524A2E35200790CF9 /* Images.xcassets */; };
 		E52678E517F26B17006CD274 /* Terminal.m in Sources */ = {isa = PBXBuildFile; fileRef = E52678E417F26B17006CD274 /* Terminal.m */; };
 		E52AA97416093CE900CE9A72 /* DataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E52AA97116093CE900CE9A72 /* DataModel.xcdatamodeld */; };
 		E54DFBE115B734130086920B /* VSD.m in Sources */ = {isa = PBXBuildFile; fileRef = E54DFBE015B734130086920B /* VSD.m */; };
@@ -40,7 +41,6 @@
 		E593F59F1540C1CB00CA44CE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E593F5791540C1CA00CA44CE /* Cocoa.framework */; };
 		E593F5A71540C1CB00CA44CE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E593F5A51540C1CB00CA44CE /* InfoPlist.strings */; };
 		E593F5AA1540C1CB00CA44CE /* GemStoneTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E593F5A91540C1CB00CA44CE /* GemStoneTests.m */; };
-		E593F5B41540C1E000CA44CE /* GemStone.icns in Resources */ = {isa = PBXBuildFile; fileRef = E593F5B31540C1E000CA44CE /* GemStone.icns */; };
 		E5A9D66815A78EFA006D51D1 /* Download.m in Sources */ = {isa = PBXBuildFile; fileRef = E5A9D66715A78EFA006D51D1 /* Download.m */; };
 		E5B50B09155B291B00BE1A65 /* DownloadVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = E5B50B08155B291B00BE1A65 /* DownloadVersion.m */; };
 		E5B984BA1767646E00831AB3 /* StartCacheWarmer.m in Sources */ = {isa = PBXBuildFile; fileRef = E5B984B91767646E00831AB3 /* StartCacheWarmer.m */; };
@@ -98,6 +98,7 @@
 		E5143A4015ADE28B00DDAD01 /* LogFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogFile.h; sourceTree = "<group>"; };
 		E5143A4115ADE28B00DDAD01 /* LogFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogFile.m; sourceTree = "<group>"; };
 		E51C7D0E1E2D437A00C37ACC /* com.GemTalk.GemStone.Helper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = com.GemTalk.GemStone.Helper; sourceTree = BUILT_PRODUCTS_DIR; };
+		E526074524A2E35200790CF9 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		E52678E317F26B17006CD274 /* Terminal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Terminal.h; sourceTree = "<group>"; };
 		E52678E417F26B17006CD274 /* Terminal.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Terminal.m; sourceTree = "<group>"; };
 		E52AA97216093CE900CE9A72 /* DataModel 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "DataModel 2.xcdatamodel"; sourceTree = "<group>"; };
@@ -150,7 +151,6 @@
 		E593F5A61540C1CB00CA44CE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		E593F5A81540C1CB00CA44CE /* GemStoneTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GemStoneTests.h; sourceTree = "<group>"; };
 		E593F5A91540C1CB00CA44CE /* GemStoneTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GemStoneTests.m; sourceTree = "<group>"; };
-		E593F5B31540C1E000CA44CE /* GemStone.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = GemStone.icns; sourceTree = SOURCE_ROOT; };
 		E5A9D66615A78EFA006D51D1 /* Download.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Download.h; sourceTree = "<group>"; };
 		E5A9D66715A78EFA006D51D1 /* Download.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Download.m; sourceTree = "<group>"; };
 		E5B50B07155B291B00BE1A65 /* DownloadVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DownloadVersion.h; sourceTree = "<group>"; };
@@ -320,9 +320,9 @@
 				E5E33C2515547ADF002B1E9F /* Version.m */,
 				E593F5811540C1CA00CA44CE /* GemStone-Info.plist */,
 				E593F5881540C1CA00CA44CE /* Credits.rtf */,
-				E593F5B31540C1E000CA44CE /* GemStone.icns */,
 				E593F5801540C1CA00CA44CE /* Supporting Files */,
 				E5CA1EDF1628DF0200997041 /* buildDistribution.sh */,
+				E526074524A2E35200790CF9 /* Images.xcassets */,
 			);
 			path = GemStone;
 			sourceTree = "<group>";
@@ -488,13 +488,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				E57F4E511E2ED1600008B42F /* Info.plist in Resources */,
+				E526074624A2E35200790CF9 /* Images.xcassets in Resources */,
 				E5E381D41805B6F6007DDCF7 /* gem.conf in Resources */,
 				E593F5841540C1CA00CA44CE /* InfoPlist.strings in Resources */,
 				E57F4E521E2ED1600008B42F /* Launchd.plist in Resources */,
 				E593F58A1540C1CA00CA44CE /* Credits.rtf in Resources */,
 				E593F5931540C1CA00CA44CE /* MainMenu.xib in Resources */,
 				E5E381D01805B5FA007DDCF7 /* system.conf in Resources */,
-				E593F5B41540C1E000CA44CE /* GemStone.icns in Resources */,
 				E5E381D71805C55E007DDCF7 /* stone.conf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -805,10 +805,11 @@
 		E593F5AE1540C1CB00CA44CE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Developer ID Application";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.4.5;
+				CURRENT_PROJECT_VERSION = 1.4.7;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 72G58AHU7P;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -827,11 +828,12 @@
 		E593F5AF1540C1CB00CA44CE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Developer ID Application";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1.4.5;
+				CURRENT_PROJECT_VERSION = 1.4.7;
 				DEVELOPMENT_TEAM = 72G58AHU7P;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
