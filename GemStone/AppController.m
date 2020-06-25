@@ -43,9 +43,10 @@
 //	Versions Tab
 @property (weak)	IBOutlet NSTextField			*lastUpdateDateField;
 //	Databases Tab
+@property (weak)    IBOutlet NSButton               *addDatabaseButton;
+@property (weak)    IBOutlet NSButton               *deleteDatabaseButton;
 @property (weak)	IBOutlet NSArrayController		*databaseListController;
 @property (weak)	IBOutlet NSTableView			*databaseTableView;
-@property			IBOutlet NSTextView				*infoPanelTextView;
 @property (weak)	IBOutlet NSArrayController		*logFileListController;
 @property (weak)	IBOutlet NSButton				*removeButton;
 @property (weak)	IBOutlet NSArrayController		*versionListController;
@@ -67,6 +68,7 @@
 @property (weak)	IBOutlet NSButton				*upgradeSeasideCheckbox;
 
 @property (weak)	IBOutlet NSPanel				*infoPanel;
+@property           IBOutlet NSTextView             *infoPanelTextView;
 @property (weak)	IBOutlet NSPanel				*taskProgressPanel;
 @property			IBOutlet NSTextView				*taskProgressText;
 @property (weak)	IBOutlet NSProgressIndicator	*taskProgressIndicator;
@@ -154,7 +156,7 @@
 		[self.operations cancelAllOperations];
 		[self taskFinishedAfterDelay];
 	} else {	//	Presumably this means that the title was changed to "Close"
-		[self taskFinished];
+        [self closeTaskProgressPanel];
 	}
 }
 
@@ -187,9 +189,15 @@
 - (IBAction)closeInfoPanel:(id)sender {
 	[self.taskProgressText setString:[NSMutableString new]];
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[self.infoPanel orderOut:nil];
-		[[NSApp mainWindow] endSheet:self.infoPanel];
+        [[NSApp mainWindow] endSheet:self.infoPanel returnCode:0];
 	});
+}
+
+- (void)closeTaskProgressPanel {
+    [self.taskProgressText setString:[NSMutableString new]];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSApp mainWindow] endSheet:self.taskProgressPanel returnCode:0];
+    });
 }
 
 - (void)criticalAlert:(NSString *)textString details:(NSString *)detailsString {
@@ -480,14 +488,17 @@
 }
 
 - (void)refreshInstalledVersionsList {
+    Boolean hasAnyInstalledVersions = false;
 	[self.versionPopupController removeObjects:[self.versionPopupController arrangedObjects]];
 	for (Version *version in [self.versionListController arrangedObjects]) {
 		[version updateIsInstalled];
 		if ([version isInstalled]) {
 			[self.versionPopupController addObject:[version name]];
+            hasAnyInstalledVersions = true;
 		}
 	}
 	[self.lastUpdateDateField setObjectValue:[self.mySetup versionsDownloadDate]];
+    [self.addDatabaseButton setEnabled:hasAnyInstalledVersions];
 }
 
 - (void)refreshUpgradeVersionsList {
@@ -583,7 +594,7 @@
 		"";
 	[self.infoPanelTextView setString:string];
     [[NSApp mainWindow]beginSheet:self.infoPanel completionHandler:^(NSModalResponse returnCode) {
-        return;
+        [self.infoPanel orderOut:self];
     }];
 }
 
@@ -616,10 +627,6 @@
 	[self taskFinishedAfterDelay];
 }
 
-- (void)taskFinished {
-	[self closeInfoPanel:self];
-}
-
 - (void)taskFinishedAfterDelay {
 	[self performSelectorOnMainThread:@selector(taskFinishedAfterDelayA)
 						   withObject:nil
@@ -636,24 +643,24 @@
 
 - (void)taskFinishedAfterDelayB {
 	if ([[self.mySetup taskCloseWhenDoneCode] boolValue]) {
-		[self taskFinished];
+        [self closeTaskProgressPanel];
 	}
 }
 
 - (void)taskProgress:(NSString *)aString {
-	Boolean isVisible = [self.taskProgressPanel isVisible];
     NSUInteger length = [aString length];
 	Boolean hasLength = 0 < length;
-	if (isVisible && hasLength) {
+	if (hasLength) {
 		[self performSelectorOnMainThread:@selector(taskProgressA:)
 							   withObject:aString
 							waitUntilDone:YES];
 	} else {
-		NSLog(@"taskProgress: - %i %lu '%@'", isVisible, (unsigned long)length, aString);
+		NSLog(@"taskProgress: \"\"");
 	}
 }
 
 - (void)taskProgressA:(NSString *)aString {
+    if (![self.taskProgressPanel isVisible]) return;
 	NSArray *array = [aString componentsSeparatedByString:@"\r"];
 	NSRange range = {self.taskProgressText.string.length, 0};
 	[self.taskProgressText insertText:[array objectAtIndex:0] replacementRange:range];
@@ -692,7 +699,7 @@
 	if (![self.taskProgressPanel isVisible]) {
         [[NSApp mainWindow] beginSheet:self.taskProgressPanel
                      completionHandler:^(NSModalResponse returnCode) {
-                         return;
+                         [self.taskProgressPanel orderOut:self];
                      }];
 		[self.taskProgressIndicator setIndeterminate:YES];
 		[self.taskProgressIndicator startAnimation:self];

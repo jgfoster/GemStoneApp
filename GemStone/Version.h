@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-#define kDownloadSite "http://seaside.gemtalksystems.com/downloads/i386.Darwin/"
+#define kDownloadSite "https://downloads.gemtalksystems.com/platforms/i386.Darwin/"
 
 @interface Version : NSManagedObject {
 	NSNumber	*_isInstalledCode;

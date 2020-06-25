@@ -28,13 +28,9 @@
 - (void)done {
 	NSString *string = self.standardOutput;
 	self.standardOutput = nil;
-	NSUInteger loc = [string rangeOfString:@">"].location;
-	if (NSNotFound == loc) {
-		AppError(@"invalid data returned from version list");
-	}
 	string = [NSString stringWithFormat:@"%@%@",
-			  @"<?xml version='1.0' encoding='UTF-8' ?",
-			  [string substringFromIndex:loc]];
+			  @"<?xml version='1.0' encoding='UTF-8' ?>",
+			  string];
 	string = [string stringByReplacingOccurrencesOfString:@"]\">" withString:@"]\" />"];
 	string = [string stringByReplacingOccurrencesOfString:@"<hr>" withString:@"<hr />"];
 	string = [string stringByReplacingOccurrencesOfString:@"&nbsp" withString:@""];
@@ -43,21 +39,27 @@
 	if (error) {
 		AppError(@"error parsing version list HTML: %@", [error description]);
 	}
-	NSArray *nodes = [doc nodesForXPath:@"/html/body/div/table/tbody/tr" error:&error];
-	NSRange nodeRange = {1, [nodes count] - 1};
-	nodes = [nodes subarrayWithRange:nodeRange];
-	NSDateFormatter *inFormatter = [NSDateFormatter new];
-	[inFormatter setDateFormat:@"yyyy-MMM-dd hh:mm:ss"];
+	NSArray *nodes = [doc nodesForXPath:@"/html/body/pre" error:&error];
+    if (error) {
+        AppError(@"error parsing version list node: %@", [error description]);
+    }
+    nodes = [[nodes objectAtIndex:0] children];
+    NSRange nodeRange = {1, [nodes count] - 1};
+    nodes = [nodes subarrayWithRange:nodeRange];
+   	NSDateFormatter *inFormatter = [NSDateFormatter new];
+	[inFormatter setDateFormat:@"dd-MMM-yyyy"];
 	NSDateFormatter *outFormatter = [NSDateFormatter new];
 	[outFormatter setDateFormat:@"yyyy-mm-dd"];
-	_versions = [NSMutableArray arrayWithCapacity:[nodes count]];
-	for (id node in nodes) {
-		NSArray *fields = [node nodesForXPath:@"td" error:&error];
-		NSString *name = [[fields objectAtIndex:0] stringValue];
-		NSDate   *date = [inFormatter dateFromString:[[fields objectAtIndex:1] stringValue]];
-		NSRange  range = {13, [name length] - 29};
-		name = [name substringWithRange:range];
-		NSDictionary *version = [NSMutableDictionary dictionaryWithCapacity:3];
+	_versions = [NSMutableArray arrayWithCapacity:[nodes count] / 2];
+    for (int i = 0; i < [nodes count]; i += 2) {
+        NSString *name = [[[nodes objectAtIndex:i] attributeForName:@"href"] stringValue];
+        NSRange  range = {13, [name length] - 29};
+        name = [name substringWithRange:range];
+        NSString *data = [[nodes objectAtIndex:i + 1] stringValue];
+        NSArray *fields = [data componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        fields = [fields filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"length > 0"]];
+        NSDate *date = [inFormatter dateFromString:[fields objectAtIndex:0]];
+		NSDictionary *version = [NSMutableDictionary dictionaryWithCapacity:2];
 		[version setValue:name forKey:@"name"];
 		[version setValue:date forKey:@"date"];
 		[self.versions addObject:version];
