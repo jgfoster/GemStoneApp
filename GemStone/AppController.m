@@ -408,7 +408,7 @@
 }
 
 - (IBAction)openBrowserOnAvailableVersions:(id)sender {
-	NSURL *url = [NSURL URLWithString:@"http://seaside.gemtalksystems.com/downloads/i386.Darwin/"];
+	NSURL *url = [NSURL URLWithString:@kDownloadSite];
 	[[NSWorkspace sharedWorkspace] openURL:url];
 }
 

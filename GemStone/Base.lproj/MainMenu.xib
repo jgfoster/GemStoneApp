@@ -734,7 +734,7 @@
                         <rect key="frame" x="20" y="61" width="510" height="319"/>
                         <clipView key="contentView" drawsBackground="NO" id="VDm-Oe-Tvh">
                             <rect key="frame" x="1" y="1" width="493" height="317"/>
-                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <autoresizingMask key="autoresizingMask"/>
                             <subviews>
                                 <textView editable="NO" importsGraphics="NO" richText="NO" verticallyResizable="YES" findStyle="panel" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="13272">
                                     <rect key="frame" x="0.0" y="0.0" width="493" height="317"/>
@@ -810,7 +810,7 @@ Gw
                         <rect key="frame" x="20" y="43" width="510" height="237"/>
                         <clipView key="contentView" drawsBackground="NO" id="fXO-Bk-rOy">
                             <rect key="frame" x="1" y="1" width="493" height="235"/>
-                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <autoresizingMask key="autoresizingMask"/>
                             <subviews>
                                 <textView importsGraphics="NO" verticallyResizable="YES" findStyle="panel" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="1389">
                                     <rect key="frame" x="0.0" y="0.0" width="493" height="235"/>
