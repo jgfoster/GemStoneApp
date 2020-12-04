@@ -695,6 +695,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.GemTalk.GemStone.Helper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
 			};
 			name = Debug;
 		};
@@ -733,6 +734,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.GemTalk.GemStone.Helper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
 			};
 			name = Release;
 		};
@@ -863,6 +865,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "GemStone System Administration Profile";
+				SKIP_INSTALL = NO;
 				VALID_ARCHS = x86_64;
 				VERSIONING_SYSTEM = "";
 				WRAPPER_EXTENSION = app;
@@ -890,6 +893,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "GemStone System Administration Profile";
+				SKIP_INSTALL = NO;
 				VALID_ARCHS = x86_64;
 				VERSIONING_SYSTEM = "";
 				WRAPPER_EXTENSION = app;

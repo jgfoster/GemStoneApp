@@ -8,10 +8,12 @@
 
 set -x
 
-cd $TARGET_BUILD_DIR/
-rm GemStoneApp.dmg GemStoneApp.sparseimage $PROJECT_DIR/GemStoneApp.dmg 2> /dev/null
+cd $TARGET_BUILD_DIR
+pwd
+ls -alF
+rm GemStoneApp.dmg GemStoneApp.sparseimage $PROJECT_DIR/GemStoneApp.dmg 2> /dev/null && true
 
-if [[ $1 = "clean" ]] ; then
+if [[ $1 == "clean" ]] ; then
 echo "clean does not require any further activity"
 exit 0
 fi
@@ -28,17 +30,25 @@ rc=$?
 if [[ $rc != 0 ]] ; then
 exit $rc
 fi
-cd $TARGET_BUILD_DIR/GemStone.app/
+pwd
+cd GemStone.app
+pwd
 echo "** Copy files to disk image"
+ls -alF
 cp -PR * /Volumes/GemStoneApp/GemStone.app/
 rc=$?
 if [[ $rc != 0 ]] ; then
 exit $rc
 fi
+pwd
 cd ../
+pwd
+cd $TARGET_BUILD_DIR
+pwd
 sleep 1
 hdiutil detach /Volumes/GemStoneApp/
 echo "** Convert disk image"
+ls -alF
 hdiutil convert GemStoneApp.sparseimage -format UDBZ -o GemStoneApp.dmg
 rc=$?
 if [[ $rc != 0 ]] ; then
