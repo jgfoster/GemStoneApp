@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E50AA29F25797DD100A1FA1A /* DownloadHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = E50AA29E25797DD100A1FA1A /* DownloadHeader.m */; };
+		E50AA2AB2579C61E00A1FA1A /* InstallVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = E50AA2AA2579C61E00A1FA1A /* InstallVersion.m */; };
+		E50AA2B72579DBDD00A1FA1A /* MountDMG.m in Sources */ = {isa = PBXBuildFile; fileRef = E50AA2B62579DBDD00A1FA1A /* MountDMG.m */; };
+		E50AA2C42579E8D500A1FA1A /* UnmountDMG.m in Sources */ = {isa = PBXBuildFile; fileRef = E50AA2C32579E8D500A1FA1A /* UnmountDMG.m */; };
 		E51317D215AF7CFB007ADCFF /* Statmonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = E51317D115AF7CFB007ADCFF /* Statmonitor.m */; };
 		E51317D615AF8F44007ADCFF /* CopyDBF.m in Sources */ = {isa = PBXBuildFile; fileRef = E51317D515AF8F44007ADCFF /* CopyDBF.m */; };
 		E5143A4215ADE28B00DDAD01 /* LogFile.m in Sources */ = {isa = PBXBuildFile; fileRef = E5143A4115ADE28B00DDAD01 /* LogFile.m */; };
@@ -91,6 +95,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E50AA29D25797DB900A1FA1A /* DownloadHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DownloadHeader.h; sourceTree = "<group>"; };
+		E50AA29E25797DD100A1FA1A /* DownloadHeader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DownloadHeader.m; sourceTree = "<group>"; };
+		E50AA2A92579C60B00A1FA1A /* InstallVersion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InstallVersion.h; sourceTree = "<group>"; };
+		E50AA2AA2579C61E00A1FA1A /* InstallVersion.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InstallVersion.m; sourceTree = "<group>"; };
+		E50AA2B52579DBCD00A1FA1A /* MountDMG.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MountDMG.h; sourceTree = "<group>"; };
+		E50AA2B62579DBDD00A1FA1A /* MountDMG.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MountDMG.m; sourceTree = "<group>"; };
+		E50AA2C12579E8B700A1FA1A /* UnmountDMG.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UnmountDMG.h; sourceTree = "<group>"; };
+		E50AA2C32579E8D500A1FA1A /* UnmountDMG.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UnmountDMG.m; sourceTree = "<group>"; };
 		E51317D015AF7CFB007ADCFF /* Statmonitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Statmonitor.h; sourceTree = "<group>"; };
 		E51317D115AF7CFB007ADCFF /* Statmonitor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Statmonitor.m; sourceTree = "<group>"; };
 		E51317D415AF8F44007ADCFF /* CopyDBF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CopyDBF.h; sourceTree = "<group>"; };
@@ -211,12 +223,18 @@
 				E593417F15AB9B1200618792 /* DatabaseTask.m */,
 				E5A9D66615A78EFA006D51D1 /* Download.h */,
 				E5A9D66715A78EFA006D51D1 /* Download.m */,
+				E50AA29D25797DB900A1FA1A /* DownloadHeader.h */,
+				E50AA29E25797DD100A1FA1A /* DownloadHeader.m */,
 				E5B50B07155B291B00BE1A65 /* DownloadVersion.h */,
 				E5B50B08155B291B00BE1A65 /* DownloadVersion.m */,
 				E570538615582FA8001686F1 /* DownloadVersionList.h */,
 				E570538715582FA8001686F1 /* DownloadVersionList.m */,
 				E5697C5115AC8D510000BE4D /* GSList.h */,
 				E5697C5215AC8D510000BE4D /* GSList.m */,
+				E50AA2A92579C60B00A1FA1A /* InstallVersion.h */,
+				E50AA2AA2579C61E00A1FA1A /* InstallVersion.m */,
+				E50AA2B52579DBCD00A1FA1A /* MountDMG.h */,
+				E50AA2B62579DBDD00A1FA1A /* MountDMG.m */,
 				E5B984B81767646E00831AB3 /* StartCacheWarmer.h */,
 				E5B984B91767646E00831AB3 /* StartCacheWarmer.m */,
 				E593418415ABB77F00618792 /* StartNetLDI.h */,
@@ -235,6 +253,8 @@
 				E52678E417F26B17006CD274 /* Terminal.m */,
 				E56720FF15B4A8A2000E93C5 /* Topaz.h */,
 				E567210015B4A8A2000E93C5 /* Topaz.m */,
+				E50AA2C12579E8B700A1FA1A /* UnmountDMG.h */,
+				E50AA2C32579E8D500A1FA1A /* UnmountDMG.m */,
 				E567E94B160A43470024905D /* UnzipVersion.h */,
 				E567E94C160A43470024905D /* UnzipVersion.m */,
 				E54DFBDF15B734130086920B /* VSD.h */,
@@ -540,12 +560,15 @@
 			files = (
 				E593F5861540C1CA00CA44CE /* main.m in Sources */,
 				E554E9711541C4C800A08D05 /* AppController.m in Sources */,
+				E50AA2B72579DBDD00A1FA1A /* MountDMG.m in Sources */,
 				E5E33C2815547ADF002B1E9F /* Version.m in Sources */,
 				E52678E517F26B17006CD274 /* Terminal.m in Sources */,
 				E570538815582FA8001686F1 /* DownloadVersionList.m in Sources */,
 				E5B50B09155B291B00BE1A65 /* DownloadVersion.m in Sources */,
+				E50AA2C42579E8D500A1FA1A /* UnmountDMG.m in Sources */,
 				E5FD0F041565ECA300045B4D /* Database.m in Sources */,
 				E565CC3A1E2C73D600C4073A /* Helper.m in Sources */,
+				E50AA2AB2579C61E00A1FA1A /* InstallVersion.m in Sources */,
 				E5F05E5315A39C3100D6FCC7 /* Task.m in Sources */,
 				E5F05E5715A39EAB00D6FCC7 /* StartStone.m in Sources */,
 				E5A9D66815A78EFA006D51D1 /* Download.m in Sources */,
@@ -558,6 +581,7 @@
 				E5697C5715ACA3AA0000BE4D /* StopNetLDI.m in Sources */,
 				E5143A4215ADE28B00DDAD01 /* LogFile.m in Sources */,
 				E51317D215AF7CFB007ADCFF /* Statmonitor.m in Sources */,
+				E50AA29F25797DD100A1FA1A /* DownloadHeader.m in Sources */,
 				E51317D615AF8F44007ADCFF /* CopyDBF.m in Sources */,
 				E567210115B4A8A2000E93C5 /* Topaz.m in Sources */,
 				E54DFBE115B734130086920B /* VSD.m in Sources */,

@@ -6,12 +6,8 @@
 //  Copyright (c) 2012-2013 GemTalk Systems LLC. All rights reserved.
 //
 
-#import "Download.h"
+#import "InstallVersion.h"
 
-@interface UnzipVersion : Task <NSOpenSavePanelDelegate> { }
-
-@property	NSString	*zipFilePath;
-
-- (void)unzip;
+@interface UnzipVersion : InstallVersion { }
 
 @end

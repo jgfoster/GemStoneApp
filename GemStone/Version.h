@@ -15,17 +15,16 @@
 	NSTask		*task;
 }
 
+@property				NSDate		*date;
+@property				NSNumber	*indexInArray;
 @property (readonly)	BOOL		isInstalled;
 @property				NSNumber	*isInstalledCode;
 @property				NSString	*name;
-@property				NSDate		*date;
-@property				NSNumber	*indexInArray;
 
 + (void)removeVersionAtPath:(NSString *)productPath;
 - (BOOL)isInstalled;
 - (NSString *)productPath;
 - (void)remove;
 - (void)updateIsInstalled;
-- (NSString *)zippedFileName;
 
 @end

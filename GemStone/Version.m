@@ -6,17 +6,28 @@
 //  Copyright (c) 2012-2013 GemTalk Systems LLC. All rights reserved.
 //
 
+#import "DownloadHeader.h"
 #import "DownloadVersion.h"
+#import "MountDMG.h"
 #import "UnzipVersion.h"
 #import "Utilities.h"
 #import "Version.h"
 
+@interface Version ()
+
+@property 	NSString 	*path;
+@property 	NSString 	*url;
+
+@end
+
 @implementation Version
 
-@dynamic isInstalledCode;
-@dynamic name;
 @dynamic date;
 @dynamic indexInArray;
+@dynamic isInstalledCode;
+@dynamic name;
+@synthesize path = _path;
+@synthesize url = _url;
 
 + (void)removeVersionAtPath:(NSString *)productPath {
 	NSError *error = nil;
@@ -43,23 +54,50 @@
 	[appController taskProgress:@"Finish delete . . .\n"];
 }
 
-- (void)download {
-	[appController taskStart:[NSString stringWithFormat:@"Downloading %@ . . .\n", self.name]];
-	DownloadVersion *download = [DownloadVersion new];
-	[download setVersionTo:self];
+- (void)dmgHeader:(DownloadHeader*)dmgHeader {
+	if ([dmgHeader resultCode] != 200) {
+		[appController taskProgress:@"\nLooking for ZIP file . . .\n"];
+		DownloadHeader *zipHeader = [DownloadHeader new];
+		[zipHeader setUrl:[NSString stringWithFormat:@"%@%@", self.url, @"zip"]];
+		__block DownloadHeader *headerTask = zipHeader;		//	blocks get a COPY of referenced objects unless explicitly shared
+		[zipHeader setCompletionBlock:^(){
+			[self zipHeader:headerTask];
+			headerTask = nil;		//	to break retain cycle
+		}];
+		[appController addOperation:zipHeader];
+		return;
+	}
+	NSInteger contentLength = [dmgHeader contentLength];
+	[appController taskProgress:[NSString stringWithFormat:@"\nFound DMG file with %ld bytes\n", contentLength]];
 	
-	UnzipVersion *unzip = [UnzipVersion new];
-	[unzip setZipFilePath: [download zipFilePath]];
-	[unzip addDependency:download];
-	__block Task *blockTask = unzip;		//	blocks get a COPY of referenced objects unless explicitly shared
-	[unzip setCompletionBlock:^(){
-		[appController performSelectorOnMainThread:@selector(versionUnzipDone:) 
-										withObject:blockTask
-									 waitUntilDone:NO];
-		blockTask = nil;		//	to break retain cycle
-	}];
+	DownloadVersion *download = [DownloadVersion new];
+	[download setPath:[NSString stringWithFormat:@"%@%@", self.path, @"dmg"]];
+	[download setUrl:[NSString stringWithFormat:@"%@%@", self.url, @"dmg"]];
+	[download setHeader:dmgHeader];
+
+	MountDMG *mountDMG = [MountDMG new];
+	[mountDMG setFilePath: [download path]];
+	[mountDMG addDependency:download];
+
 	[appController addOperation:download];
-	[appController addOperation:unzip];
+	[appController addOperation:mountDMG];
+}
+
+- (void)download {
+	NSString *fileName;
+	[appController taskStart:[NSString stringWithFormat:@"Looking for DMG for %@ . . .\n", self.name]];
+	fileName = [NSString stringWithFormat:@"%@%@%@", @"GemStone64Bit", self.name, @"-i386.Darwin."];
+	self.url = [NSString stringWithFormat:@"%@%@", @kDownloadSite, fileName];
+	self.path = [NSString stringWithFormat:@"%@/%@", basePath, fileName];
+	
+	DownloadHeader *dmgHeader = [DownloadHeader new];
+	[dmgHeader setUrl:[NSString stringWithFormat:@"%@%@", self.url, @"dmg"]];
+	__block DownloadHeader *headerTask = dmgHeader;		//	blocks get a COPY of referenced objects unless explicitly shared
+	[dmgHeader setCompletionBlock:^(){
+		[self dmgHeader:headerTask];
+		headerTask = nil;		//	to break retain cycle
+	}];
+	[appController addOperation:dmgHeader];
 }
 
 - (BOOL)isActuallyInstalled {
@@ -112,12 +150,33 @@
 	}
 }
 
-- (NSString *)zippedFileName {
-	NSMutableString *string = [NSMutableString new];
-	[string appendString:@"GemStone64Bit"];
-	[string appendString:self.name];
-	[string appendString:@"-i386.Darwin.zip"];
-	return string;
+- (void)zipHeader:(DownloadHeader*)zipHeader;
+{
+	if ([zipHeader resultCode] != 200) {
+		[appController taskProgress:[NSString stringWithFormat:@"\nServer returned error code %ld\n", [zipHeader resultCode]]];
+		[appController taskFinishedAfterDelay];
+		return;
+	}
+	NSInteger contentLength = [zipHeader contentLength];
+	[appController taskProgress:[NSString stringWithFormat:@"\nFound ZIP file with %ld bytes\n", contentLength]];
+	
+	DownloadVersion *download = [DownloadVersion new];
+	[download setPath:[NSString stringWithFormat:@"%@%@", self.path, @"zip"]];
+	[download setUrl:[NSString stringWithFormat:@"%@%@", self.url, @"zip"]];
+	[download setHeader:zipHeader];
+
+	UnzipVersion *unzip = [UnzipVersion new];
+	[unzip setFilePath: [download path]];
+	[unzip addDependency:download];
+	__block Task *blockTask = unzip;		//	blocks get a COPY of referenced objects unless explicitly shared
+	[unzip setCompletionBlock:^(){
+		[appController performSelectorOnMainThread:@selector(versionInstallDone:)
+										withObject:blockTask
+									 waitUntilDone:NO];
+		blockTask = nil;		//	to break retain cycle
+	}];
+	[appController addOperation:download];
+	[appController addOperation:unzip];
 }
 
 @end

@@ -33,8 +33,9 @@
 - (IBAction)removeHelperTool:(id)sender;
 - (IBAction)showHelperToolInfo:(id)sender;
 - (IBAction)taskCloseWhenDone:(id)sender;
+- (IBAction)installFromDmgFile:(id)sender;
 - (IBAction)versionListDownloadRequest:(id)sender;
-- (IBAction)versionUnzipRequest:(id)sender;
+- (IBAction)installFromZipFile:(id)sender;
 
 - (void)addOperation:(NSOperation *)anOperation;
 - (Boolean)databaseExistsForVersion:(Version *)version;
@@ -52,7 +53,7 @@
 - (void)taskProgress:(NSString *)aString;
 - (void)updateDatabaseList:(id)sender;
 - (void)updateSetupState;
+- (void)versionInstallDone:(UnzipVersion *)installTask;
 - (NSArray *)versionList;
-- (void)versionUnzipDone:(UnzipVersion *)unzipTask;
 
 @end

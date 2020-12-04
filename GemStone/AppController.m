@@ -15,6 +15,7 @@
 #import "DownloadVersionList.h"
 #import "GSList.h"
 #import "Helper.h"
+#import "MountDMG.h"
 #import "LogFile.h"
 #import "StartNetLDI.h"
 #import "StartStone.h"
@@ -303,6 +304,15 @@
 		NSString *myString = ([error localizedDescription] != nil) ? [error localizedDescription] : @"Unknown Error";
         AppError(@"Store Configuration Failure\n%@", myString);
     }
+}
+
+//	Install from a DMG file
+- (IBAction)installFromDmgFile:(id)sender {
+	[[MountDMG new] install];
+}
+
+- (IBAction)installFromZipFile:(id)sender {
+	[[UnzipVersion new] install];
 }
 
 - (IBAction)installHelperTool:(id)sender {
@@ -761,6 +771,37 @@
 	}
 }
 
+- (void)versionInstallDone:(UnzipVersion *)installTask {
+	if (![installTask isCancelled]) {
+		NSManagedObjectModel *managedObjectModel = [[[self managedObjectContext] persistentStoreCoordinator] managedObjectModel];
+		NSString *path = [installTask filePath];
+		NSInteger lastSlash = -1, lastDash = -1;
+		for (NSUInteger i = 0; i < [path length]; ++i) {
+			char myChar = [path characterAtIndex:i];
+			if (myChar == '/') lastSlash = i;
+			if (myChar == '-') lastDash = i;
+		}
+		NSString *name = [[path substringToIndex:lastDash] substringFromIndex:lastSlash + 14];
+		Boolean isVersionPresent = NO;
+		for (Version *version in [self.versionListController arrangedObjects]) {
+			isVersionPresent = isVersionPresent || [[version name] isEqualToString:name];
+		}
+		if (!isVersionPresent) {
+			NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Version"];
+			Version *version = [[Version alloc]
+								initWithEntity:entity
+								insertIntoManagedObjectContext:[self managedObjectContext]];
+			[version setName:name];
+			[version setDate:[NSDate date]];
+			[self.versionListController addObject:version];
+		}
+		[self refreshInstalledVersionsList];
+		[self refreshUpgradeVersionsList];
+		[self taskProgressA:@"Finished import!"];
+	}
+	[self taskFinishedAfterDelay];
+}
+
 - (NSArray *)versionList {
 	return [self.versionListController arrangedObjects];
 }
@@ -822,41 +863,6 @@
 		blockTask = nil;				//	break reference count cycle
 	}];
 	[self.operations addOperation:task];
-}
-
-- (void)versionUnzipDone:(UnzipVersion *)unzipTask {
-	if (![unzipTask isCancelled]) {
-		NSManagedObjectModel *managedObjectModel = [[[self managedObjectContext] persistentStoreCoordinator] managedObjectModel];
-		NSString *path = [unzipTask zipFilePath];
-		NSInteger lastSlash = -1, lastDash = -1;
-		for (NSUInteger i = 0; i < [path length]; ++i) {
-			char myChar = [path characterAtIndex:i];
-			if (myChar == '/') lastSlash = i;
-			if (myChar == '-') lastDash = i;
-		}
-		NSString *name = [[path substringToIndex:lastDash] substringFromIndex:lastSlash + 14];
-		Boolean isVersionPresent = NO;
-		for (Version *version in [self.versionListController arrangedObjects]) {
-			isVersionPresent = isVersionPresent || [[version name] isEqualToString:name];
-		}
-		if (!isVersionPresent) {
-			NSEntityDescription *entity = [[managedObjectModel entitiesByName] objectForKey:@"Version"];
-			Version *version = [[Version alloc]
-								initWithEntity:entity 
-								insertIntoManagedObjectContext:[self managedObjectContext]];
-			[version setName:name];
-			[version setDate:[NSDate date]];
-			[self.versionListController addObject:version];
-		}
-		[self refreshInstalledVersionsList];
-		[self refreshUpgradeVersionsList];
-		[self taskProgressA:@"Finished import of zip file!"];
-	}
-	[self taskFinishedAfterDelay];
-}
-
-- (IBAction)versionUnzipRequest:(id)sender {
-	[[UnzipVersion new] unzip];
 }
 
 - (BOOL)windowShouldClose:(NSWindow *)window;
