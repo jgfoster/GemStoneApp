@@ -189,8 +189,10 @@
 
 - (void)terminate;
 {
-    xpc_connection_cancel(self.connection);
-    self.connection = nil;
+    if (self.connection) {
+        xpc_connection_cancel(self.connection);
+        self.connection = nil;
+    }
 }
 
 - (void)updateSetupState {
@@ -220,7 +222,7 @@
 
 - (void)xpcEventDictionary:(xpc_object_t)dictionary;
 {
-//	NSLog(@"Got XPC dictionary (%lu) on connection (%lu).", (unsigned long)dictionary, (unsigned long) connection);
+	NSLog(@"Got XPC dictionary (%lu) on connection (%lu).", (unsigned long)dictionary, (unsigned long) self.connection);
     NSString *bundleVersionString = NSBundle.mainBundle.infoDictionary[@"CFBundleShortVersionString"];
     const char *helperVersionString = xpc_dictionary_get_string(dictionary, "version");
     _isAvailable = helperVersionString && [bundleVersionString isEqualToString:@(helperVersionString)];
@@ -230,14 +232,17 @@
 - (void)xpcEventError:(xpc_object_t)error;
 {
     if (error == XPC_ERROR_CONNECTION_INTERRUPTED) {
-//      NSLog(@"XPC connection interupted.");
-		
+      NSLog(@"XPC connection interupted.");
 	} else if (error == XPC_ERROR_CONNECTION_INVALID) {
-//		NSLog(@"XPC connection invalid, releasing.");
+		NSLog(@"XPC connection invalid, releasing.");
 		self.connection = nil;
 		_isAvailable = NO;
 		[self updateSetupState];
-		
+    } else if (error == XPC_ERROR_TERMINATION_IMMINENT) {
+        NSLog(@"XPC termination imminent, releasing.");
+        self.connection = nil;
+        _isAvailable = NO;
+        [self updateSetupState];
 	} else {
 		NSLog(@"Unexpected XPC error (%lu).", (unsigned long) error);
 	}
@@ -246,8 +251,8 @@
 - (void)xpcInit;
 {
     self.connection = xpc_connection_create_mach_service(kHelperIdentifier,
-                                                    NULL,
-                                                    XPC_CONNECTION_MACH_SERVICE_PRIVILEGED);
+                                                         NULL,
+                                                         XPC_CONNECTION_MACH_SERVICE_PRIVILEGED);
     if (!self.connection) {
         AppError(@"Failed to create XPC connection.");
     }
@@ -270,9 +275,9 @@
 										   message,
 										   dispatch_get_main_queue(),
 										   ^(xpc_object_t event) { [self xpcEvent:event]; });
-//	NSLog(@"Sent XPC request (%lu) on connection (%lu).",
-//		  (unsigned long) xpc_dictionary_get_uint64(message, "request"),
-//		  (unsigned long) connection);
+	NSLog(@"Sent XPC request (%lu) on connection (%lu).",
+		  (unsigned long) xpc_dictionary_get_uint64(message, "request"),
+		  (unsigned long) self.connection);
 }
 
 @end
