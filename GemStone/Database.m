@@ -44,11 +44,21 @@
 
 - (void)archiveCurrentLogFiles {
 	NSError  *error = nil;
-	NSString *path = [NSString stringWithFormat:@"%@/log", [self directory]];
+	NSString *logPath = [NSString stringWithFormat:@"%@/log", [self directory]];
+    NSString *archivePath = [NSString stringWithFormat:@"%@/archive", logPath];
+    // ensure archive directory exists
+    [[NSFileManager defaultManager] createDirectoryAtPath:archivePath
+                              withIntermediateDirectories:YES
+                                               attributes:nil
+                                                    error:&error];
+    if (error != nil) {
+        AppError(@"Unable to create %@ because %@", archivePath, [error description]);
+    }
+    
 	NSArray  *baseList = [[self name] componentsSeparatedByString:@"_"];
 	NSUInteger baseListCount = [baseList count];
 	
-	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:path];
+	NSDirectoryEnumerator *dirEnum = [fileManager enumeratorAtPath:logPath];
 	NSString *file;
 	while (file = [dirEnum nextObject]) {
 		NSArray *thisList = [file componentsSeparatedByString:@"_"];
@@ -59,13 +69,14 @@
 			}
 		}
 		if (j + 1 == baseListCount) {
-			NSString *target = [NSString stringWithFormat:@"%@/archive/%@", path, file];
+            NSString *source = [NSString stringWithFormat:@"%@/%@", logPath, file];
+			NSString *target = [NSString stringWithFormat:@"%@/%@", archivePath, file];
 			[fileManager removeItemAtPath:target error:nil];
 			if (![fileManager 
-				  moveItemAtPath:[NSString stringWithFormat:@"%@/%@", path, file]
+				  moveItemAtPath:source
 				  toPath:target
 				  error:&error]) {
-				AppError(@"Unable to move %@/%@ because %@", path, file, [error description]);
+				AppError(@"Unable to move %@/%@ because %@", logPath, file, [error description]);
 			}
 		}
 	}
@@ -730,7 +741,6 @@
 	[appController taskStart:@"Stopping NetLDI and Stone . . .\n\n"];
 	StopNetLDI *stopNetLdi = [StopNetLDI forDatabase:self];
 	StopStone *stopStone = [StopStone forDatabase:self];
-	[stopStone addDependency:stopNetLdi];
 	[self.statmonitor cancel];
 	self.statmonitor = nil;
 	__block id me = self;		//	blocks get a COPY of referenced objects unless explicitly shared
