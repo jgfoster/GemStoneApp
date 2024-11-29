@@ -13,77 +13,70 @@ class DownloadProgress extends StatefulWidget {
 }
 
 class DownloadProgressState extends State<DownloadProgress> {
+  bool isDownloading = false;
   String progressText = 'Downloading...';
-  double progressPercent = 10.0;
-
-  void updateProgress(String text, double percent) {
-    setState(() {
-      progressText = text;
-      progressPercent = percent;
-    });
-  }
+  double progressPercent = 0.0;
 
   void callback(String text) {
-    print(text);
+    if (text.startsWith('  %') || text.startsWith('   ')) {
+      return;
+    }
+    setState(() {
+      progressText = text;
+      if (text.startsWith(' ')) {
+        progressPercent = double.tryParse(text.trim().split(' ')[0]) ?? 0.0;
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    unawaited(widget.database.download(callback));
+    if (!isDownloading) {
+      isDownloading = true;
+      // ignore: discarded_futures
+      widget.database.download(callback).then((_) {
+        if (context.mounted) {
+          Navigator.of(context).pop();
+        }
+        // ignore: discarded_futures
+      }).catchError((error) {
+        if (context.mounted) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: $error'),
+            ),
+          );
+        }
+      });
+    }
     return Dialog(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(value: progressPercent),
+            CircularProgressIndicator(value: progressPercent / 100),
             const SizedBox(height: 16),
-            Text(progressText),
+            const Text(
+              '   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current',
+              style: TextStyle(fontFamily: 'Courier New'),
+            ),
+            const Text(
+              '                                 Dload  Upload   Total   Spent    Left  Speed',
+              style: TextStyle(fontFamily: 'Courier New'),
+            ),
+            Text(
+              progressText,
+              style: const TextStyle(fontFamily: 'Courier New'),
+            ),
+            ElevatedButton(
+              onPressed: () async => widget.database.cancelDownload(),
+              child: const Text('Cancel'),
+            ),
           ],
         ),
       ),
     );
   }
 }
-
-// Future<void> showProgressDialog(
-//   BuildContext context,
-//   DownloadProgressState progressDialogState,
-// ) async {
-//   await showDialog(
-//     context: context,
-//     barrierDismissible: false,
-//     builder: (BuildContext context) {
-//       return const DownloadProgress();
-//     },
-//   ).then((_) {
-//     // Optionally handle dialog close
-//   });
-// }
-
-// void hideProgressDialog(BuildContext context) {
-//   Navigator.of(context).pop();
-// }
-
-// Future<void> doWithProgress(
-//   BuildContext context,
-//   Future<void> Function(void Function(String) callback) operation,
-// ) async {
-//   final progressDialogState = DownloadProgressState();
-//   await showProgressDialog(context, progressDialogState);
-
-//   await operation((String data) {
-//     progressDialogState.updateProgress(data, 0.0);
-//   }).then((_) {
-//     if (context.mounted) {
-//       hideProgressDialog(context);
-//     }
-//   }).catchError((error) {
-//     if (context.mounted) {
-//       hideProgressDialog(context);
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         SnackBar(content: Text('Error: $error')),
-//       );
-//     }
-//   });
-// }
