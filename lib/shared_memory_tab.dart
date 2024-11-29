@@ -5,8 +5,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class SharedMemory extends StatelessWidget {
-  const SharedMemory({super.key});
+class SharedMemoryTab extends StatelessWidget {
+  const SharedMemoryTab({super.key});
 
   @override
   Widget build(BuildContext context) {

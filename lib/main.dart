@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gemstoneapp/download_versions.dart';
-import 'package:gemstoneapp/shared_memory.dart';
+import 'package:gemstoneapp/download_tab.dart';
+import 'package:gemstoneapp/shared_memory_tab.dart';
 
 void main() {
   runApp(const GemStoneTools());
@@ -40,8 +40,8 @@ class GemStoneTools extends StatelessWidget {
           ),
           body: const TabBarView(
             children: [
-              SharedMemory(),
-              DownloadVersions(),
+              SharedMemoryTab(),
+              DownloadTab(),
               Icon(Icons.dataset),
               Icon(Icons.table_rows),
             ],
