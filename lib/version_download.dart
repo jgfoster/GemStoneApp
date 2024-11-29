@@ -2,18 +2,18 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:gemstoneapp/database.dart';
+import 'package:gemstoneapp/version.dart';
 
-class DownloadProgress extends StatefulWidget {
-  const DownloadProgress({required this.database, super.key});
+class VersionDownload extends StatefulWidget {
+  const VersionDownload({required this.database, super.key});
 
-  final Database database;
+  final Version database;
 
   @override
-  DownloadProgressState createState() => DownloadProgressState();
+  VersionDownloadState createState() => VersionDownloadState();
 }
 
-class DownloadProgressState extends State<DownloadProgress> {
+class VersionDownloadState extends State<VersionDownload> {
   bool isDownloading = false;
   String progressText = 'Downloading...';
   double progressPercent = 0.0;
@@ -71,7 +71,7 @@ class DownloadProgressState extends State<DownloadProgress> {
   }
 
   Dialog extractDialog() {
-    unawaited(Process.run('open', [Database.gemstoneDir]));
+    unawaited(Process.run('open', [Version.gemstoneDir]));
     return Dialog(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -100,7 +100,7 @@ class DownloadProgressState extends State<DownloadProgress> {
   }
 
   void startDownload(BuildContext context) {
-    unawaited(Process.run('open', [Database.gemstoneDir]));
+    unawaited(Process.run('open', [Version.gemstoneDir]));
     isDownloading = true;
     // ignore: discarded_futures
     widget.database.download(callback).then((_) {

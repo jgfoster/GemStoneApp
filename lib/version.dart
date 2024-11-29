@@ -4,10 +4,11 @@ import 'dart:io';
 
 import 'package:intl/intl.dart';
 
-class Database {
-  Database({
+class Version {
+  Version({
     required this.date,
     required this.version,
+    // TODO: include download size so we can verify the download
   }) {
     dmgName = 'GemStone64Bit$version-arm64.Darwin.dmg';
     downloadFilePath = '$gemstoneDir/$dmgName';
@@ -28,7 +29,7 @@ class Database {
   late String productFilePath;
   late String productUrlPath;
   final String version;
-  static List<Database>? _versionList;
+  static List<Version>? _versionList;
 
   Future<void> cancelDownload() async {
     process?.kill();
@@ -84,7 +85,7 @@ class Database {
     isDownloaded = true;
   }
 
-  static Future<List<Database>> versionList() async {
+  static Future<List<Version>> versionList() async {
     if (_versionList != null) {
       return _versionList!;
     }
@@ -99,7 +100,7 @@ class Database {
     if (result.exitCode != 0) {
       throw Exception(result.stderr);
     }
-    final versions = <Database>[];
+    final versions = <Version>[];
     final lines = result.stdout.toString().split('\n');
     final dateFormat = DateFormat('dd-MMM-yyyy');
     for (final line in lines) {
@@ -109,7 +110,7 @@ class Database {
       if (match != null) {
         final version = match.group(1)!;
         final date = dateFormat.parse(match.group(2)!);
-        final database = Database(version: version, date: date);
+        final database = Version(version: version, date: date);
         await database.checkIfExtracted();
         versions.add(database);
       }

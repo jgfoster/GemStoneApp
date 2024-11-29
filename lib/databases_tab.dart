@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:gemstoneapp/database.dart';
-import 'package:gemstoneapp/download_progress.dart';
+import 'package:gemstoneapp/version.dart';
+import 'package:gemstoneapp/version_download.dart';
 import 'package:intl/intl.dart';
 
-class DownloadTab extends StatefulWidget {
-  const DownloadTab({super.key});
+class DatabasesTab extends StatefulWidget {
+  const DatabasesTab({super.key});
 
   @override
-  DownloadTabState createState() => DownloadTabState();
+  DatabasesTabState createState() => DatabasesTabState();
 }
 
-class DownloadTabState extends State<DownloadTab> {
+class DatabasesTabState extends State<DatabasesTab> {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Database>>(
+    return FutureBuilder<List<Version>>(
       // ignore: discarded_futures
-      future: Database.versionList(),
-      builder: (BuildContext context, AsyncSnapshot<List<Database>> snapshot) {
+      future: Version.versionList(),
+      builder: (BuildContext context, AsyncSnapshot<List<Version>> snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const CircularProgressIndicator();
         }
@@ -65,11 +65,11 @@ class DownloadTabState extends State<DownloadTab> {
     );
   }
 
-  Future<void> download(BuildContext context, Database database) async {
+  Future<void> download(BuildContext context, Version database) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return DownloadProgress(database: database);
+          return VersionDownload(database: database);
         },
       ),
     );
