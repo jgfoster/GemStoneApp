@@ -38,12 +38,12 @@ class DownloadTabState extends State<DownloadTab> {
               title: Row(
                 children: [
                   Checkbox(
-                    value: database.isDownloaded,
+                    value: database.isExtracted,
                     onChanged: (newValue) async {
                       if (newValue!) {
                         await download(context, database);
                       } else {
-                        await database.delete();
+                        await database.deleteProduct();
                       }
                       setState(() {});
                     },
@@ -73,12 +73,5 @@ class DownloadTabState extends State<DownloadTab> {
         },
       ),
     );
-    // try {
-    //   await database.download();
-    // } catch (e) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text('Error: $e')),
-    //   );
-    // }
   }
 }

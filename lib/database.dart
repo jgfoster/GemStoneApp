@@ -10,13 +10,16 @@ class Database {
     required this.version,
   }) {
     dmgName = 'GemStone64Bit$version-arm64.Darwin.dmg';
+    downloadFilePath = '$gemstoneDir/$dmgName';
     productFilePath = '$gemstoneDir/GemStone64Bit$version-arm64.Darwin';
     productUrlPath = '$productsUrlPath/$dmgName';
   }
 
   final DateTime date;
   late String dmgName;
+  late String downloadFilePath;
   late bool isDownloaded = false;
+  late bool isExtracted = false;
   static String gemstoneDir =
       '${Directory.current.path}/Library/Application Support/GemStone';
   Process? process;
@@ -33,20 +36,30 @@ class Database {
   }
 
   Future<void> checkIfDownloaded() async {
-    isDownloaded = Directory(productFilePath).existsSync();
+    isDownloaded = File(downloadFilePath).existsSync();
   }
 
-  Future<void> delete() async {
-    Directory(productFilePath).deleteSync(recursive: true);
+  Future<void> checkIfExtracted() async {
+    isExtracted = Directory(productFilePath).existsSync();
+  }
+
+  Future<void> _deleteDownload() async {
+    if (File(downloadFilePath).existsSync()) {
+      File(downloadFilePath).deleteSync();
+    }
+  }
+
+  Future<void> deleteProduct() async {
+    if (Directory(productFilePath).existsSync()) {
+      Directory(productFilePath).deleteSync(recursive: true);
+    }
   }
 
   Future<void> download(void Function(String)? callback) async {
     if (!Directory(gemstoneDir).existsSync()) {
       Directory(gemstoneDir).createSync(recursive: true);
     }
-    if (File('$gemstoneDir/$dmgName').existsSync()) {
-      File('$gemstoneDir/$dmgName').deleteSync();
-    }
+    await _deleteDownload();
 
     process = await Process.start(
       'curl',
@@ -64,13 +77,10 @@ class Database {
     process = null;
     if (exitCode != 0) {
       isDownloaded = false;
-      if (File('$gemstoneDir/$dmgName').existsSync()) {
-        File('$gemstoneDir/$dmgName').deleteSync();
-      }
+      await _deleteDownload();
       throw Exception('Failed to download $dmgName (exit code $exitCode)');
     }
 
-    await Process.run('open', [gemstoneDir]);
     isDownloaded = true;
   }
 
@@ -100,7 +110,7 @@ class Database {
         final version = match.group(1)!;
         final date = dateFormat.parse(match.group(2)!);
         final database = Database(version: version, date: date);
-        await database.checkIfDownloaded();
+        await database.checkIfExtracted();
         versions.add(database);
       }
     }

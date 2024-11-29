@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:gemstoneapp/database.dart';
@@ -18,38 +19,27 @@ class DownloadProgressState extends State<DownloadProgress> {
   double progressPercent = 0.0;
 
   void callback(String text) {
-    if (text.startsWith('  %') || text.startsWith('   ')) {
-      return;
+    if (text[2] == '%') {
+      return; // ignore header
     }
     setState(() {
       progressText = text;
-      if (text.startsWith(' ')) {
-        progressPercent = double.tryParse(text.trim().split(' ')[0]) ?? 0.0;
-      }
+      progressPercent = double.tryParse(text.trim().split(' ')[0]) ?? 0.0;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!isDownloading) {
-      isDownloading = true;
-      // ignore: discarded_futures
-      widget.database.download(callback).then((_) {
-        if (context.mounted) {
-          Navigator.of(context).pop();
-        }
-        // ignore: discarded_futures
-      }).catchError((error) {
-        if (context.mounted) {
-          Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: $error'),
-            ),
-          );
-        }
-      });
+    if (!widget.database.isDownloaded && !isDownloading) {
+      startDownload(context);
     }
+    if (isDownloading) {
+      return downloadDialog();
+    }
+    return extractDialog();
+  }
+
+  Dialog downloadDialog() {
     return Dialog(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -78,5 +68,57 @@ class DownloadProgressState extends State<DownloadProgress> {
         ),
       ),
     );
+  }
+
+  Dialog extractDialog() {
+    unawaited(Process.run('open', [Database.gemstoneDir]));
+    return Dialog(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('We have downloaded ${widget.database.dmgName}.'),
+            const Text(
+              'For security reasons, you must extract it manually.\n'
+              'Open the .dmg file and drag the contents to the open\n'
+              'GemStone folder. You may then eject the disk image.',
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await widget.database.checkIfExtracted();
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void startDownload(BuildContext context) {
+    unawaited(Process.run('open', [Database.gemstoneDir]));
+    isDownloading = true;
+    // ignore: discarded_futures
+    widget.database.download(callback).then((_) {
+      isDownloading = false;
+      setState(() {
+        progressText = 'Extracting...';
+      });
+      // ignore: discarded_futures
+    }).catchError((error) {
+      isDownloading = false;
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $error'),
+          ),
+        );
+      }
+    });
   }
 }
