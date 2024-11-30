@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gemstoneapp/database.dart';
 import 'package:gemstoneapp/version.dart';
 import 'package:gemstoneapp/version_download.dart';
 import 'package:intl/intl.dart';
@@ -13,10 +14,10 @@ class DatabasesTab extends StatefulWidget {
 class DatabasesTabState extends State<DatabasesTab> {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Version>>(
+    return FutureBuilder<List<Database>>(
       // ignore: discarded_futures
-      future: Version.versionList(),
-      builder: (BuildContext context, AsyncSnapshot<List<Version>> snapshot) {
+      future: Database.databaseList(),
+      builder: (BuildContext context, AsyncSnapshot<List<Database>> snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const CircularProgressIndicator();
         }
@@ -26,10 +27,6 @@ class DatabasesTabState extends State<DatabasesTab> {
         return ListView.builder(
           itemCount: snapshot.data!.length,
           itemBuilder: (BuildContext context, int index) {
-            final database = snapshot.data![index];
-            final version = database.version;
-            final date = database.date;
-            final formattedDate = DateFormat('yyyy-MMM-dd').format(date);
             return ListTile(
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 8.0,
@@ -38,23 +35,19 @@ class DatabasesTabState extends State<DatabasesTab> {
               title: Row(
                 children: [
                   Checkbox(
-                    value: database.isExtracted,
+                    value: false,
                     onChanged: (newValue) async {
-                      if (newValue!) {
-                        await download(context, database);
-                      } else {
-                        await database.deleteProduct();
-                      }
+                      //
                       setState(() {});
                     },
                   ),
                   SizedBox(
                     width: 60.0,
-                    child: Text(version),
+                    child: Text('abc'),
                   ),
                   SizedBox(
                     width: 200.0,
-                    child: Text(formattedDate),
+                    child: Text('xy'),
                   ),
                 ],
               ),

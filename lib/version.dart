@@ -11,8 +11,8 @@ class Version {
     // TODO: include download size so we can verify the download
   }) {
     dmgName = 'GemStone64Bit$version-arm64.Darwin.dmg';
-    downloadFilePath = '$gemstoneDir/$dmgName';
-    productFilePath = '$gemstoneDir/GemStone64Bit$version-arm64.Darwin';
+    downloadFilePath = '$versionsDir/$dmgName';
+    productFilePath = '$versionsDir/GemStone64Bit$version-arm64.Darwin';
     productUrlPath = '$productsUrlPath/$dmgName';
   }
 
@@ -21,7 +21,7 @@ class Version {
   late String downloadFilePath;
   late bool isDownloaded = false;
   late bool isExtracted = false;
-  static String gemstoneDir =
+  static String versionsDir =
       '${Directory.current.path}/Library/Application Support/GemStone';
   Process? process;
   static String productsUrlPath =
@@ -57,15 +57,15 @@ class Version {
   }
 
   Future<void> download(void Function(String)? callback) async {
-    if (!Directory(gemstoneDir).existsSync()) {
-      Directory(gemstoneDir).createSync(recursive: true);
+    if (!Directory(versionsDir).existsSync()) {
+      Directory(versionsDir).createSync(recursive: true);
     }
     await _deleteDownload();
 
     process = await Process.start(
       'curl',
       ['-O', productUrlPath],
-      workingDirectory: gemstoneDir,
+      workingDirectory: versionsDir,
     );
 
     process?.stderr.transform(utf8.decoder).listen((data) {

@@ -71,7 +71,7 @@ class VersionDownloadState extends State<VersionDownload> {
   }
 
   Dialog extractDialog() {
-    unawaited(Process.run('open', [Version.gemstoneDir]));
+    unawaited(Process.run('open', [Version.versionsDir]));
     return Dialog(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -100,7 +100,7 @@ class VersionDownloadState extends State<VersionDownload> {
   }
 
   void startDownload(BuildContext context) {
-    unawaited(Process.run('open', [Version.gemstoneDir]));
+    unawaited(Process.run('open', [Version.versionsDir]));
     isDownloading = true;
     // ignore: discarded_futures
     widget.database.download(callback).then((_) {
