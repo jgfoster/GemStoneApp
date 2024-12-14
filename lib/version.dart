@@ -19,6 +19,7 @@ class Version {
   final DateTime date;
   late String dmgName;
   late String downloadFilePath;
+  final List<String> extents = [];
   late bool isDownloaded = false;
   late bool isExtracted = false;
   static String versionsDir =
@@ -29,7 +30,7 @@ class Version {
   late String productFilePath;
   late String productUrlPath;
   final String version;
-  static List<Version>? _versionList;
+  static List<Version> versionList = [];
 
   Future<void> cancelDownload() async {
     process?.kill();
@@ -42,6 +43,9 @@ class Version {
 
   Future<void> checkIfExtracted() async {
     isExtracted = Directory(productFilePath).existsSync();
+    if (isExtracted) {
+      await fillExtentList();
+    }
   }
 
   Future<void> _deleteDownload() async {
@@ -51,9 +55,40 @@ class Version {
   }
 
   Future<void> deleteProduct() async {
-    if (Directory(productFilePath).existsSync()) {
-      Directory(productFilePath).deleteSync(recursive: true);
+    final directory = Directory(productFilePath);
+    if (directory.existsSync()) {
+      await _setDirectoryWritable(directory);
+      directory.deleteSync(recursive: true);
     }
+    isExtracted = false;
+  }
+
+  Future<void> fillExtentList() async {
+    extents.clear();
+    final list = Directory('$productFilePath/bin').listSync();
+    list.sort((a, b) => a.path.compareTo(b.path));
+    for (final entity in list) {
+      final path = entity.path;
+      if (entity is File && path.endsWith('.dbf')) {
+        final name =
+            path.substring(productFilePath.length + 5, path.length - 4);
+        extents.add(name);
+      }
+    }
+  }
+
+  static List<Version> installedVersions() {
+    final versions = <Version>[];
+    for (final version in versionList) {
+      if (version.isExtracted) {
+        versions.add(version);
+      }
+    }
+    return versions;
+  }
+
+  Future<void> _setDirectoryWritable(Directory directory) async {
+    await Process.run('chmod', ['-R', 'u+w', directory.path]);
   }
 
   Future<void> download(void Function(String)? callback) async {
@@ -85,17 +120,15 @@ class Version {
     isDownloaded = true;
   }
 
-  static Future<List<Version>> versionList() async {
-    if (_versionList != null) {
-      return _versionList!;
-    }
+  static Future<void> buildVersionList() async {
+    versionList.clear();
     ProcessResult result;
     try {
       result = await Process.run('curl', ['$productsUrlPath/'])
           .timeout(const Duration(seconds: 2));
     } on TimeoutException {
       // TODO: build a list of already-installed versions
-      return [];
+      return;
     }
     if (result.exitCode != 0) {
       throw Exception(result.stderr);
@@ -115,7 +148,6 @@ class Version {
         versions.add(database);
       }
     }
-    _versionList = versions.reversed.toList();
-    return _versionList!;
+    versionList.addAll(versions.reversed.toList());
   }
 }

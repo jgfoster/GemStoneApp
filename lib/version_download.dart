@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:gemstoneapp/version.dart';
 
 class VersionDownload extends StatefulWidget {
-  const VersionDownload({required this.database, super.key});
+  const VersionDownload({required this.version, super.key});
 
-  final Version database;
+  final Version version;
 
   @override
   VersionDownloadState createState() => VersionDownloadState();
@@ -30,7 +30,7 @@ class VersionDownloadState extends State<VersionDownload> {
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.database.isDownloaded && !isDownloading) {
+    if (!widget.version.isDownloaded && !isDownloading) {
       startDownload(context);
     }
     if (isDownloading) {
@@ -61,7 +61,7 @@ class VersionDownloadState extends State<VersionDownload> {
               style: const TextStyle(fontFamily: 'Courier New'),
             ),
             ElevatedButton(
-              onPressed: () async => widget.database.cancelDownload(),
+              onPressed: () async => widget.version.cancelDownload(),
               child: const Text('Cancel'),
             ),
           ],
@@ -78,7 +78,7 @@ class VersionDownloadState extends State<VersionDownload> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('We have downloaded ${widget.database.dmgName}.'),
+            Text('We have downloaded ${widget.version.dmgName}.'),
             const Text(
               'For security reasons, you must extract it manually.\n'
               'Open the .dmg file and drag the contents to the open\n'
@@ -86,7 +86,7 @@ class VersionDownloadState extends State<VersionDownload> {
             ),
             ElevatedButton(
               onPressed: () async {
-                await widget.database.checkIfExtracted();
+                await widget.version.checkIfExtracted();
                 if (mounted) {
                   Navigator.of(context).pop();
                 }
@@ -103,7 +103,7 @@ class VersionDownloadState extends State<VersionDownload> {
     unawaited(Process.run('open', [Version.versionsDir]));
     isDownloading = true;
     // ignore: discarded_futures
-    widget.database.download(callback).then((_) {
+    widget.version.download(callback).then((_) {
       isDownloading = false;
       setState(() {
         progressText = 'Extracting...';

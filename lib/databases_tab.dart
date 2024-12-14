@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gemstoneapp/database.dart';
+import 'package:gemstoneapp/new_database.dart';
 import 'package:gemstoneapp/version.dart';
 import 'package:gemstoneapp/version_download.dart';
-import 'package:intl/intl.dart';
 
 class DatabasesTab extends StatefulWidget {
   const DatabasesTab({super.key});
@@ -12,49 +12,106 @@ class DatabasesTab extends StatefulWidget {
 }
 
 class DatabasesTabState extends State<DatabasesTab> {
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<Database>>(
-      // ignore: discarded_futures
-      future: Database.databaseList(),
-      builder: (BuildContext context, AsyncSnapshot<List<Database>> snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const CircularProgressIndicator();
-        }
-        if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        }
-        return ListView.builder(
-          itemCount: snapshot.data!.length,
-          itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 8.0,
-                vertical: 0.0,
-              ),
-              title: Row(
-                children: [
-                  Checkbox(
-                    value: false,
-                    onChanged: (newValue) async {
-                      //
-                      setState(() {});
-                    },
-                  ),
-                  SizedBox(
-                    width: 60.0,
-                    child: Text('abc'),
-                  ),
-                  SizedBox(
-                    width: 200.0,
-                    child: Text('xy'),
-                  ),
-                ],
+  Database? _database;
+
+  Column addRemoveButtons() {
+    return Column(
+      children: [
+        ElevatedButton(
+          onPressed: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => NewDatabaseForm(),
               ),
             );
+            setState(() {});
           },
-        );
-      },
+          child: const Icon(Icons.add),
+        ),
+        SizedBox(height: 8.0),
+        ElevatedButton(
+          onPressed: () {
+            print('Remove ${_database!.path}');
+          },
+          child: const Icon(Icons.remove),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(flex: 1, child: databasesRow()),
+        Expanded(flex: 2, child: Text('Row 2')),
+      ],
+    );
+  }
+
+  Widget databasesRow() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          Expanded(child: databaseList()),
+          addRemoveButtons(),
+        ],
+      ),
+    );
+  }
+
+  Widget databaseList() {
+    final columns = <DataColumn>[
+      const DataColumn(
+        label: Expanded(
+          child: Text(
+            'Version',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      ),
+      const DataColumn(
+        label: Expanded(
+          child: Text(
+            'Stone Name',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      ),
+      const DataColumn(
+        label: Expanded(
+          child: Text(
+            'NetLDI Name',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      ),
+    ];
+    final rows = Database.databaseList.map((database) {
+      return DataRow(
+        onSelectChanged: (selected) {
+          if (selected!) {
+            setState(() {
+              _database = database;
+            });
+          }
+        },
+        selected: _database == database,
+        cells: <DataCell>[
+          DataCell(Text(database.version.version)),
+          DataCell(Text(database.stoneName)),
+          DataCell(Text(database.ldiName)),
+        ],
+      );
+    }).toList();
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: DataTable(
+        columns: columns,
+        rows: rows,
+      ),
     );
   }
 
@@ -62,7 +119,7 @@ class DatabasesTabState extends State<DatabasesTab> {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return VersionDownload(database: database);
+          return VersionDownload(version: database);
         },
       ),
     );
