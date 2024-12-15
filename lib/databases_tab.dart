@@ -1,6 +1,10 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:gemstoneapp/database.dart';
 import 'package:gemstoneapp/new_database.dart';
+import 'package:gemstoneapp/platform.dart';
 import 'package:gemstoneapp/version.dart';
 import 'package:gemstoneapp/version_download.dart';
 
@@ -14,53 +18,86 @@ class DatabasesTab extends StatefulWidget {
 class DatabasesTabState extends State<DatabasesTab> {
   Database? _database;
 
-  Column addRemoveButtons() {
-    return Column(
-      children: [
-        ElevatedButton(
-          onPressed: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => NewDatabaseForm(),
-              ),
-            );
-            setState(() {});
-          },
-          child: const Icon(Icons.add),
-        ),
-        SizedBox(height: 8.0),
-        ElevatedButton(
-          onPressed: _database == null
-              ? null
-              : () async {
-                  await _showDeleteConfirmationDialog(context);
-                },
-          child: const Icon(Icons.remove),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(flex: 1, child: databasesRow()),
-        Expanded(flex: 2, child: Text('Database Details')),
-      ],
-    );
-  }
-
-  Widget databasesRow() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
           Expanded(child: databaseList()),
-          addRemoveButtons(),
+          SizedBox(width: 8),
+          buttons(),
         ],
       ),
+    );
+  }
+
+  Widget buttons() {
+    return Column(
+      children: [
+        Tooltip(
+          message: 'Create a new database',
+          child: ElevatedButton(
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NewDatabaseForm(),
+                ),
+              );
+              setState(() {});
+            },
+            child: const Icon(Icons.add),
+          ),
+        ),
+        SizedBox(height: 8),
+        Tooltip(
+          message: 'Delete database',
+          child: ElevatedButton(
+            onPressed: _database == null
+                ? null
+                : () async {
+                    await _showDeleteConfirmationDialog(context);
+                  },
+            child: const Icon(Icons.remove),
+          ),
+        ),
+        SizedBox(height: 8),
+        Tooltip(
+          message: 'Start database',
+          child: ElevatedButton(
+            onPressed: _database == null
+                ? null
+                : () async {
+                    await _database!.startDatabase();
+                  },
+            child: const Icon(Icons.play_arrow),
+          ),
+        ),
+        SizedBox(height: 8),
+        Tooltip(
+          message: 'Stop database',
+          child: ElevatedButton(
+            onPressed: _database == null
+                ? null
+                : () async {
+                    // unawaited(Process.run('open', [_database!.path]));
+                    print('Stop database');
+                  },
+            child: const Icon(Icons.stop),
+          ),
+        ),
+        SizedBox(height: 8),
+        Tooltip(
+          message: 'Open database folder',
+          child: ElevatedButton(
+            onPressed: () async {
+              await Process.run('open', [_database?.path ?? gsPath]);
+            },
+            child: const Icon(Icons.folder_open),
+          ),
+        ),
+      ],
     );
   }
 
@@ -94,11 +131,9 @@ class DatabasesTabState extends State<DatabasesTab> {
     final rows = Database.databaseList.map((database) {
       return DataRow(
         onSelectChanged: (selected) {
-          if (selected!) {
-            setState(() {
-              _database = database;
-            });
-          }
+          setState(() {
+            _database = selected! ? database : null;
+          });
         },
         selected: _database == database,
         cells: <DataCell>[
@@ -108,12 +143,17 @@ class DatabasesTabState extends State<DatabasesTab> {
         ],
       );
     }).toList();
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: DataTable(
-        columns: columns,
-        rows: rows,
-      ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: DataTable(
+            columns: columns,
+            rows: rows,
+          ),
+        ),
+      ],
     );
   }
 

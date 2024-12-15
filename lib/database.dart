@@ -152,17 +152,28 @@ class Database {
     };
   }
 
-  // Future<void> start() async {
-  //   final process = await Process.start(
-  //     '${version.productFilePath}/bin/$ldiName',
-  //     ['start', '-l', '$path/log', '-d', path],
-  //   );
-  //   process.stdout.transform(utf8.decoder).listen((data) {
-  //     print(data);
-  //   });
-  //   process.stderr.transform(utf8.decoder).listen((data) {
-  //     print(data);
-  //   });
-  //   await process.exitCode;
-  // }
+  Future<void> createRemoveQuarantineScript() async {
+    final string =
+        'sudo xattr -d com.apple.quarantine GemStone64Bit*.Darwin/bin/*\n';
+    final file = File('$gsPath/removeQuarantine.sh');
+    await file.writeAsString(string);
+    await Process.run('chmod', ['+x', file.path]);
+    // open the file in Finder
+    await Process.run('open', ['-R', file.path]);
+  }
+
+  Future<void> startDatabase() async {
+    final startnetldi = await Process.start(
+      '${version.productFilePath}/bin/startnetldi',
+      ['-a', Platform.environment['USER']!, '-g'],
+      environment: environment(),
+    );
+    startnetldi.stdout.transform(utf8.decoder).listen((data) {
+      print('startnetldi stdout: $data');
+    });
+    startnetldi.stderr.transform(utf8.decoder).listen((data) {
+      print('startnetldi stderr: $data');
+    });
+    await startnetldi.exitCode;
+  }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gemstoneapp/platform.dart';
 import 'package:gemstoneapp/version.dart';
 
@@ -72,18 +73,45 @@ class VersionDownloadState extends State<VersionDownload> {
   }
 
   Dialog extractDialog() {
-    unawaited(Process.run('open', [gsPath]));
+    unawaited(Process.run('open', [gsPath])); // build method cannot wait!
+    final xattrCommand = 'sudo xattr -r -d com.apple.quarantine $gsPath';
     return Dialog(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('We have downloaded ${widget.version.dmgName}.'),
-            const Text(
-              'For security reasons, you must extract it manually.\n'
-              'Open the .dmg file and drag the contents to the open\n'
-              'GemStone folder. You may then eject the disk image.',
+            Text('We have downloaded ${widget.version.dmgName}.\n\n'
+                'For security reasons, you must extract it manually. '
+                'Open the .dmg file and drag the contents into the open '
+                'GemStone folder (next to the .dmg file). You may then '
+                'eject the disk image.\n\n'
+                'Next you need to remove the quarantine attribute from '
+                'the extracted files. Open a Terminal window and run the '
+                'following:\n'),
+            Row(
+              children: [
+                Expanded(
+                  child: SelectableText(
+                    '$xattrCommand\n',
+                    style: TextStyle(
+                      fontFamily: 'Courier New',
+                      fontSize: 14.0,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.copy),
+                  onPressed: () async {
+                    await Clipboard.setData(
+                      ClipboardData(text: xattrCommand),
+                    );
+                  },
+                ),
+              ],
+            ),
+            Text(
+              'Click OK when you have finished.',
             ),
             ElevatedButton(
               onPressed: () async {

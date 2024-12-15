@@ -33,33 +33,60 @@ class DownloadTabState extends State<DownloadTab> {
       const DataColumn(
         label: Expanded(
           child: Text(
-            'Release Date',
+            'Date',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      ),
+      const DataColumn(
+        label: Expanded(
+          child: Text(
+            'Downloaded',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      ),
+      const DataColumn(
+        label: Expanded(
+          child: Text(
+            'Expanded',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      ),
+      const DataColumn(
+        label: Expanded(
+          child: Text(
+            'Runnable',
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
       ),
     ];
-    final rows = Version.versionList.map((database) {
-      final version = database.version;
-      final date = database.date;
+    final rows = Version.versionList.map((version) {
+      final versionName = version.version;
+      final date = version.date;
       final formattedDate = DateFormat('yyyy-MMM-dd').format(date);
       return DataRow(
         cells: <DataCell>[
           DataCell(
             Checkbox(
-              value: database.isExtracted,
+              value: version.isExtracted,
               onChanged: (newValue) async {
                 if (newValue!) {
-                  await download(context, database);
+                  await download(context, version);
                 } else {
-                  await database.deleteProduct();
+                  await delete(context, version);
                 }
                 setState(() {});
               },
             ),
           ),
-          DataCell(Text(version)),
+          DataCell(Text(versionName)),
           DataCell(Text(formattedDate)),
+          DataCell(Text(version.isDownloaded ? 'Yes' : 'No')),
+          DataCell(Text(version.isExtracted ? 'Yes' : 'No')),
+          DataCell(Text(version.isRunnable ? 'Yes' : 'No')),
         ],
       );
     }).toList();
@@ -70,6 +97,37 @@ class DownloadTabState extends State<DownloadTab> {
         rows: rows,
       ),
     );
+  }
+
+  Future<void> delete(BuildContext context, Version version) async {
+    // Show the "Deleting" dialog
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 16),
+                Text('Deleting...'),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    // Perform the deletion
+    await version.deleteProduct();
+
+    // Dismiss the "Deleting" dialog
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> download(BuildContext context, Version database) async {

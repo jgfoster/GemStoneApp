@@ -9,7 +9,7 @@ class Version {
   Version({
     required this.date,
     required this.version,
-    // TODO: include download size so we can verify the download
+    required this.size,
   }) {
     dmgName = 'GemStone64Bit$version-arm64.Darwin.dmg';
     downloadFilePath = '$gsPath/$dmgName';
@@ -23,27 +23,53 @@ class Version {
   final List<String> extents = [];
   late bool isDownloaded = false;
   late bool isExtracted = false;
+  late bool isRunnable = false;
   Process? process;
   static String productsUrlPath =
       'https://downloads.gemtalksystems.com/platforms/arm64.Darwin';
   late String productFilePath;
   late String productUrlPath;
+  final int size;
   final String version;
   static List<Version> versionList = [];
 
   Future<void> cancelDownload() async {
     process?.kill();
     process = null;
+    await _deleteDownload();
   }
 
   Future<void> checkIfDownloaded() async {
-    isDownloaded = File(downloadFilePath).existsSync();
+    isDownloaded = false;
+    final file = File(downloadFilePath);
+    if (file.existsSync()) {
+      final stat = file.statSync();
+      if (stat.size == size) {
+        isDownloaded = true;
+      } else {
+        await _deleteDownload();
+      }
+    }
   }
 
   Future<void> checkIfExtracted() async {
     isExtracted = Directory(productFilePath).existsSync();
     if (isExtracted) {
       await fillExtentList();
+    }
+  }
+
+  Future<void> checkIfRunnable() async {
+    if (isExtracted) {
+      final result = await Process.run(
+        'xattr',
+        ['-l', productFilePath],
+      );
+      if (result.exitCode == 0) {
+        isRunnable = !result.stdout.toString().contains('com.apple.quarantine');
+      } else {
+        isRunnable = false;
+      }
     }
   }
 
@@ -91,10 +117,10 @@ class Version {
   }
 
   Future<void> download(void Function(String)? callback) async {
-    if (!Directory(gsPath).existsSync()) {
-      Directory(gsPath).createSync(recursive: true);
+    await checkIfDownloaded();
+    if (isDownloaded) {
+      return;
     }
-    await _deleteDownload();
 
     process = await Process.start(
       'curl',
@@ -136,15 +162,19 @@ class Version {
     final lines = result.stdout.toString().split('\n');
     final dateFormat = DateFormat('dd-MMM-yyyy');
     for (final line in lines) {
+      // <a href="GemStone64Bit3.6.1-arm64.Darwin.dmg">GemStone64Bit3.6.1-arm64.Darwin.dmg</a>                06-Apr-2021 20:35           145306111
       final match = RegExp(
-        r'href="[^"]*GemStone64Bit(\d+\.\d+\.\d+)[^"]*".*?(\d{2}-\w{3}-\d{4})',
+        r'href="[^"]*GemStone64Bit(\d+\.\d+\.\d+)[^"]*".*?(\d{2}-\w{3}-\d{4})\s+\d{2}:\d{2}\s+(\d+)',
       ).firstMatch(line);
       if (match != null) {
-        final version = match.group(1)!;
+        final versionString = match.group(1)!;
         final date = dateFormat.parse(match.group(2)!);
-        final database = Version(version: version, date: date);
-        await database.checkIfExtracted();
-        versions.add(database);
+        final size = int.parse(match.group(3)!);
+        final version = Version(version: versionString, date: date, size: size);
+        await version.checkIfDownloaded();
+        await version.checkIfExtracted();
+        await version.checkIfRunnable();
+        versions.add(version);
       }
     }
     versionList.addAll(versions.reversed.toList());
