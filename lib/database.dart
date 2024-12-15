@@ -20,26 +20,6 @@ class Database {
   String stoneName;
   Version version;
 
-  Future<void> createDatabase() async {
-    var i = 1;
-    while (Directory('$databasesDir/db-$i').existsSync()) {
-      i++;
-    }
-    Directory('$databasesDir/db-$i').createSync();
-    Directory('$databasesDir/db-$i/conf').createSync();
-    Directory('$databasesDir/db-$i/data').createSync();
-    Directory('$databasesDir/db-$i/log').createSync();
-    Directory('$databasesDir/db-$i/stat').createSync();
-    final yamlString = '---\n'
-        'baseExtent: "$baseExtent.dbf"\n'
-        'ldiName: "$ldiName"\n'
-        'stoneName: "$stoneName"\n'
-        'version: "${version.version}"\n';
-    final yamlFile = File('$databasesDir/db-$i/database.yaml');
-    await yamlFile.writeAsString(yamlString);
-    databaseList.add(this);
-  }
-
   static Future<void> buildDatabaseList() async {
     if (!Directory(databasesDir).existsSync()) {
       Directory(databasesDir).createSync(recursive: true);
@@ -67,5 +47,30 @@ class Database {
         }
       }
     }
+  }
+
+  Future<void> createDatabase() async {
+    var i = 1;
+    while (Directory('$databasesDir/db-$i').existsSync()) {
+      i++;
+    }
+    Directory('$databasesDir/db-$i').createSync();
+    Directory('$databasesDir/db-$i/conf').createSync();
+    Directory('$databasesDir/db-$i/data').createSync();
+    Directory('$databasesDir/db-$i/log').createSync();
+    Directory('$databasesDir/db-$i/stat').createSync();
+    final yamlString = '---\n'
+        'baseExtent: "$baseExtent.dbf"\n'
+        'ldiName: "$ldiName"\n'
+        'stoneName: "$stoneName"\n'
+        'version: "${version.version}"\n';
+    final yamlFile = File('$databasesDir/db-$i/database.yaml');
+    await yamlFile.writeAsString(yamlString);
+    databaseList.add(this);
+  }
+
+  Future<void> deleteDatabase() async {
+    await Directory(path).delete(recursive: true);
+    Database.databaseList.remove(this);
   }
 }

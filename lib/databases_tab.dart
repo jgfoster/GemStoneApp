@@ -31,9 +31,11 @@ class DatabasesTabState extends State<DatabasesTab> {
         ),
         SizedBox(height: 8.0),
         ElevatedButton(
-          onPressed: () {
-            print('Remove ${_database!.path}');
-          },
+          onPressed: _database == null
+              ? null
+              : () async {
+                  await _showDeleteConfirmationDialog(context);
+                },
           child: const Icon(Icons.remove),
         ),
       ],
@@ -45,7 +47,7 @@ class DatabasesTabState extends State<DatabasesTab> {
     return Column(
       children: [
         Expanded(flex: 1, child: databasesRow()),
-        Expanded(flex: 2, child: Text('Row 2')),
+        Expanded(flex: 2, child: Text('Database Details')),
       ],
     );
   }
@@ -122,6 +124,38 @@ class DatabasesTabState extends State<DatabasesTab> {
           return VersionDownload(version: database);
         },
       ),
+    );
+  }
+
+  Future<void> _showDeleteConfirmationDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Deletion'),
+          content:
+              Text('Are you sure you want to delete ${_database!.stoneName}?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await _database!.deleteDatabase();
+                _database = null;
+                setState(() {});
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
