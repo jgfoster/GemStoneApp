@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:gemstoneapp/platform.dart';
 import 'package:gemstoneapp/version.dart';
 
 class VersionDownload extends StatefulWidget {
@@ -71,7 +72,7 @@ class VersionDownloadState extends State<VersionDownload> {
   }
 
   Dialog extractDialog() {
-    unawaited(Process.run('open', [Version.versionsDir]));
+    unawaited(Process.run('open', [gsPath]));
     return Dialog(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -100,7 +101,7 @@ class VersionDownloadState extends State<VersionDownload> {
   }
 
   void startDownload(BuildContext context) {
-    unawaited(Process.run('open', [Version.versionsDir]));
+    unawaited(Process.run('open', [gsPath]));
     isDownloading = true;
     // ignore: discarded_futures
     widget.version.download(callback).then((_) {

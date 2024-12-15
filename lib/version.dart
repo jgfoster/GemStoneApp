@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:gemstoneapp/platform.dart';
 import 'package:intl/intl.dart';
 
 class Version {
@@ -11,8 +12,8 @@ class Version {
     // TODO: include download size so we can verify the download
   }) {
     dmgName = 'GemStone64Bit$version-arm64.Darwin.dmg';
-    downloadFilePath = '$versionsDir/$dmgName';
-    productFilePath = '$versionsDir/GemStone64Bit$version-arm64.Darwin';
+    downloadFilePath = '$gsPath/$dmgName';
+    productFilePath = '$gsPath/GemStone64Bit$version-arm64.Darwin';
     productUrlPath = '$productsUrlPath/$dmgName';
   }
 
@@ -22,8 +23,6 @@ class Version {
   final List<String> extents = [];
   late bool isDownloaded = false;
   late bool isExtracted = false;
-  static String versionsDir =
-      '${Directory.current.path}/Library/Application Support/GemStone';
   Process? process;
   static String productsUrlPath =
       'https://downloads.gemtalksystems.com/platforms/arm64.Darwin';
@@ -92,15 +91,15 @@ class Version {
   }
 
   Future<void> download(void Function(String)? callback) async {
-    if (!Directory(versionsDir).existsSync()) {
-      Directory(versionsDir).createSync(recursive: true);
+    if (!Directory(gsPath).existsSync()) {
+      Directory(gsPath).createSync(recursive: true);
     }
     await _deleteDownload();
 
     process = await Process.start(
       'curl',
       ['-O', productUrlPath],
-      workingDirectory: versionsDir,
+      workingDirectory: gsPath,
     );
 
     process?.stderr.transform(utf8.decoder).listen((data) {
