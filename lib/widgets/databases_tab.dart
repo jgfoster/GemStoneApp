@@ -3,10 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:gemstoneapp/domain/database.dart';
-import 'package:gemstoneapp/domain/platform.dart';
-import 'package:gemstoneapp/domain/version.dart';
 import 'package:gemstoneapp/widgets/new_database.dart';
-import 'package:gemstoneapp/widgets/version_download.dart';
 
 class DatabasesTab extends StatefulWidget {
   const DatabasesTab({super.key});
@@ -16,7 +13,19 @@ class DatabasesTab extends StatefulWidget {
 }
 
 class DatabasesTabState extends State<DatabasesTab> {
-  Database? _database;
+  Widget _actions(Database database) {
+    return Row(
+      children: [
+        _deleteDatabaseButton(database),
+        SizedBox(width: 4),
+        _startDatabaseButton(database),
+        SizedBox(width: 4),
+        _stopDatabaseButton(database),
+        SizedBox(width: 4),
+        _openFinder(database),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,84 +33,16 @@ class DatabasesTabState extends State<DatabasesTab> {
       padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
-          Expanded(child: databaseList()),
+          Expanded(child: _databaseList()),
           SizedBox(width: 8),
-          buttons(),
+          _newDatabaseButton(),
         ],
       ),
     );
   }
 
-  Widget buttons() {
-    return Column(
-      children: [
-        Tooltip(
-          message: 'Create a new database',
-          child: ElevatedButton(
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => NewDatabaseForm(),
-                ),
-              );
-              setState(() {});
-            },
-            child: const Icon(Icons.add),
-          ),
-        ),
-        SizedBox(height: 8),
-        Tooltip(
-          message: 'Delete database',
-          child: ElevatedButton(
-            onPressed: _database == null
-                ? null
-                : () async {
-                    await _showDeleteConfirmationDialog(context);
-                  },
-            child: const Icon(Icons.remove),
-          ),
-        ),
-        SizedBox(height: 8),
-        Tooltip(
-          message: 'Start database',
-          child: ElevatedButton(
-            onPressed: _database == null
-                ? null
-                : () async {
-                    await _database!.start();
-                  },
-            child: const Icon(Icons.play_arrow),
-          ),
-        ),
-        SizedBox(height: 8),
-        Tooltip(
-          message: 'Stop database',
-          child: ElevatedButton(
-            onPressed: _database == null
-                ? null
-                : () async {
-                    await _database!.stop();
-                  },
-            child: const Icon(Icons.stop),
-          ),
-        ),
-        SizedBox(height: 8),
-        Tooltip(
-          message: 'Open database folder',
-          child: ElevatedButton(
-            onPressed: () async {
-              await Process.run('open', [_database?.path ?? gsPath]);
-            },
-            child: const Icon(Icons.folder_open),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget databaseList() {
-    final columns = <DataColumn>[
+  List<DataColumn> get _columns {
+    return <DataColumn>[
       const DataColumn(
         label: Expanded(
           child: Text(
@@ -113,7 +54,7 @@ class DatabasesTabState extends State<DatabasesTab> {
       const DataColumn(
         label: Expanded(
           child: Text(
-            'Stone Name',
+            'Stone',
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
@@ -121,59 +62,103 @@ class DatabasesTabState extends State<DatabasesTab> {
       const DataColumn(
         label: Expanded(
           child: Text(
-            'NetLDI Name',
+            'NetLDI',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      ),
+      const DataColumn(
+        label: Expanded(
+          child: Text(
+            'Actions',
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
       ),
     ];
-    final rows = Database.databaseList.map((database) {
-      return DataRow(
-        onSelectChanged: (selected) {
-          setState(() {
-            _database = selected! ? database : null;
-          });
-        },
-        selected: _database == database,
-        cells: <DataCell>[
-          DataCell(Text(database.version.version)),
-          DataCell(Text(database.stoneName)),
-          DataCell(Text(database.ldiName)),
-        ],
-      );
-    }).toList();
+  }
+
+  Widget _databaseList() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: DataTable(
-            columns: columns,
-            rows: rows,
+            columns: _columns,
+            rows: _rows(),
           ),
         ),
       ],
     );
   }
 
-  Future<void> download(BuildContext context, Version database) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return VersionDownload(version: database);
+  Tooltip _deleteDatabaseButton(Database database) {
+    return Tooltip(
+      message: 'Delete database',
+      child: ElevatedButton(
+        onPressed: () async {
+          await _showDeleteConfirmationDialog(context, database);
         },
+        child: const Icon(Icons.remove),
       ),
     );
   }
 
-  Future<void> _showDeleteConfirmationDialog(BuildContext context) async {
+  Tooltip _newDatabaseButton() {
+    return Tooltip(
+      message: 'Create a new database',
+      child: ElevatedButton(
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => NewDatabaseForm(),
+            ),
+          );
+          setState(() {});
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Tooltip _openFinder(Database database) {
+    return Tooltip(
+      message: 'Open database folder',
+      child: ElevatedButton(
+        onPressed: () async {
+          await Process.run('open', [database.path]);
+        },
+        child: const Icon(Icons.folder_open),
+      ),
+    );
+  }
+
+  List<DataRow> _rows() {
+    return Database.databaseList.map((database) {
+      return DataRow(
+        cells: <DataCell>[
+          DataCell(Text(database.version.version)),
+          DataCell(Text(database.stoneName)),
+          DataCell(Text(database.ldiName)),
+          DataCell(_actions(database)),
+        ],
+      );
+    }).toList();
+  }
+
+  Future<void> _showDeleteConfirmationDialog(
+    BuildContext context,
+    Database database,
+  ) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Confirm Deletion'),
           content:
-              Text('Are you sure you want to delete ${_database!.stoneName}?'),
+              Text('Are you sure you want to delete ${database.stoneName}?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -183,8 +168,7 @@ class DatabasesTabState extends State<DatabasesTab> {
             ),
             ElevatedButton(
               onPressed: () async {
-                await _database!.deleteDatabase();
-                _database = null;
+                await database.deleteDatabase();
                 setState(() {});
                 if (context.mounted) {
                   Navigator.of(context).pop();
@@ -195,6 +179,30 @@ class DatabasesTabState extends State<DatabasesTab> {
           ],
         );
       },
+    );
+  }
+
+  Tooltip _startDatabaseButton(Database database) {
+    return Tooltip(
+      message: 'Start database',
+      child: ElevatedButton(
+        onPressed: () async {
+          await database.start();
+        },
+        child: const Icon(Icons.play_arrow),
+      ),
+    );
+  }
+
+  Tooltip _stopDatabaseButton(Database database) {
+    return Tooltip(
+      message: 'Stop database',
+      child: ElevatedButton(
+        onPressed: () async {
+          await database.stop();
+        },
+        child: const Icon(Icons.stop),
+      ),
     );
   }
 }
