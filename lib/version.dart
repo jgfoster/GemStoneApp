@@ -33,6 +33,46 @@ class Version {
   final String version;
   static List<Version> versionList = [];
 
+  Future<String> attach() async {
+    late String volumePath;
+    process = await Process.start(
+      'hdiutil',
+      ['attach', dmgName],
+      workingDirectory: gsPath,
+    );
+    process?.stdout.transform(utf8.decoder).listen((data) {
+      for (final line in data.split('\n')) {
+        final match = RegExp(r'.*/Volumes/([^ ]+)$').firstMatch(line);
+        if (match != null) {
+          volumePath = '/Volumes/${match.group(1)}';
+        }
+      }
+    });
+    process?.stderr.transform(utf8.decoder).listen((data) {
+      isExtracted = false;
+      // await _deleteExtract();
+      throw Exception('Failed to attach $dmgName ($data)');
+    });
+    final exitCode = await process?.exitCode;
+    process = null;
+    if (exitCode != 0) {
+      isExtracted = false;
+      // await _deleteExtract();
+      throw Exception('Failed to attach $dmgName (exit code $exitCode)');
+    }
+    return volumePath;
+  }
+
+  static Future<void> buildVersionList() async {
+    versionList.clear();
+    try {
+      await downloadVersionList();
+    } on TimeoutException {
+      await readVersions();
+    }
+    return;
+  }
+
   Future<void> cancelDownload() async {
     process?.kill();
     process = null;
@@ -88,6 +128,98 @@ class Version {
     isExtracted = false;
   }
 
+  Future<void> detach(String volumePath) async {
+    process = await Process.start(
+      'hdiutil',
+      ['detach', volumePath],
+    );
+    process?.stderr.transform(utf8.decoder).listen((data) {
+      isExtracted = false;
+      // await _deleteExtract();
+      throw Exception('Failed to detach $volumePath ($data)');
+    });
+    final exitCode = await process?.exitCode;
+    process = null;
+    if (exitCode != 0) {
+      isExtracted = false;
+      // await _deleteExtract();
+      throw Exception('Failed to detach $volumePath (exit code $exitCode)');
+    }
+  }
+
+  Future<void> downloadVersion(void Function(String)? callback) async {
+    await checkIfDownloaded();
+    if (isDownloaded) {
+      return;
+    }
+    process = await Process.start(
+      'curl',
+      ['-O', productUrlPath],
+      workingDirectory: gsPath,
+    );
+    process?.stderr.transform(utf8.decoder).listen((data) {
+      if (callback != null) {
+        callback(data);
+      }
+    });
+    final exitCode = await process?.exitCode;
+    process = null;
+    if (exitCode != 0) {
+      isDownloaded = false;
+      await _deleteDownload();
+      throw Exception('Failed to download $dmgName (exit code $exitCode)');
+    }
+    File(downloadFilePath).setLastModifiedSync(date);
+    isDownloaded = true;
+  }
+
+  static Future<void> downloadVersionList() async {
+    final result = await Process.run('curl', ['$productsUrlPath/'])
+        .timeout(const Duration(seconds: 2));
+    if (result.exitCode != 0) {
+      throw Exception(result.stderr);
+    }
+    final versions = <Version>[];
+    final lines = result.stdout.toString().split('\n');
+    final dateFormat = DateFormat('dd-MMM-yyyy');
+    for (final line in lines) {
+      // <a href="GemStone64Bit3.6.1-arm64.Darwin.dmg">GemStone64Bit3.6.1-arm64.Darwin.dmg</a>                06-Apr-2021 20:35           145306111
+      final match = RegExp(
+        r'href="[^"]*GemStone64Bit(\d+\.\d+\.\d+)[^"]*".*?(\d{2}-\w{3}-\d{4})\s+\d{2}:\d{2}\s+(\d+)',
+      ).firstMatch(line);
+      if (match != null) {
+        final versionString = match.group(1)!;
+        final date = dateFormat.parse(match.group(2)!);
+        final size = int.parse(match.group(3)!);
+        final version = Version(version: versionString, date: date, size: size);
+        await version.checkIfDownloaded();
+        await version.checkIfExtracted();
+        await version.checkIfRunnable();
+        versions.add(version);
+      }
+    }
+    versionList.addAll(versions.reversed.toList());
+  }
+
+  Future<void> extract([void Function(String)? callback]) async {
+    await checkIfExtracted();
+    if (isExtracted) {
+      return;
+    }
+    final volumePath = await attach();
+    final list = Directory(volumePath).listSync();
+    for (final entity in list) {
+      final result = await Process.run('cp', ['-R', entity.path, gsPath]);
+      if (result.exitCode != 0) {
+        isExtracted = false;
+        // await _deleteExtract();
+        throw Exception('Failed to copy $entity to $gsPath');
+      }
+    }
+    await detach(volumePath);
+    await checkIfExtracted();
+  }
+
   Future<void> fillExtentList() async {
     extents.clear();
     final list = Directory('$productFilePath/bin').listSync();
@@ -112,71 +244,54 @@ class Version {
     return versions;
   }
 
-  Future<void> _setDirectoryWritable(Directory directory) async {
-    await Process.run('chmod', ['-R', 'u+w', directory.path]);
-  }
-
-  Future<void> download(void Function(String)? callback) async {
-    await checkIfDownloaded();
-    if (isDownloaded) {
-      return;
-    }
-
-    process = await Process.start(
-      'curl',
-      ['-O', productUrlPath],
-      workingDirectory: gsPath,
-    );
-
-    process?.stderr.transform(utf8.decoder).listen((data) {
-      if (callback != null) {
-        callback(data);
-      }
-    });
-
-    final exitCode = await process?.exitCode;
-    process = null;
-    if (exitCode != 0) {
-      isDownloaded = false;
-      await _deleteDownload();
-      throw Exception('Failed to download $dmgName (exit code $exitCode)');
-    }
-
-    isDownloaded = true;
-  }
-
-  static Future<void> buildVersionList() async {
-    versionList.clear();
-    ProcessResult result;
-    try {
-      result = await Process.run('curl', ['$productsUrlPath/'])
-          .timeout(const Duration(seconds: 2));
-    } on TimeoutException {
-      // TODO: build a list of already-installed versions
-      return;
-    }
-    if (result.exitCode != 0) {
-      throw Exception(result.stderr);
-    }
-    final versions = <Version>[];
-    final lines = result.stdout.toString().split('\n');
-    final dateFormat = DateFormat('dd-MMM-yyyy');
-    for (final line in lines) {
-      // <a href="GemStone64Bit3.6.1-arm64.Darwin.dmg">GemStone64Bit3.6.1-arm64.Darwin.dmg</a>                06-Apr-2021 20:35           145306111
-      final match = RegExp(
-        r'href="[^"]*GemStone64Bit(\d+\.\d+\.\d+)[^"]*".*?(\d{2}-\w{3}-\d{4})\s+\d{2}:\d{2}\s+(\d+)',
-      ).firstMatch(line);
-      if (match != null) {
-        final versionString = match.group(1)!;
-        final date = dateFormat.parse(match.group(2)!);
-        final size = int.parse(match.group(3)!);
-        final version = Version(version: versionString, date: date, size: size);
+  static Future<void> readVersions() async {
+    final entries = Directory(gsPath).listSync();
+    for (final each in entries) {
+      if (each.path.endsWith('-arm64.Darwin.dmg') &&
+          await FileSystemEntity.isFile(each.path)) {
+        final versionString = each.path.substring(
+          gsPath.length + 14,
+          each.path.length - 17,
+        );
+        final stat = File(each.path).statSync();
+        final version = Version(
+          date: stat.modified,
+          size: stat.size,
+          version: versionString,
+        );
         await version.checkIfDownloaded();
         await version.checkIfExtracted();
-        await version.checkIfRunnable();
-        versions.add(version);
+        versionList.add(version);
+      }
+      if (each.path.endsWith('-arm64.Darwin') &&
+          await FileSystemEntity.isDirectory(each.path)) {
+        final versionString = each.path.substring(
+          gsPath.length + 14,
+          each.path.length - 13,
+        );
+        Version? version;
+        for (final each in versionList) {
+          if (each.version == versionString) {
+            version = each;
+            break;
+          }
+        }
+        if (version == null) {
+          final stat = File(each.path).statSync();
+          final version = Version(
+            date: stat.modified,
+            size: stat.size,
+            version: versionString,
+          );
+          await version.checkIfDownloaded();
+          await version.checkIfExtracted();
+          versionList.add(version);
+        }
       }
     }
-    versionList.addAll(versions.reversed.toList());
+  }
+
+  Future<void> _setDirectoryWritable(Directory directory) async {
+    await Process.run('chmod', ['-R', 'u+w', directory.path]);
   }
 }

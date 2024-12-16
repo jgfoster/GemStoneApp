@@ -9,12 +9,18 @@ import 'package:gemstoneapp/version.dart';
 import 'package:gemstoneapp/versions_tab.dart';
 
 void main() async {
-  if (!Directory(gsPath).existsSync()) {
-    Directory(gsPath).createSync(recursive: true);
+  await setup();
+  runApp(const GemStoneTools());
+}
+
+Future<void> setup() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await getGsPath();
+  if (!Directory('$gsPath/locks').existsSync()) {
+    Directory('$gsPath/locks').createSync(recursive: true);
   }
   await Version.buildVersionList();
   await Database.buildDatabaseList();
-  runApp(const GemStoneTools());
 }
 
 class GemStoneTools extends StatelessWidget {

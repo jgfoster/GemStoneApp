@@ -33,9 +33,16 @@ class Database {
         if (yamlFile.existsSync()) {
           final yamlString = await yamlFile.readAsString();
           final yaml = loadYaml(yamlString);
-          final version = Version.versionList.firstWhere(
-            (element) => element.version == yaml['version'],
-          );
+          Version? version;
+          for (final eachVersion in Version.versionList) {
+            if (eachVersion.version == yaml['version']) {
+              version = eachVersion;
+              break;
+            }
+          }
+          if (version == null) {
+            continue;
+          }
           databaseList.add(
             Database(
               version: version,
@@ -152,20 +159,17 @@ class Database {
     };
   }
 
-  Future<void> createRemoveQuarantineScript() async {
-    final string =
-        'sudo xattr -d com.apple.quarantine GemStone64Bit*.Darwin/bin/*\n';
-    final file = File('$gsPath/removeQuarantine.sh');
-    await file.writeAsString(string);
-    await Process.run('chmod', ['+x', file.path]);
-    // open the file in Finder
-    await Process.run('open', ['-R', file.path]);
-  }
-
   Future<void> startDatabase() async {
     final startnetldi = await Process.start(
       '${version.productFilePath}/bin/startnetldi',
-      ['-a', Platform.environment['USER']!, '-g'],
+      [
+        '-a',
+        Platform.environment['USER']!,
+        '-g',
+        '-l',
+        '$path/log/$ldiName.log',
+        ldiName,
+      ],
       environment: environment(),
     );
     startnetldi.stdout.transform(utf8.decoder).listen((data) {

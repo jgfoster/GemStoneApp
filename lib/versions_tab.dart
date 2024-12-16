@@ -49,15 +49,7 @@ class DownloadTabState extends State<DownloadTab> {
       const DataColumn(
         label: Expanded(
           child: Text(
-            'Expanded',
-            style: TextStyle(fontStyle: FontStyle.italic),
-          ),
-        ),
-      ),
-      const DataColumn(
-        label: Expanded(
-          child: Text(
-            'Runnable',
+            'Extracted',
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
@@ -86,7 +78,6 @@ class DownloadTabState extends State<DownloadTab> {
           DataCell(Text(formattedDate)),
           DataCell(Text(version.isDownloaded ? 'Yes' : 'No')),
           DataCell(Text(version.isExtracted ? 'Yes' : 'No')),
-          DataCell(Text(version.isRunnable ? 'Yes' : 'No')),
         ],
       );
     }).toList();
@@ -130,11 +121,11 @@ class DownloadTabState extends State<DownloadTab> {
     }
   }
 
-  Future<void> download(BuildContext context, Version database) async {
+  Future<void> download(BuildContext context, Version version) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return VersionDownload(version: database);
+          return VersionDownload(version: version);
         },
       ),
     );

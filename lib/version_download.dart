@@ -1,9 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:gemstoneapp/platform.dart';
 import 'package:gemstoneapp/version.dart';
 
 class VersionDownload extends StatefulWidget {
@@ -17,18 +14,9 @@ class VersionDownload extends StatefulWidget {
 
 class VersionDownloadState extends State<VersionDownload> {
   bool isDownloading = false;
+  bool isExtracting = false;
   String progressText = 'Downloading...';
   double progressPercent = 0.0;
-
-  void callback(String text) {
-    if (text[2] == '%') {
-      return; // ignore header
-    }
-    setState(() {
-      progressText = text;
-      progressPercent = double.tryParse(text.trim().split(' ')[0]) ?? 0.0;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +26,30 @@ class VersionDownloadState extends State<VersionDownload> {
     if (isDownloading) {
       return downloadDialog();
     }
-    return extractDialog();
+    if (!widget.version.isExtracted && !isExtracting) {
+      startExtract(context);
+    }
+    if (isExtracting) {
+      return extractDialog();
+    }
+    Future.delayed(const Duration(milliseconds: 1), () async {
+      await widget.version.checkIfDownloaded();
+      await widget.version.checkIfExtracted();
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+    });
+    return const SizedBox.shrink();
+  }
+
+  void callback(String text) {
+    if (text[2] == '%') {
+      return; // ignore header
+    }
+    setState(() {
+      progressText = text;
+      progressPercent = double.tryParse(text.trim().split(' ')[0]) ?? 0.0;
+    });
   }
 
   Dialog downloadDialog() {
@@ -72,81 +83,72 @@ class VersionDownloadState extends State<VersionDownload> {
     );
   }
 
+  void downloadError(BuildContext context, dynamic error) {
+    isDownloading = false;
+    isExtracting = false;
+    if (context.mounted) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $error'),
+        ),
+      );
+    }
+  }
+
+  void downloadFinished(_) {
+    isDownloading = false;
+    setState(() {});
+  }
+
   Dialog extractDialog() {
-    unawaited(Process.run('open', [gsPath])); // build method cannot wait!
-    final xattrCommand = 'sudo xattr -r -d com.apple.quarantine $gsPath';
     return Dialog(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('We have downloaded ${widget.version.dmgName}.\n\n'
-                'For security reasons, you must extract it manually. '
-                'Open the .dmg file and drag the contents into the open '
-                'GemStone folder (next to the .dmg file). You may then '
-                'eject the disk image.\n\n'
-                'Next you need to remove the quarantine attribute from '
-                'the extracted files. Open a Terminal window and run the '
-                'following:\n'),
-            Row(
-              children: [
-                Expanded(
-                  child: SelectableText(
-                    '$xattrCommand\n',
-                    style: TextStyle(
-                      fontFamily: 'Courier New',
-                      fontSize: 14.0,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.copy),
-                  onPressed: () async {
-                    await Clipboard.setData(
-                      ClipboardData(text: xattrCommand),
-                    );
-                  },
-                ),
-              ],
-            ),
-            Text(
-              'Click OK when you have finished.',
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await widget.version.checkIfExtracted();
-                if (mounted) {
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('OK'),
-            ),
+            CircularProgressIndicator(),
+            Text('Extracting...'),
           ],
         ),
       ),
     );
   }
 
+  FutureOr<Null> extractFinished(_) {
+    isExtracting = false;
+    setState(() {
+      progressText = 'Done extracting...';
+    });
+  }
+
   void startDownload(BuildContext context) {
-    unawaited(Process.run('open', [gsPath]));
     isDownloading = true;
-    // ignore: discarded_futures
-    widget.version.download(callback).then((_) {
-      isDownloading = false;
-      setState(() {
-        progressText = 'Extracting...';
-      });
-      // ignore: discarded_futures
-    }).catchError((error) {
-      isDownloading = false;
+    widget.version
+        // ignore: discarded_futures
+        .downloadVersion(callback)
+        // ignore: discarded_futures
+        .then(downloadFinished)
+        // ignore: discarded_futures
+        .catchError((error) {
       if (context.mounted) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $error'),
-          ),
-        );
+        downloadError(context, error);
+      }
+    });
+  }
+
+  void startExtract(BuildContext context) {
+    isExtracting = true;
+    widget.version
+        // ignore: discarded_futures
+        .extract()
+        // ignore: discarded_futures
+        .then(extractFinished)
+        // ignore: discarded_futures
+        .catchError((error) {
+      if (context.mounted) {
+        downloadError(context, error);
       }
     });
   }
