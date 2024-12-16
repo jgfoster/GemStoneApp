@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:gemstoneapp/database.dart';
-import 'package:gemstoneapp/new_database.dart';
-import 'package:gemstoneapp/platform.dart';
-import 'package:gemstoneapp/version.dart';
-import 'package:gemstoneapp/version_download.dart';
+import 'package:gemstoneapp/domain/database.dart';
+import 'package:gemstoneapp/domain/platform.dart';
+import 'package:gemstoneapp/domain/version.dart';
+import 'package:gemstoneapp/widgets/new_database.dart';
+import 'package:gemstoneapp/widgets/version_download.dart';
 
 class DatabasesTab extends StatefulWidget {
   const DatabasesTab({super.key});

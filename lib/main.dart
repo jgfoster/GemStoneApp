@@ -1,12 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:gemstoneapp/database.dart';
-import 'package:gemstoneapp/databases_tab.dart';
-import 'package:gemstoneapp/platform.dart';
-import 'package:gemstoneapp/shared_memory_tab.dart';
-import 'package:gemstoneapp/version.dart';
-import 'package:gemstoneapp/versions_tab.dart';
+import 'package:gemstoneapp/domain/database.dart';
+import 'package:gemstoneapp/domain/platform.dart';
+import 'package:gemstoneapp/domain/version.dart';
+import 'package:gemstoneapp/widgets/databases_tab.dart';
+import 'package:gemstoneapp/widgets/shared_memory_tab.dart';
+import 'package:gemstoneapp/widgets/versions_tab.dart';
 
 void main() async {
   await setup();

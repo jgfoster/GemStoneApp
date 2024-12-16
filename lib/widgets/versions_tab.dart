@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:gemstoneapp/version.dart';
-import 'package:gemstoneapp/version_download.dart';
+import 'package:gemstoneapp/domain/version.dart';
+import 'package:gemstoneapp/widgets/version_download.dart';
 import 'package:intl/intl.dart';
 
 class DownloadTab extends StatefulWidget {

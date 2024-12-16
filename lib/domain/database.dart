@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:gemstoneapp/platform.dart';
-import 'package:gemstoneapp/version.dart';
+import 'package:gemstoneapp/domain/platform.dart';
+import 'package:gemstoneapp/domain/version.dart';
 import 'package:yaml/yaml.dart';
 
 class Database {

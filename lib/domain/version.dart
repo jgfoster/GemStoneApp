@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:gemstoneapp/platform.dart';
+import 'package:gemstoneapp/domain/platform.dart';
 import 'package:intl/intl.dart';
 
 class Version {

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:gemstoneapp/version.dart';
+import 'package:gemstoneapp/domain/version.dart';
 
 class VersionDownload extends StatefulWidget {
   const VersionDownload({required this.version, super.key});

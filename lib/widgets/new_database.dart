@@ -1,8 +1,8 @@
 // ignore_for_file: require_trailing_commas
 
 import 'package:flutter/material.dart';
-import 'package:gemstoneapp/database.dart';
-import 'package:gemstoneapp/version.dart';
+import 'package:gemstoneapp/domain/database.dart';
+import 'package:gemstoneapp/domain/version.dart';
 
 class NewDatabaseForm extends StatefulWidget {
   const NewDatabaseForm({super.key});
