@@ -159,7 +159,11 @@ class Database {
     };
   }
 
-  Future<void> startDatabase() async {
+  Future<void> start() async {
+    await startNetLDI();
+  }
+
+  Future<void> startNetLDI() async {
     final startnetldi = await Process.start(
       '${version.productFilePath}/bin/startnetldi',
       [
@@ -176,8 +180,35 @@ class Database {
       print('startnetldi stdout: $data');
     });
     startnetldi.stderr.transform(utf8.decoder).listen((data) {
-      print('startnetldi stderr: $data');
+      throw Exception('startnetldi: "$data"');
     });
-    await startnetldi.exitCode;
+    final exitCode = await startnetldi.exitCode;
+    if (exitCode != 0) {
+      throw Exception('startnetldi failed with exit code $exitCode');
+    }
+  }
+
+  Future<void> stop() async {
+    await stopNetLDI();
+  }
+
+  Future<void> stopNetLDI() async {
+    final stopnetldi = await Process.start(
+      '${version.productFilePath}/bin/stopnetldi',
+      [
+        ldiName,
+      ],
+      environment: environment(),
+    );
+    stopnetldi.stdout.transform(utf8.decoder).listen((data) {
+      print('startnetldi stdout: $data');
+    });
+    stopnetldi.stderr.transform(utf8.decoder).listen((data) {
+      throw Exception('startnetldi: "$data"');
+    });
+    final exitCode = await stopnetldi.exitCode;
+    if (exitCode != 0) {
+      throw Exception('stopnetldi failed with exit code $exitCode');
+    }
   }
 }

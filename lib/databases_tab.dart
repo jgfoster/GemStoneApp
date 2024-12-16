@@ -69,7 +69,7 @@ class DatabasesTabState extends State<DatabasesTab> {
             onPressed: _database == null
                 ? null
                 : () async {
-                    await _database!.startDatabase();
+                    await _database!.start();
                   },
             child: const Icon(Icons.play_arrow),
           ),
@@ -81,8 +81,7 @@ class DatabasesTabState extends State<DatabasesTab> {
             onPressed: _database == null
                 ? null
                 : () async {
-                    // unawaited(Process.run('open', [_database!.path]));
-                    print('Stop database');
+                    await _database!.stop();
                   },
             child: const Icon(Icons.stop),
           ),
