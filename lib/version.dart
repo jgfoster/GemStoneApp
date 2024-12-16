@@ -33,7 +33,7 @@ class Version {
   final String version;
   static List<Version> versionList = [];
 
-  Future<String> attach() async {
+  Future<String> _attach() async {
     late String volumePath;
     process = await Process.start(
       'hdiutil',
@@ -76,7 +76,7 @@ class Version {
   Future<void> cancelDownload() async {
     process?.kill();
     process = null;
-    await _deleteDownload();
+    await deleteDownload();
   }
 
   Future<void> checkIfDownloaded() async {
@@ -87,7 +87,7 @@ class Version {
       if (stat.size == size) {
         isDownloaded = true;
       } else {
-        await _deleteDownload();
+        await deleteDownload();
       }
     }
   }
@@ -95,31 +95,18 @@ class Version {
   Future<void> checkIfExtracted() async {
     isExtracted = Directory(productFilePath).existsSync();
     if (isExtracted) {
-      await fillExtentList();
+      await _fillExtentList();
     }
   }
 
-  Future<void> checkIfRunnable() async {
-    if (isExtracted) {
-      final result = await Process.run(
-        'xattr',
-        ['-l', productFilePath],
-      );
-      if (result.exitCode == 0) {
-        isRunnable = !result.stdout.toString().contains('com.apple.quarantine');
-      } else {
-        isRunnable = false;
-      }
-    }
-  }
-
-  Future<void> _deleteDownload() async {
+  Future<void> deleteDownload() async {
     if (File(downloadFilePath).existsSync()) {
       File(downloadFilePath).deleteSync();
     }
+    await checkIfDownloaded();
   }
 
-  Future<void> deleteProduct() async {
+  Future<void> deleteExtract() async {
     final directory = Directory(productFilePath);
     if (directory.existsSync()) {
       await _setDirectoryWritable(directory);
@@ -128,7 +115,7 @@ class Version {
     isExtracted = false;
   }
 
-  Future<void> detach(String volumePath) async {
+  Future<void> _detach(String volumePath) async {
     process = await Process.start(
       'hdiutil',
       ['detach', volumePath],
@@ -166,7 +153,7 @@ class Version {
     process = null;
     if (exitCode != 0) {
       isDownloaded = false;
-      await _deleteDownload();
+      await deleteDownload();
       throw Exception('Failed to download $dmgName (exit code $exitCode)');
     }
     File(downloadFilePath).setLastModifiedSync(date);
@@ -194,33 +181,32 @@ class Version {
         final version = Version(version: versionString, date: date, size: size);
         await version.checkIfDownloaded();
         await version.checkIfExtracted();
-        await version.checkIfRunnable();
         versions.add(version);
       }
     }
     versionList.addAll(versions.reversed.toList());
   }
 
-  Future<void> extract([void Function(String)? callback]) async {
+  Future<void> extract() async {
     await checkIfExtracted();
     if (isExtracted) {
       return;
     }
-    final volumePath = await attach();
+    final volumePath = await _attach();
     final list = Directory(volumePath).listSync();
     for (final entity in list) {
       final result = await Process.run('cp', ['-R', entity.path, gsPath]);
       if (result.exitCode != 0) {
         isExtracted = false;
-        // await _deleteExtract();
+        await deleteExtract();
         throw Exception('Failed to copy $entity to $gsPath');
       }
     }
-    await detach(volumePath);
+    await _detach(volumePath);
     await checkIfExtracted();
   }
 
-  Future<void> fillExtentList() async {
+  Future<void> _fillExtentList() async {
     extents.clear();
     final list = Directory('$productFilePath/bin').listSync();
     list.sort((a, b) => a.path.compareTo(b.path));
