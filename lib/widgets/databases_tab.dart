@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:gemstoneapp/domain/database.dart';
+import 'package:gemstoneapp/domain/platform.dart';
 import 'package:gemstoneapp/widgets/new_database.dart';
 import 'package:gemstoneapp/widgets/run_process.dart';
 
@@ -23,7 +24,7 @@ class DatabasesTabState extends State<DatabasesTab> {
         SizedBox(width: 4),
         _stopDatabaseButton(database),
         SizedBox(width: 4),
-        _openFinder(database),
+        _openFinderOn(database.path),
       ],
     );
   }
@@ -36,7 +37,14 @@ class DatabasesTabState extends State<DatabasesTab> {
         children: [
           Expanded(child: _databaseList()),
           SizedBox(width: 8),
-          _newDatabaseButton(),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              _newDatabaseButton(),
+              SizedBox(height: 8),
+              _openFinderOn(gsPath),
+            ],
+          ),
         ],
       ),
     );
@@ -86,6 +94,7 @@ class DatabasesTabState extends State<DatabasesTab> {
         SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: DataTable(
+            showCheckboxColumn: false,
             columns: _columns,
             rows: _rows(),
           ),
@@ -124,28 +133,38 @@ class DatabasesTabState extends State<DatabasesTab> {
     );
   }
 
-  Tooltip _openFinder(Database database) {
+  Tooltip _openFinderOn(String path) {
     return Tooltip(
-      message: 'Open database folder',
+      message: 'Open folder',
       child: ElevatedButton(
         onPressed: () async {
-          await Process.run('open', [database.path]);
+          await Process.run('open', [path]);
         },
         child: const Icon(Icons.folder_open),
       ),
     );
   }
 
+  DataRow row(Database database) {
+    return DataRow(
+      cells: <DataCell>[
+        DataCell(Text(database.version.name)),
+        DataCell(Text(database.stoneName)),
+        DataCell(Text(database.ldiName)),
+        DataCell(_actions(database)),
+      ],
+      onSelectChanged: (selected) {
+        if (selected != null && selected) {
+          // Perform your desired action here
+          print('Row selected: ${database.stoneName}');
+        }
+      },
+    );
+  }
+
   List<DataRow> _rows() {
     return Database.databaseList.map((database) {
-      return DataRow(
-        cells: <DataCell>[
-          DataCell(Text(database.version.name)),
-          DataCell(Text(database.stoneName)),
-          DataCell(Text(database.ldiName)),
-          DataCell(_actions(database)),
-        ],
-      );
+      return row(database);
     }).toList();
   }
 
@@ -195,6 +214,14 @@ class DatabasesTabState extends State<DatabasesTab> {
               heading: 'Starting ${database.ldiName}',
               allowCancel: true,
             );
+            if (mounted) {
+              await runProcess(
+                context: context,
+                processFuture: database.startStone(),
+                heading: 'Starting ${database.stoneName}',
+                allowCancel: true,
+              );
+            }
           } catch (e) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(

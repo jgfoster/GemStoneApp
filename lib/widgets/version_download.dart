@@ -67,7 +67,10 @@ class VersionDownloadState extends State<VersionDownload> {
                   const SizedBox(height: 16),
                   Text(line1, style: courierStyle),
                   Text(line2, style: courierStyle),
-                  Text(text[2] == '%' ? '' : text, style: courierStyle),
+                  Text(
+                    text.isEmpty || text[2] == '%' ? '' : text,
+                    style: courierStyle,
+                  ),
                   const SizedBox(height: 16),
                   CircularProgressIndicator(value: percent / 100),
                   const SizedBox(height: 32),

@@ -5,6 +5,7 @@ import 'package:gemstoneapp/domain/database.dart';
 import 'package:gemstoneapp/domain/platform.dart';
 import 'package:gemstoneapp/domain/version.dart';
 import 'package:gemstoneapp/widgets/databases_tab.dart';
+import 'package:gemstoneapp/widgets/gslist_tab.dart';
 import 'package:gemstoneapp/widgets/shared_memory_tab.dart';
 import 'package:gemstoneapp/widgets/versions_tab.dart';
 
@@ -41,7 +42,7 @@ class GemStoneTools extends StatelessWidget {
               SharedMemoryTab(),
               DownloadTab(),
               DatabasesTab(),
-              Icon(Icons.table_rows),
+              GsListTab(),
             ],
           ),
         ),

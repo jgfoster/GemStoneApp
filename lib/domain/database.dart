@@ -119,10 +119,10 @@ class Database {
         '# In general, this file should not be edited.\n'
         '# You may customize the stone config file (stonename.conf) or gem.conf\n'
         '\n'
-        'DBF_EXTENT_NAMES = "$gsPath/data/extent0.dbf";\n'
+        'DBF_EXTENT_NAMES = "$path/data/extent0.dbf";\n'
         'STN_TRAN_FULL_LOGGING = TRUE;\n'
-        'STN_TRAN_LOG_DIRECTORIES = "$gsPath/data/";\n'
-        'STN_TRAN_LOG_SIZES = 1000, 1000;\n';
+        'STN_TRAN_LOG_DIRECTORIES = "$path/data/";\n'
+        'STN_TRAN_LOG_SIZES = 1000;\n';
     final file = File('$path/conf/system.conf');
     await file.writeAsString(string);
   }
@@ -158,10 +158,6 @@ class Database {
     };
   }
 
-  Future<void> start() async {
-    await startNetLDI();
-  }
-
   Future<Process> startNetLDI() async {
     return Process.start(
       '${version.productFilePath}/bin/startnetldi',
@@ -172,6 +168,18 @@ class Database {
         '-l',
         '$path/log/$ldiName.log',
         ldiName,
+      ],
+      environment: environment(),
+    );
+  }
+
+  Future<Process> startStone() async {
+    return Process.start(
+      '${version.productFilePath}/bin/startstone',
+      [
+        '-l',
+        '$path/log/$stoneName.log',
+        stoneName,
       ],
       environment: environment(),
     );

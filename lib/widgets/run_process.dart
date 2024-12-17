@@ -46,6 +46,7 @@ class RunProcess extends StatefulWidget {
 }
 
 class RunProcessState extends State<RunProcess> {
+  late int exitCode;
   bool isRunning = true;
   List<Map<int, String>> log = [];
 
@@ -61,10 +62,16 @@ class RunProcessState extends State<RunProcess> {
           child: Column(
             children: [
               Expanded(
-                child: logWidget(),
+                child: _logWidget(),
               ),
               SizedBox(height: 8),
-              _cancelButton(),
+              Row(
+                children: [
+                  _cancelButton(),
+                  SizedBox(width: 8),
+                  _closeButton(),
+                ],
+              ),
             ],
           ),
         ),
@@ -76,10 +83,27 @@ class RunProcessState extends State<RunProcess> {
     return ElevatedButton(
       onPressed: isRunning
           ? () async {
-              //
+              widget.process.kill();
+              await Future.delayed(const Duration(seconds: 2));
+              if (mounted) {
+                Navigator.of(context).pop(exitCode);
+              }
             }
           : null,
       child: const Text('Cancel'),
+    );
+  }
+
+  ElevatedButton _closeButton() {
+    return ElevatedButton(
+      onPressed: !isRunning
+          ? () async {
+              if (mounted) {
+                Navigator.of(context).pop(exitCode);
+              }
+            }
+          : null,
+      child: const Text('Close'),
     );
   }
 
@@ -96,10 +120,10 @@ class RunProcessState extends State<RunProcess> {
         log.add({2: data});
       });
     });
-    unawaited(waitForExit());
+    unawaited(_waitForExit());
   }
 
-  ListView logWidget() {
+  ListView _logWidget() {
     return ListView.builder(
       itemCount: log.length,
       itemBuilder: (context, index) {
@@ -110,18 +134,16 @@ class RunProcessState extends State<RunProcess> {
           value,
           style: TextStyle(
             color: key == 1 ? Colors.black : Colors.red,
+            fontFamily: 'Courier New',
           ),
         );
       },
     );
   }
 
-  Future<void> waitForExit() async {
-    final exitCode = await widget.process.exitCode;
+  Future<void> _waitForExit() async {
+    exitCode = await widget.process.exitCode;
     isRunning = false;
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      Navigator.of(context).pop(exitCode);
-    }
+    setState(() {});
   }
 }

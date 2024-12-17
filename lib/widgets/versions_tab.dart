@@ -130,6 +130,23 @@ class DownloadTabState extends State<DownloadTab> {
     );
   }
 
+  Widget _downloadCheckbox(Version version, BuildContext context) {
+    return Tooltip(
+      message: 'Check to download, uncheck to delete downloaded file.',
+      child: Checkbox(
+        value: version.isDownloaded,
+        onChanged: (newValue) async {
+          if (newValue!) {
+            await _download(context, version);
+          } else {
+            await _deleteDownload(context, version);
+          }
+          setState(() {});
+        },
+      ),
+    );
+  }
+
   Future<void> _extract(BuildContext context, Version version) async {
     unawaited(
       showDialog(
@@ -158,6 +175,23 @@ class DownloadTabState extends State<DownloadTab> {
     }
   }
 
+  Widget _extractCheckbox(Version version, BuildContext context) {
+    return Tooltip(
+      message: 'Check to extract, uncheck to delete extracted files.',
+      child: Checkbox(
+        value: version.isExtracted,
+        onChanged: (newValue) async {
+          if (newValue!) {
+            await _extract(context, version);
+          } else {
+            await _deleteExtract(context, version);
+          }
+          setState(() {});
+        },
+      ),
+    );
+  }
+
   List<DataRow> _rows(BuildContext context) {
     return Version.versionList.map((version) {
       final versionName = version.name;
@@ -167,32 +201,8 @@ class DownloadTabState extends State<DownloadTab> {
         cells: <DataCell>[
           DataCell(Text(versionName)),
           DataCell(Text(formattedDate)),
-          DataCell(
-            Checkbox(
-              value: version.isDownloaded,
-              onChanged: (newValue) async {
-                if (newValue!) {
-                  await _download(context, version);
-                } else {
-                  await _deleteDownload(context, version);
-                }
-                setState(() {});
-              },
-            ),
-          ),
-          DataCell(
-            Checkbox(
-              value: version.isExtracted,
-              onChanged: (newValue) async {
-                if (newValue!) {
-                  await _extract(context, version);
-                } else {
-                  await _deleteExtract(context, version);
-                }
-                setState(() {});
-              },
-            ),
-          ),
+          DataCell(_downloadCheckbox(version, context)),
+          DataCell(_extractCheckbox(version, context)),
         ],
       );
     }).toList();
