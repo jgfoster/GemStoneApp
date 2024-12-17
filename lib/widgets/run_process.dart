@@ -12,7 +12,7 @@ Future<void> runProcess({
 }) async {
   final process = await processFuture;
   if (context.mounted) {
-    await Navigator.of(context).push(
+    final result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
           return RunProcess(
@@ -23,6 +23,9 @@ Future<void> runProcess({
         },
       ),
     );
+    if (result != 0) {
+      throw Exception('Process failed with exit code $result');
+    }
   }
 }
 
@@ -43,26 +46,39 @@ class RunProcess extends StatefulWidget {
 }
 
 class RunProcessState extends State<RunProcess> {
+  bool isRunning = true;
   List<Map<int, String>> log = [];
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        if (widget.heading.isNotEmpty) Text(widget.heading),
-        Expanded(
-          child: logWidget(),
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.heading),
         ),
-        _cancelButton(),
-      ],
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Expanded(
+                child: logWidget(),
+              ),
+              SizedBox(height: 8),
+              _cancelButton(),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   ElevatedButton _cancelButton() {
     return ElevatedButton(
-      onPressed: () async {
-        //
-      },
+      onPressed: isRunning
+          ? () async {
+              //
+            }
+          : null,
       child: const Text('Cancel'),
     );
   }
@@ -102,11 +118,10 @@ class RunProcessState extends State<RunProcess> {
 
   Future<void> waitForExit() async {
     final exitCode = await widget.process.exitCode;
+    isRunning = false;
+    await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
-      Navigator.of(context).pop();
-    }
-    if (exitCode != 0) {
-      throw Exception('Process exit code $exitCode.');
+      Navigator.of(context).pop(exitCode);
     }
   }
 }

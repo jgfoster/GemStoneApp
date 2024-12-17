@@ -188,11 +188,20 @@ class DatabasesTabState extends State<DatabasesTab> {
       message: 'Start database',
       child: ElevatedButton(
         onPressed: () async {
-          await runProcess(
-            context: context,
-            processFuture: database.startNetLDI(),
-            heading: 'Starting ${database.stoneName}',
-          );
+          try {
+            await runProcess(
+              context: context,
+              processFuture: database.startNetLDI(),
+              heading: 'Starting ${database.ldiName}',
+              allowCancel: true,
+            );
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error: ${e.toString()}')),
+              );
+            }
+          }
         },
         child: const Icon(Icons.play_arrow),
       ),
@@ -204,7 +213,19 @@ class DatabasesTabState extends State<DatabasesTab> {
       message: 'Stop database',
       child: ElevatedButton(
         onPressed: () async {
-          await database.stop();
+          try {
+            await runProcess(
+              context: context,
+              processFuture: database.stopNetLDI(),
+              heading: 'Stopping ${database.ldiName}',
+            );
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error: ${e.toString()}')),
+              );
+            }
+          }
         },
         child: const Icon(Icons.stop),
       ),
