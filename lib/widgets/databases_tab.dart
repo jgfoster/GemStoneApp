@@ -139,7 +139,7 @@ class DatabasesTabState extends State<DatabasesTab> {
     return Database.databaseList.map((database) {
       return DataRow(
         cells: <DataCell>[
-          DataCell(Text(database.version.version)),
+          DataCell(Text(database.version.name)),
           DataCell(Text(database.stoneName)),
           DataCell(Text(database.ldiName)),
           DataCell(_actions(database)),

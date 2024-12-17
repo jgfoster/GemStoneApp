@@ -131,7 +131,7 @@ class NewDatabaseFormState extends State<NewDatabaseForm> {
       items: Version.installedVersions().map((version) {
         return DropdownMenuItem<Version>(
           value: version,
-          child: Text(version.version),
+          child: Text(version.name),
         );
       }).toList(),
       validator: (value) => value == null ? 'Please select a version' : null,

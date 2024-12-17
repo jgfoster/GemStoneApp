@@ -160,7 +160,7 @@ class DownloadTabState extends State<DownloadTab> {
 
   List<DataRow> _rows(BuildContext context) {
     return Version.versionList.map((version) {
-      final versionName = version.version;
+      final versionName = version.name;
       final date = version.date;
       final formattedDate = DateFormat('yyyy-MMM-dd').format(date);
       return DataRow(

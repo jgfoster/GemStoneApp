@@ -45,31 +45,35 @@ class VersionDownloadState extends State<VersionDownload> {
     });
   }
 
+  ElevatedButton _cancelButton() {
+    return ElevatedButton(
+      onPressed: () async => widget.version.cancelDownload(),
+      child: const Text('Cancel'),
+    );
+  }
+
   Dialog _downloadDialog() {
-    return Dialog(
+    final line1 =
+        '   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current';
+    final line2 =
+        '                                 Dload  Upload   Total   Spent    Left  Speed';
+    final courierStyle = TextStyle(fontFamily: 'Courier New');
+    final headingStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 24.0);
+    return Dialog.fullscreen(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Text('Downloading ${widget.version.name}...', style: headingStyle),
+            const SizedBox(height: 16),
             CircularProgressIndicator(value: progressPercent / 100),
             const SizedBox(height: 16),
-            const Text(
-              '   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current',
-              style: TextStyle(fontFamily: 'Courier New'),
-            ),
-            const Text(
-              '                                 Dload  Upload   Total   Spent    Left  Speed',
-              style: TextStyle(fontFamily: 'Courier New'),
-            ),
-            Text(
-              progressText,
-              style: const TextStyle(fontFamily: 'Courier New'),
-            ),
-            ElevatedButton(
-              onPressed: () async => widget.version.cancelDownload(),
-              child: const Text('Cancel'),
-            ),
+            Text(line1, style: courierStyle),
+            Text(line2, style: courierStyle),
+            Text(progressText, style: courierStyle),
+            const SizedBox(height: 32),
+            _cancelButton(),
           ],
         ),
       ),
@@ -97,7 +101,7 @@ class VersionDownloadState extends State<VersionDownload> {
     isDownloading = true;
     widget.version
         // ignore: discarded_futures
-        .downloadVersion(_callback)
+        .download(_callback)
         // ignore: discarded_futures
         .then(_downloadFinished)
         // ignore: discarded_futures

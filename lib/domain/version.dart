@@ -8,39 +8,39 @@ import 'package:intl/intl.dart';
 class Version {
   Version({
     required this.date,
-    required this.version,
+    required this.name,
     required this.size,
   }) {
-    dmgName = 'GemStone64Bit$version-arm64.Darwin.dmg';
-    downloadFilePath = '$gsPath/$dmgName';
-    productFilePath = '$gsPath/GemStone64Bit$version-arm64.Darwin';
-    productUrlPath = '$productsUrlPath/$dmgName';
+    _dmgName = 'GemStone64Bit$name-arm64.Darwin.dmg';
+    _downloadFilePath = '$gsPath/$_dmgName';
+    productFilePath = '$gsPath/GemStone64Bit$name-arm64.Darwin';
+    _productUrlPath = '$_productsUrlPath/$_dmgName';
   }
 
   final DateTime date;
-  late String dmgName;
-  late String downloadFilePath;
+  late String _dmgName;
+  late String _downloadFilePath;
+  Process? _downloadProcess;
   final List<String> extents = [];
   late bool isDownloaded = false;
   late bool isExtracted = false;
-  late bool isRunnable = false;
-  Process? process;
-  static String productsUrlPath =
+  final String name;
+  static final String _productsUrlPath =
       'https://downloads.gemtalksystems.com/platforms/arm64.Darwin';
   late String productFilePath;
-  late String productUrlPath;
+  late String _productUrlPath;
   final int size;
-  final String version;
   static List<Version> versionList = [];
 
   Future<String> _attach() async {
+    Process process;
     late String volumePath;
     process = await Process.start(
       'hdiutil',
-      ['attach', dmgName],
+      ['attach', _dmgName],
       workingDirectory: gsPath,
     );
-    process?.stdout.transform(utf8.decoder).listen((data) {
+    process.stdout.transform(utf8.decoder).listen((data) {
       for (final line in data.split('\n')) {
         final match = RegExp(r'.*/Volumes/([^ ]+)$').firstMatch(line);
         if (match != null) {
@@ -48,17 +48,16 @@ class Version {
         }
       }
     });
-    process?.stderr.transform(utf8.decoder).listen((data) {
+    process.stderr.transform(utf8.decoder).listen((data) {
       isExtracted = false;
       // await _deleteExtract();
-      throw Exception('Failed to attach $dmgName ($data)');
+      throw Exception('Failed to attach $_dmgName ($data)');
     });
-    final exitCode = await process?.exitCode;
-    process = null;
+    final exitCode = await process.exitCode;
     if (exitCode != 0) {
       isExtracted = false;
-      // await _deleteExtract();
-      throw Exception('Failed to attach $dmgName (exit code $exitCode)');
+      await deleteExtract();
+      throw Exception('Failed to attach $_dmgName (exit code $exitCode)');
     }
     return volumePath;
   }
@@ -74,14 +73,14 @@ class Version {
   }
 
   Future<void> cancelDownload() async {
-    process?.kill();
-    process = null;
+    _downloadProcess?.kill();
+    _downloadProcess = null;
     await deleteDownload();
   }
 
   Future<void> checkIfDownloaded() async {
     isDownloaded = false;
-    final file = File(downloadFilePath);
+    final file = File(_downloadFilePath);
     if (file.existsSync()) {
       final stat = file.statSync();
       if (stat.size == size) {
@@ -100,8 +99,8 @@ class Version {
   }
 
   Future<void> deleteDownload() async {
-    if (File(downloadFilePath).existsSync()) {
-      File(downloadFilePath).deleteSync();
+    if (File(_downloadFilePath).existsSync()) {
+      File(_downloadFilePath).deleteSync();
     }
     await checkIfDownloaded();
   }
@@ -116,17 +115,17 @@ class Version {
   }
 
   Future<void> _detach(String volumePath) async {
+    Process process;
     process = await Process.start(
       'hdiutil',
       ['detach', volumePath],
     );
-    process?.stderr.transform(utf8.decoder).listen((data) {
+    process.stderr.transform(utf8.decoder).listen((data) {
       isExtracted = false;
       // await _deleteExtract();
       throw Exception('Failed to detach $volumePath ($data)');
     });
-    final exitCode = await process?.exitCode;
-    process = null;
+    final exitCode = await process.exitCode;
     if (exitCode != 0) {
       isExtracted = false;
       // await _deleteExtract();
@@ -134,34 +133,32 @@ class Version {
     }
   }
 
-  Future<void> downloadVersion(void Function(String)? callback) async {
+  Future<void> download(void Function(String) callback) async {
     await checkIfDownloaded();
     if (isDownloaded) {
       return;
     }
-    process = await Process.start(
+    _downloadProcess = await Process.start(
       'curl',
-      ['-O', productUrlPath],
+      ['-O', _productUrlPath],
       workingDirectory: gsPath,
     );
-    process?.stderr.transform(utf8.decoder).listen((data) {
-      if (callback != null) {
-        callback(data);
-      }
+    _downloadProcess?.stderr.transform(utf8.decoder).listen((data) {
+      callback(data);
     });
-    final exitCode = await process?.exitCode;
-    process = null;
+    final exitCode = await _downloadProcess?.exitCode;
+    _downloadProcess = null;
     if (exitCode != 0) {
       isDownloaded = false;
       await deleteDownload();
-      throw Exception('Failed to download $dmgName (exit code $exitCode)');
+      throw Exception('Failed to download $_dmgName (exit code $exitCode)');
     }
-    File(downloadFilePath).setLastModifiedSync(date);
+    File(_downloadFilePath).setLastModifiedSync(date);
     isDownloaded = true;
   }
 
   static Future<void> downloadVersionList() async {
-    final result = await Process.run('curl', ['$productsUrlPath/'])
+    final result = await Process.run('curl', ['$_productsUrlPath/'])
         .timeout(const Duration(seconds: 2));
     if (result.exitCode != 0) {
       throw Exception(result.stderr);
@@ -178,7 +175,7 @@ class Version {
         final versionString = match.group(1)!;
         final date = dateFormat.parse(match.group(2)!);
         final size = int.parse(match.group(3)!);
-        final version = Version(version: versionString, date: date, size: size);
+        final version = Version(name: versionString, date: date, size: size);
         await version.checkIfDownloaded();
         await version.checkIfExtracted();
         versions.add(version);
@@ -243,7 +240,7 @@ class Version {
         final version = Version(
           date: stat.modified,
           size: stat.size,
-          version: versionString,
+          name: versionString,
         );
         await version.checkIfDownloaded();
         await version.checkIfExtracted();
@@ -257,7 +254,7 @@ class Version {
         );
         Version? version;
         for (final each in versionList) {
-          if (each.version == versionString) {
+          if (each.name == versionString) {
             version = each;
             break;
           }
@@ -267,7 +264,7 @@ class Version {
           final version = Version(
             date: stat.modified,
             size: stat.size,
-            version: versionString,
+            name: versionString,
           );
           await version.checkIfDownloaded();
           await version.checkIfExtracted();

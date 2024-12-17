@@ -35,7 +35,7 @@ class Database {
           final yaml = loadYaml(yamlString);
           Version? version;
           for (final eachVersion in Version.versionList) {
-            if (eachVersion.version == yaml['version']) {
+            if (eachVersion.name == yaml['version']) {
               version = eachVersion;
               break;
             }
@@ -133,7 +133,7 @@ class Database {
         'baseExtent: "$baseExtent.dbf"\n'
         'ldiName: "$ldiName"\n'
         'stoneName: "$stoneName"\n'
-        'version: "${version.version}"\n';
+        'version: "${version.name}"\n';
     final file = File('$path/database.yaml');
     await file.writeAsString(string);
   }
