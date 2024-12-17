@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:gemstoneapp/domain/version.dart';
@@ -56,6 +57,14 @@ class DownloadTabState extends State<DownloadTab> {
         label: Expanded(
           child: Text(
             'Extracted',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      ),
+      const DataColumn(
+        label: Expanded(
+          child: Text(
+            'Folder',
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
@@ -192,6 +201,18 @@ class DownloadTabState extends State<DownloadTab> {
     );
   }
 
+  Widget _openFinderOn(String path) {
+    return Tooltip(
+      message: 'Open folder',
+      child: ElevatedButton(
+        onPressed: () async {
+          await Process.run('open', [path]);
+        },
+        child: const Icon(Icons.folder_open),
+      ),
+    );
+  }
+
   List<DataRow> _rows(BuildContext context) {
     return Version.versionList.map((version) {
       final versionName = version.name;
@@ -203,6 +224,11 @@ class DownloadTabState extends State<DownloadTab> {
           DataCell(Text(formattedDate)),
           DataCell(_downloadCheckbox(version, context)),
           DataCell(_extractCheckbox(version, context)),
+          DataCell(
+            version.isExtracted
+                ? _openFinderOn(version.productFilePath)
+                : Text(''),
+          ),
         ],
       );
     }).toList();

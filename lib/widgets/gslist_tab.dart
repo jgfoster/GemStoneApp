@@ -17,11 +17,18 @@ class GsListTab extends StatelessWidget {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else {
+          final lastUpdateTime = DateTime.now().toString().split('.').first;
           return Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(
-              snapshot.data!,
-              style: TextStyle(fontFamily: 'Courier New'),
+            child: Column(
+              children: [
+                Text(
+                  snapshot.data!,
+                  style: TextStyle(fontFamily: 'Courier New'),
+                ),
+                SizedBox(height: 8),
+                Text('Last update on $lastUpdateTime'),
+              ],
             ),
           );
         }

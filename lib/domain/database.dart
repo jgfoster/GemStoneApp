@@ -185,15 +185,23 @@ class Database {
     );
   }
 
-  Future<void> stop() async {
-    await stopNetLDI();
-  }
-
   Future<Process> stopNetLDI() async {
     return Process.start(
       '${version.productFilePath}/bin/stopnetldi',
       [
         ldiName,
+      ],
+      environment: environment(),
+    );
+  }
+
+  Future<Process> stopStone() async {
+    return Process.start(
+      '${version.productFilePath}/bin/stopstone',
+      [
+        stoneName,
+        'DataCurator',
+        'swordfish',
       ],
       environment: environment(),
     );

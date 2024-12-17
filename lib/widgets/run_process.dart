@@ -66,6 +66,7 @@ class RunProcessState extends State<RunProcess> {
               ),
               SizedBox(height: 8),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _cancelButton(),
                   SizedBox(width: 8),
