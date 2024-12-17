@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:gemstoneapp/domain/database.dart';
 import 'package:gemstoneapp/widgets/new_database.dart';
+import 'package:gemstoneapp/widgets/run_process.dart';
 
 class DatabasesTab extends StatefulWidget {
   const DatabasesTab({super.key});
@@ -187,7 +188,11 @@ class DatabasesTabState extends State<DatabasesTab> {
       message: 'Start database',
       child: ElevatedButton(
         onPressed: () async {
-          await database.start();
+          await runProcess(
+            context: context,
+            processFuture: database.startNetLDI(),
+            heading: 'Starting ${database.stoneName}',
+          );
         },
         child: const Icon(Icons.play_arrow),
       ),

@@ -163,8 +163,8 @@ class Database {
     await startNetLDI();
   }
 
-  Future<void> startNetLDI() async {
-    final startnetldi = await Process.start(
+  Future<Process> startNetLDI() async {
+    return Process.start(
       '${version.productFilePath}/bin/startnetldi',
       [
         '-a',
@@ -176,16 +176,6 @@ class Database {
       ],
       environment: environment(),
     );
-    startnetldi.stdout.transform(utf8.decoder).listen((data) {
-      print('startnetldi stdout: $data');
-    });
-    startnetldi.stderr.transform(utf8.decoder).listen((data) {
-      throw Exception('startnetldi: "$data"');
-    });
-    final exitCode = await startnetldi.exitCode;
-    if (exitCode != 0) {
-      throw Exception('startnetldi failed with exit code $exitCode');
-    }
   }
 
   Future<void> stop() async {
