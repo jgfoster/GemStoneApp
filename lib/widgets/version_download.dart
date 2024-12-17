@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:gemstoneapp/domain/version.dart';
+import 'package:provider/provider.dart';
 
 class VersionDownload extends StatefulWidget {
   const VersionDownload({required this.version, super.key});
@@ -14,8 +15,6 @@ class VersionDownload extends StatefulWidget {
 
 class VersionDownloadState extends State<VersionDownload> {
   bool isDownloading = false;
-  String progressText = 'Downloading...';
-  double progressPercent = 0.0;
 
   @override
   Widget build(BuildContext context) {
@@ -35,16 +34,6 @@ class VersionDownloadState extends State<VersionDownload> {
     return const SizedBox.shrink();
   }
 
-  void _callback(String text) {
-    if (text[2] == '%') {
-      return; // ignore header
-    }
-    setState(() {
-      progressText = text;
-      progressPercent = double.tryParse(text.trim().split(' ')[0]) ?? 0.0;
-    });
-  }
-
   ElevatedButton _cancelButton() {
     return ElevatedButton(
       onPressed: () async => widget.version.cancelDownload(),
@@ -62,19 +51,31 @@ class VersionDownloadState extends State<VersionDownload> {
     return Dialog.fullscreen(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Downloading ${widget.version.name}...', style: headingStyle),
-            const SizedBox(height: 16),
-            CircularProgressIndicator(value: progressPercent / 100),
-            const SizedBox(height: 16),
-            Text(line1, style: courierStyle),
-            Text(line2, style: courierStyle),
-            Text(progressText, style: courierStyle),
-            const SizedBox(height: 32),
-            _cancelButton(),
-          ],
+        child: ChangeNotifierProvider.value(
+          value: widget.version,
+          child: Consumer<Version>(
+            builder: (context, version, child) {
+              final text = version.downloadProgress;
+              final percent = double.tryParse(text.trim().split(' ')[0]) ?? 0.0;
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Downloading ${version.name}...',
+                    style: headingStyle,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(line1, style: courierStyle),
+                  Text(line2, style: courierStyle),
+                  Text(text[2] == '%' ? '' : text, style: courierStyle),
+                  const SizedBox(height: 16),
+                  CircularProgressIndicator(value: percent / 100),
+                  const SizedBox(height: 32),
+                  _cancelButton(),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -101,7 +102,7 @@ class VersionDownloadState extends State<VersionDownload> {
     isDownloading = true;
     widget.version
         // ignore: discarded_futures
-        .download(_callback)
+        .download()
         // ignore: discarded_futures
         .then(_downloadFinished)
         // ignore: discarded_futures

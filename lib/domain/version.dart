@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:gemstoneapp/domain/platform.dart';
 import 'package:intl/intl.dart';
 
-class Version {
+class Version with ChangeNotifier {
   Version({
     required this.date,
     required this.name,
@@ -21,6 +22,7 @@ class Version {
   late String _dmgName;
   late String _downloadFilePath;
   Process? _downloadProcess;
+  String downloadProgress = '';
   final List<String> extents = [];
   late bool isDownloaded = false;
   late bool isExtracted = false;
@@ -133,7 +135,7 @@ class Version {
     }
   }
 
-  Future<void> download(void Function(String) callback) async {
+  Future<void> download() async {
     await checkIfDownloaded();
     if (isDownloaded) {
       return;
@@ -144,7 +146,8 @@ class Version {
       workingDirectory: gsPath,
     );
     _downloadProcess?.stderr.transform(utf8.decoder).listen((data) {
-      callback(data);
+      downloadProgress = data;
+      notifyListeners();
     });
     final exitCode = await _downloadProcess?.exitCode;
     _downloadProcess = null;
