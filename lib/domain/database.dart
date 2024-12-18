@@ -163,6 +163,21 @@ class Database {
     };
   }
 
+  Future<void> openTerminal() async {
+    final command = 'cd \\"$path\\" && export PATH=\$GEMSTONE/bin:\$PATH';
+    final result = await Process.run(
+      'osascript',
+      [
+        '-e',
+        'tell application "Terminal" to do script "$command"',
+      ],
+      environment: environment(),
+    );
+    if (result.exitCode != 0) {
+      throw Exception('Failed to open shell');
+    }
+  }
+
   void reset() {
     ldiPid = null;
     ldiPort = null;

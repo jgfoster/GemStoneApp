@@ -132,6 +132,8 @@ class DatabaseViewState extends State<DatabaseView> {
         ),
         _openFinderOn(widget.database.path),
         SizedBox(width: 8),
+        _openTerminal(),
+        SizedBox(width: 8),
         _deleteDatabaseButton(),
       ],
     );
@@ -169,6 +171,18 @@ class DatabaseViewState extends State<DatabaseView> {
           await Process.run('open', [path]);
         },
         child: const Icon(Icons.file_open),
+      ),
+    );
+  }
+
+  Widget _openTerminal() {
+    return Tooltip(
+      message: 'Open Terminal',
+      child: ElevatedButton(
+        onPressed: () async {
+          await widget.database.openTerminal();
+        },
+        child: const Icon(Icons.terminal),
       ),
     );
   }
