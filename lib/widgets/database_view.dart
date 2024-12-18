@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gemstoneapp/domain/database.dart';
 import 'package:gemstoneapp/domain/gslist.dart';
 import 'package:gemstoneapp/widgets/run_process.dart';
+import 'package:intl/intl.dart';
 
 class DatabaseView extends StatefulWidget {
   const DatabaseView({required this.database, super.key});
@@ -29,13 +30,15 @@ class DatabaseViewState extends State<DatabaseView> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _versionRow(),
+              SizedBox(height: 8),
               _stoneRow(),
               SizedBox(height: 8),
               _netLdiRow(),
               SizedBox(height: 8),
               _pathRow(),
               SizedBox(height: 8),
-              _versionRow(),
+              _extentRow(),
             ],
           );
         }
@@ -56,26 +59,50 @@ class DatabaseViewState extends State<DatabaseView> {
     );
   }
 
-  Row _netLdiRow() {
-    final ldiStartTime = widget.database.ldiStartTime;
-    final startTimeString = ldiStartTime.toString();
-    final whenStarted = ldiStartTime != null
-        ? 'started ${startTimeString.substring(0, startTimeString.length - 7)}'
-        : 'not running';
+  Row _extentRow() {
     return Row(
       children: [
-        SizedBox(width: 80, child: Text('NetLDI:')),
+        SizedBox(width: 100, child: Text('Repository:')),
+        SizedBox(
+          width: 100,
+          child: Text(widget.database.baseExtent),
+        ),
+        SizedBox(
+          width: _pathLength - 100,
+          child: Text('(from ${widget.database.baseExtent})'),
+        ),
+      ],
+    );
+  }
+
+  Row _netLdiRow() {
+    final ldiStartTime = widget.database.ldiStartTime;
+    final format = DateFormat('dd MMM kk:mm');
+    final whenStarted = ldiStartTime != null
+        ? 'started ${format.format(ldiStartTime)}'
+        : 'not running';
+    final port = widget.database.ldiPort;
+    final portString = port != null ? '(on $port)' : '';
+    return Row(
+      children: [
+        SizedBox(width: 100, child: Text('NetLDI:')),
         SizedBox(
           width: 100,
           child: Text(widget.database.ldiName),
         ),
         SizedBox(
-          width: _pathLength - 100,
+          width: _pathLength - 200,
           child: Text(whenStarted),
+        ),
+        SizedBox(
+          width: 100,
+          child: Text(portString),
         ),
         _startNetLdiButton(),
         SizedBox(width: 8),
         _stopNetLdiButton(),
+        SizedBox(width: 8),
+        _openLog('${widget.database.path}/log/${widget.database.ldiName}.log'),
       ],
     );
   }
@@ -95,15 +122,30 @@ class DatabaseViewState extends State<DatabaseView> {
   Row _pathRow() {
     return Row(
       children: [
-        SizedBox(width: 80, child: Text('Path:')),
+        SizedBox(width: 100, child: Text('Path:')),
         SizedBox(
           width: _pathLength,
-          child: Text(widget.database.path),
+          child: Text(
+            widget.database.path,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
         _openFinderOn(widget.database.path),
         SizedBox(width: 8),
         _deleteDatabaseButton(),
       ],
+    );
+  }
+
+  Widget _openConfigFolder(String path) {
+    return Tooltip(
+      message: 'Open Configurations Folder',
+      child: ElevatedButton(
+        onPressed: () async {
+          await Process.run('open', [path]);
+        },
+        child: const Icon(Icons.settings),
+      ),
     );
   }
 
@@ -115,6 +157,18 @@ class DatabaseViewState extends State<DatabaseView> {
           await Process.run('open', [path]);
         },
         child: const Icon(Icons.folder_open),
+      ),
+    );
+  }
+
+  Widget _openLog(String path) {
+    return Tooltip(
+      message: 'Open Log File',
+      child: ElevatedButton(
+        onPressed: () async {
+          await Process.run('open', [path]);
+        },
+        child: const Icon(Icons.file_open),
       ),
     );
   }
@@ -217,7 +271,7 @@ class DatabaseViewState extends State<DatabaseView> {
         : 'not running';
     return Row(
       children: [
-        SizedBox(width: 80, child: Text('Stone:')),
+        SizedBox(width: 100, child: Text('Stone:')),
         SizedBox(
           width: 100,
           child: Text(widget.database.stoneName),
@@ -229,6 +283,12 @@ class DatabaseViewState extends State<DatabaseView> {
         _startStoneButton(),
         SizedBox(width: 8),
         _stopStoneButton(),
+        SizedBox(width: 8),
+        _openLog(
+          '${widget.database.path}/log/${widget.database.stoneName}.log',
+        ),
+        SizedBox(width: 8),
+        _openConfigFolder('${widget.database.path}/conf'),
       ],
     );
   }
@@ -290,7 +350,7 @@ class DatabaseViewState extends State<DatabaseView> {
   Row _versionRow() {
     return Row(
       children: [
-        SizedBox(width: 80, child: Text('Version:')),
+        SizedBox(width: 100, child: Text('Version:')),
         SizedBox(
           width: _pathLength,
           child: Text(widget.database.version.name),
