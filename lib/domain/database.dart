@@ -16,8 +16,13 @@ class Database {
   static List<Database> databaseList = [];
   String baseExtent;
   String ldiName;
+  int? ldiPid;
+  int? ldiPort;
+  DateTime? ldiStartTime;
   String path;
   String stoneName;
+  int? stonePid;
+  DateTime? stoneStartTime;
   Version version;
 
   static Future<void> buildDatabaseList() async {
@@ -156,6 +161,14 @@ class Database {
       'MANPATH':
           '${version.productFilePath}/doc:${Platform.environment['MANPATH']}',
     };
+  }
+
+  void reset() {
+    ldiPid = null;
+    ldiPort = null;
+    ldiStartTime = null;
+    stonePid = null;
+    stoneStartTime = null;
   }
 
   Future<Process> startNetLDI() async {

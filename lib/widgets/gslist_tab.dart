@@ -1,7 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:gemstoneapp/domain/platform.dart';
+import 'package:gemstoneapp/domain/gslist.dart';
 
 class GsListTab extends StatelessWidget {
   const GsListTab({super.key});
@@ -37,22 +35,9 @@ class GsListTab extends StatelessWidget {
   }
 
   Future<String> _fetchData() async {
-    try {
-      final directory = Directory(gsPath);
-      final fullList = directory.list(recursive: true);
-      final gsList = await fullList.firstWhere(
-        (file) => file.path.endsWith('/bin/gslist'),
-      );
-      final result = await Process.run(
-        gsList.path,
-        ['-cvl'],
-        environment: {
-          'GEMSTONE_GLOBAL_DIR': gsPath,
-        },
-      );
-      return result.stdout;
-    } catch (e) {
-      return 'We are unable to find the gslist executable. Do you have a version of GemStone/S installed?';
-    }
+    await GsList().fetchData();
+    return GsList().output ??
+        'We are unable to find the gslist executable. '
+            'Do you have a version of GemStone/S installed?';
   }
 }
