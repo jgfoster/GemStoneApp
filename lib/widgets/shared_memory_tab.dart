@@ -47,6 +47,13 @@ class SharedMemoryTab extends StatelessWidget {
                 },
                 child: const Text('/Library/LaunchDaemons/'),
               ),
+              const Text(
+                'change ownership to root:wheel (using Terminal and your admin password),',
+              ),
+              const SelectableText(
+                'sudo chown root:wheel /Library/LaunchDaemons/com.gemtalksystems.shared-memory.plist',
+                style: TextStyle(fontFamily: 'Courier New'),
+              ),
               const Text('and then restart your computer.'),
               DecoratedBox(
                 decoration: BoxDecoration(
