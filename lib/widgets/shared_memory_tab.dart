@@ -23,7 +23,7 @@ class SharedMemoryTab extends StatelessWidget {
         // calculate the values in GB
         final shmmax = snapshot.data![0] / pow(2, 30);
         final shmall = snapshot.data![1] / pow(2, 18);
-        if (shmmax > 4 && shmall > 4) {
+        if (shmmax >= 4 && shmall >= 4) {
           return Center(
             child: Text(
               'Shared memory is already configured at '
