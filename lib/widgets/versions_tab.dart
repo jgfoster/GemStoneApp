@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:gemstoneapp/domain/version.dart';
 import 'package:gemstoneapp/widgets/version_download.dart';
 import 'package:intl/intl.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class DownloadTab extends StatefulWidget {
   const DownloadTab({super.key});
@@ -13,16 +14,25 @@ class DownloadTab extends StatefulWidget {
   DownloadTabState createState() => DownloadTabState();
 }
 
-class DownloadTabState extends State<DownloadTab> {
+class DownloadTabState extends State<DownloadTab> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final columns = _columns;
     final rows = _rows(context);
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: DataTable(
-        columns: columns,
-        rows: rows,
+    return VisibilityDetector(
+      key: Key('scroll-view-key'),
+      onVisibilityChanged: (VisibilityInfo info) {
+        if (info.visibleFraction > 0) {
+          // The widget is visible, you can refresh the state or perform actions here
+          setState(() {});
+        }
+      },
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: DataTable(
+          columns: columns,
+          rows: rows,
+        ),
       ),
     );
   }
@@ -129,6 +139,23 @@ class DownloadTabState extends State<DownloadTab> {
     }
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('AppLifecycleState changed to: $state');
+    if (state == AppLifecycleState.resumed) {
+      print('App gained focus');
+      setState(() {}); // Refresh the state when the app gains focus
+    } else if (state == AppLifecycleState.paused) {
+      print('App lost focus');
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
   Future<void> _download(BuildContext context, Version version) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
@@ -178,7 +205,27 @@ class DownloadTabState extends State<DownloadTab> {
         },
       ),
     );
-    await version.extract();
+    try {
+      await version.extract();
+    } catch (e) {
+      if (context.mounted) {
+        await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Extraction Error'),
+              content: Text(e.toString()),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    }
     if (context.mounted) {
       Navigator.of(context).pop();
     }
@@ -199,6 +246,12 @@ class DownloadTabState extends State<DownloadTab> {
         },
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   Widget _openFinderOn(String path) {

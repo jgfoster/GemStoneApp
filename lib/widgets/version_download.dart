@@ -96,7 +96,7 @@ class VersionDownloadState extends State<VersionDownload> {
     }
   }
 
-  void _downloadFinished(_) {
+  void _downloadFinished(dynamic _) {
     isDownloading = false;
     setState(() {});
   }

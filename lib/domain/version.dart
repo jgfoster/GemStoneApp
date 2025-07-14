@@ -7,11 +7,7 @@ import 'package:gemstoneapp/domain/platform.dart';
 import 'package:intl/intl.dart';
 
 class Version with ChangeNotifier {
-  Version({
-    required this.date,
-    required this.name,
-    required this.size,
-  }) {
+  Version({required this.date, required this.name, required this.size}) {
     _dmgName = 'GemStone64Bit$name-arm64.Darwin.dmg';
     _downloadFilePath = '$gsPath/$_dmgName';
     productFilePath = '$gsPath/GemStone64Bit$name-arm64.Darwin';
@@ -37,9 +33,11 @@ class Version with ChangeNotifier {
   Future<String> _attach() async {
     Process process;
     late String volumePath;
+    // Cannot start hdiejectd because app is sandboxed
     process = await Process.start(
       'hdiutil',
-      ['attach', _dmgName],
+      ['attach', '-debug', _dmgName],
+      runInShell: true,
       workingDirectory: gsPath,
     );
     process.stdout.transform(utf8.decoder).listen((data) {
@@ -50,16 +48,19 @@ class Version with ChangeNotifier {
         }
       }
     });
+    String errorMessage = '';
     process.stderr.transform(utf8.decoder).listen((data) {
-      isExtracted = false;
-      // await _deleteExtract();
-      throw Exception('Failed to attach $_dmgName ($data)');
+      errorMessage += data;
     });
     final exitCode = await process.exitCode;
     if (exitCode != 0) {
       isExtracted = false;
       await deleteExtract();
-      throw Exception('Failed to attach $_dmgName (exit code $exitCode)');
+      debugPrint('Failed to attach $_downloadFilePath: $errorMessage');
+      throw Exception(
+        'Failed to attach $_downloadFilePath: \n'
+        '"$errorMessage"',
+      );
     }
     return volumePath;
   }
@@ -94,7 +95,11 @@ class Version with ChangeNotifier {
   }
 
   Future<void> checkIfExtracted() async {
-    isExtracted = Directory(productFilePath).existsSync();
+    final bool flag = Directory(productFilePath).existsSync();
+    if (flag != isExtracted) {
+      isExtracted = flag;
+      notifyListeners();
+    }
     if (isExtracted) {
       await _fillExtentList();
     }
@@ -118,10 +123,7 @@ class Version with ChangeNotifier {
 
   Future<void> _detach(String volumePath) async {
     Process process;
-    process = await Process.start(
-      'hdiutil',
-      ['detach', volumePath],
-    );
+    process = await Process.start('hdiutil', ['detach', volumePath]);
     process.stderr.transform(utf8.decoder).listen((data) {
       isExtracted = false;
       // await _deleteExtract();
@@ -142,7 +144,10 @@ class Version with ChangeNotifier {
     }
     _downloadProcess = await Process.start(
       'curl',
-      ['-O', _productUrlPath],
+      [
+        '-O',
+        _productUrlPath,
+      ],
       workingDirectory: gsPath,
     );
     _downloadProcess?.stderr.transform(utf8.decoder).listen((data) {
@@ -161,8 +166,9 @@ class Version with ChangeNotifier {
   }
 
   static Future<void> downloadVersionList() async {
-    final result = await Process.run('curl', ['$_productsUrlPath/'])
-        .timeout(const Duration(seconds: 2));
+    final result = await Process.run('curl', [
+      '$_productsUrlPath/',
+    ]).timeout(const Duration(seconds: 2));
     if (result.exitCode != 0) {
       throw Exception(result.stderr);
     }
@@ -172,7 +178,7 @@ class Version with ChangeNotifier {
     for (final line in lines) {
       // <a href="GemStone64Bit3.6.1-arm64.Darwin.dmg">GemStone64Bit3.6.1-arm64.Darwin.dmg</a>                06-Apr-2021 20:35           145306111
       final match = RegExp(
-        r'href="[^"]*GemStone64Bit(\d+\.\d+\.\d+)[^"]*".*?(\d{2}-\w{3}-\d{4})\s+\d{2}:\d{2}\s+(\d+)',
+        r'href="[^"]*GemStone64Bit(\d+\.\d+\.\d+[\.\d]*)[^"]*".*?(\d{2}-\w{3}-\d{4})\s+\d{2}:\d{2}\s+(\d+)',
       ).firstMatch(line);
       if (match != null) {
         final versionString = match.group(1)!;
@@ -213,8 +219,10 @@ class Version with ChangeNotifier {
     for (final entity in list) {
       final path = entity.path;
       if (entity is File && path.endsWith('.dbf')) {
-        final name =
-            path.substring(productFilePath.length + 5, path.length - 4);
+        final name = path.substring(
+          productFilePath.length + 5,
+          path.length - 4,
+        );
         extents.add(name);
       }
     }
