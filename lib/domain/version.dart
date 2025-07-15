@@ -8,14 +8,14 @@ import 'package:intl/intl.dart';
 
 class Version with ChangeNotifier {
   Version({required this.date, required this.name, required this.size}) {
-    _dmgName = 'GemStone64Bit$name-arm64.Darwin.dmg';
-    _downloadFilePath = '$gsPath/$_dmgName';
+    dmgName = 'GemStone64Bit$name-arm64.Darwin.dmg';
+    _downloadFilePath = '$gsPath/$dmgName';
     productFilePath = '$gsPath/GemStone64Bit$name-arm64.Darwin';
-    _productUrlPath = '$_productsUrlPath/$_dmgName';
+    _productUrlPath = '$_productsUrlPath/$dmgName';
   }
 
   final DateTime date;
-  late String _dmgName;
+  late String dmgName;
   late String _downloadFilePath;
   Process? _downloadProcess;
   String downloadProgress = '';
@@ -29,41 +29,6 @@ class Version with ChangeNotifier {
   late String _productUrlPath;
   final int size;
   static List<Version> versionList = [];
-
-  Future<String> _attach() async {
-    Process process;
-    late String volumePath;
-    // Cannot start hdiejectd because app is sandboxed
-    process = await Process.start(
-      'hdiutil',
-      ['attach', '-debug', _dmgName],
-      runInShell: true,
-      workingDirectory: gsPath,
-    );
-    process.stdout.transform(utf8.decoder).listen((data) {
-      for (final line in data.split('\n')) {
-        final match = RegExp(r'.*/Volumes/([^ ]+)$').firstMatch(line);
-        if (match != null) {
-          volumePath = '/Volumes/${match.group(1)}';
-        }
-      }
-    });
-    String errorMessage = '';
-    process.stderr.transform(utf8.decoder).listen((data) {
-      errorMessage += data;
-    });
-    final exitCode = await process.exitCode;
-    if (exitCode != 0) {
-      isExtracted = false;
-      await deleteExtract();
-      debugPrint('Failed to attach $_downloadFilePath: $errorMessage');
-      throw Exception(
-        'Failed to attach $_downloadFilePath: \n'
-        '"$errorMessage"',
-      );
-    }
-    return volumePath;
-  }
 
   static Future<void> buildVersionList() async {
     versionList.clear();
@@ -121,22 +86,6 @@ class Version with ChangeNotifier {
     isExtracted = false;
   }
 
-  Future<void> _detach(String volumePath) async {
-    Process process;
-    process = await Process.start('hdiutil', ['detach', volumePath]);
-    process.stderr.transform(utf8.decoder).listen((data) {
-      isExtracted = false;
-      // await _deleteExtract();
-      throw Exception('Failed to detach $volumePath ($data)');
-    });
-    final exitCode = await process.exitCode;
-    if (exitCode != 0) {
-      isExtracted = false;
-      // await _deleteExtract();
-      throw Exception('Failed to detach $volumePath (exit code $exitCode)');
-    }
-  }
-
   Future<void> download() async {
     await checkIfDownloaded();
     if (isDownloaded) {
@@ -159,7 +108,7 @@ class Version with ChangeNotifier {
     if (exitCode != 0) {
       isDownloaded = false;
       await deleteDownload();
-      throw Exception('Failed to download $_dmgName (exit code $exitCode)');
+      throw Exception('Failed to download $dmgName (exit code $exitCode)');
     }
     File(_downloadFilePath).setLastModifiedSync(date);
     isDownloaded = true;
@@ -191,25 +140,6 @@ class Version with ChangeNotifier {
       }
     }
     versionList.addAll(versions.reversed.toList());
-  }
-
-  Future<void> extract() async {
-    await checkIfExtracted();
-    if (isExtracted) {
-      return;
-    }
-    final volumePath = await _attach();
-    final list = Directory(volumePath).listSync();
-    for (final entity in list) {
-      final result = await Process.run('cp', ['-R', entity.path, gsPath]);
-      if (result.exitCode != 0) {
-        isExtracted = false;
-        await deleteExtract();
-        throw Exception('Failed to copy $entity to $gsPath');
-      }
-    }
-    await _detach(volumePath);
-    await checkIfExtracted();
   }
 
   Future<void> _fillExtentList() async {
@@ -287,5 +217,10 @@ class Version with ChangeNotifier {
 
   Future<void> _setDirectoryWritable(Directory directory) async {
     await Process.run('chmod', ['-R', 'u+w', directory.path]);
+  }
+
+  Future<void> updateState() async {
+    await checkIfDownloaded();
+    await checkIfExtracted();
   }
 }

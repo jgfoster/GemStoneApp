@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:gemstoneapp/domain/platform.dart';
 import 'package:gemstoneapp/domain/version.dart';
 import 'package:gemstoneapp/widgets/version_download.dart';
 import 'package:intl/intl.dart';
@@ -21,10 +22,9 @@ class DownloadTabState extends State<DownloadTab> with WidgetsBindingObserver {
     final rows = _rows(context);
     return VisibilityDetector(
       key: Key('scroll-view-key'),
-      onVisibilityChanged: (VisibilityInfo info) {
+      onVisibilityChanged: (VisibilityInfo info) async {
         if (info.visibleFraction > 0) {
-          // The widget is visible, you can refresh the state or perform actions here
-          setState(() {});
+          await updateVersionState();
         }
       },
       child: SingleChildScrollView(
@@ -83,7 +83,6 @@ class DownloadTabState extends State<DownloadTab> with WidgetsBindingObserver {
   }
 
   Future<void> _deleteDownload(BuildContext context, Version version) async {
-    // Show the "Deleting" dialog
     unawaited(
       showDialog(
         context: context,
@@ -140,13 +139,9 @@ class DownloadTabState extends State<DownloadTab> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('AppLifecycleState changed to: $state');
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed) {
-      print('App gained focus');
-      setState(() {}); // Refresh the state when the app gains focus
-    } else if (state == AppLifecycleState.paused) {
-      print('App lost focus');
+      await updateVersionState();
     }
   }
 
@@ -168,7 +163,9 @@ class DownloadTabState extends State<DownloadTab> with WidgetsBindingObserver {
 
   Widget _downloadCheckbox(Version version, BuildContext context) {
     return Tooltip(
-      message: 'Check to download, uncheck to delete downloaded file.',
+      message: version.isDownloaded
+          ? 'Click to delete downloaded disk image.'
+          : 'Click to download installer disk image.',
       child: Checkbox(
         value: version.isDownloaded,
         onChanged: (newValue) async {
@@ -184,56 +181,42 @@ class DownloadTabState extends State<DownloadTab> with WidgetsBindingObserver {
   }
 
   Future<void> _extract(BuildContext context, Version version) async {
-    unawaited(
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return Dialog(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(width: 16),
-                  Text('Extracting download...'),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-    try {
-      await version.extract();
-    } catch (e) {
-      if (context.mounted) {
-        await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Extraction Error'),
-              content: Text(e.toString()),
-              actions: [
+    unawaited(Process.run('open', [gsPath]));
+    unawaited(Process.run('open', ['${version.productFilePath}.dmg']));
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 16),
+                Text('Copy ${version.dmgName} from the disk\n'
+                    'image to the Data/Documents folder (next to the .dmg file).\n'
+                    'You may then close the Finder windows and eject the disk image.\n'
+                    '(macOS security requires that this be done manually.)'),
+                SizedBox(width: 16),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text('OK'),
+                  child: Text('Ok'),
                 ),
               ],
-            );
-          },
+            ),
+          ),
         );
-      }
-    }
-    if (context.mounted) {
-      Navigator.of(context).pop();
-    }
+      },
+    );
   }
 
   Widget _extractCheckbox(Version version, BuildContext context) {
     return Tooltip(
-      message: 'Check to extract, uncheck to delete extracted files.',
+      message: version.isExtracted
+          ? 'Click to delete extracted files.'
+          : 'Click to get instructions to extract files.',
       child: Checkbox(
         value: version.isExtracted,
         onChanged: (newValue) async {
@@ -285,5 +268,11 @@ class DownloadTabState extends State<DownloadTab> with WidgetsBindingObserver {
         ],
       );
     }).toList();
+  }
+
+  Future<void> updateVersionState() async {
+    for (final version in Version.versionList) {
+      await version.updateState();
+    }
   }
 }
