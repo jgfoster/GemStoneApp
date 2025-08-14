@@ -26,11 +26,11 @@ class Database {
   Version version;
 
   static Future<void> buildDatabaseList() async {
-    if (!Directory(gsPath).existsSync()) {
-      Directory(gsPath).createSync(recursive: true);
+    if (!Directory(gemstoneGlobalDir).existsSync()) {
+      Directory(gemstoneGlobalDir).createSync(recursive: true);
     }
     databaseList.clear();
-    final entries = Directory(gsPath).listSync();
+    final entries = Directory(gemstoneGlobalDir).listSync();
     for (final each in entries) {
       if (await FileSystemEntity.isDirectory(each.path)) {
         final yamlFile = File('${each.path}/database.yaml');
@@ -76,10 +76,10 @@ class Database {
 
   Future<void> createDatabase() async {
     var i = 1;
-    while (Directory('$gsPath/db-$i').existsSync()) {
+    while (Directory('$gemstoneGlobalDir/db-$i').existsSync()) {
       i++;
     }
-    path = '$gsPath/db-$i';
+    path = '$gemstoneGlobalDir/db-$i';
     Directory(path).createSync();
     Directory('$path/conf').createSync();
     Directory('$path/data').createSync();
@@ -151,7 +151,7 @@ class Database {
     return {
       'GEMSTONE': version.productFilePath,
       'GEMSTONE_SYS_CONF': '$path/conf',
-      'GEMSTONE_GLOBAL_DIR': gsPath,
+      'GEMSTONE_GLOBAL_DIR': gemstoneGlobalDir,
       'GEMSTONE_LOG': '$path/log/$stoneName.log',
       'GEMSTONE_EXE_CONF': '$path/conf',
       'GEMSTONE_NRS_ALL': '#netldi:$ldiName#dir:$path#log:$path/log/%N_%P.log',

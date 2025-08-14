@@ -9,8 +9,8 @@ import 'package:intl/intl.dart';
 class Version with ChangeNotifier {
   Version({required this.date, required this.name, required this.size}) {
     dmgName = 'GemStone64Bit$name-arm64.Darwin.dmg';
-    _downloadFilePath = '$gsPath/$dmgName';
-    productFilePath = '$gsPath/GemStone64Bit$name-arm64.Darwin';
+    _downloadFilePath = '$gemstoneGlobalDir/$dmgName';
+    productFilePath = '$gemstoneGlobalDir/GemStone64Bit$name-arm64.Darwin';
     _productUrlPath = '$_productsUrlPath/$dmgName';
   }
 
@@ -97,7 +97,7 @@ class Version with ChangeNotifier {
         '-O',
         _productUrlPath,
       ],
-      workingDirectory: gsPath,
+      workingDirectory: gemstoneGlobalDir,
     );
     _downloadProcess?.stderr.transform(utf8.decoder).listen((data) {
       downloadProgress = data;
@@ -169,12 +169,12 @@ class Version with ChangeNotifier {
   }
 
   static Future<void> readVersions() async {
-    final entries = Directory(gsPath).listSync();
+    final entries = Directory(gemstoneGlobalDir).listSync();
     for (final each in entries) {
       if (each.path.endsWith('-arm64.Darwin.dmg') &&
           await FileSystemEntity.isFile(each.path)) {
         final versionString = each.path.substring(
-          gsPath.length + 14,
+          gemstoneGlobalDir.length + 14,
           each.path.length - 17,
         );
         final stat = File(each.path).statSync();
@@ -190,7 +190,7 @@ class Version with ChangeNotifier {
       if (each.path.endsWith('-arm64.Darwin') &&
           await FileSystemEntity.isDirectory(each.path)) {
         final versionString = each.path.substring(
-          gsPath.length + 14,
+          gemstoneGlobalDir.length + 14,
           each.path.length - 13,
         );
         Version? version;

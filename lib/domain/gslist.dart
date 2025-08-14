@@ -15,7 +15,7 @@ class GsList {
 
   Future<void> fetchData() async {
     try {
-      final directory = Directory(gsPath);
+      final directory = Directory(gemstoneProduct);
       final fullList = directory.list(recursive: true);
       final gsList = await fullList.firstWhere(
         (file) => file.path.endsWith('/bin/gslist'),
@@ -24,7 +24,7 @@ class GsList {
         gsList.path,
         ['-cvl'],
         environment: {
-          'GEMSTONE_GLOBAL_DIR': gsPath,
+          'GEMSTONE_GLOBAL_DIR': gemstoneGlobalDir,
         },
       );
       lastUpdateTime = DateTime.now();
