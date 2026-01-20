@@ -196,12 +196,15 @@ class DownloadTabState extends State<DownloadTab> with WidgetsBindingObserver {
                 CircularProgressIndicator(),
                 SizedBox(width: 16),
                 Text('Copy ${version.dmgName} from the disk\n'
-                    'image to the Data/Documents folder (next to the .dmg file).\n'
+                    'image to the Documents/GemStone folder (next to the .dmg file).\n'
                     'You may then close the Finder windows and eject the disk image.\n'
                     '(macOS security requires that this be done manually.)'),
                 SizedBox(width: 16),
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    setState(() {});
+                  },
                   child: Text('Ok'),
                 ),
               ],

@@ -1,16 +1,14 @@
-# gemstoneapp
+# GemStone SysAdmin Tools
 
-A new Flutter project.
+## Sandboxing
 
-## Getting Started
+With sandboxing disabled, your app will have unrestricted access to:
 
-This project is a starting point for a Flutter application.
+* File system
+* Network resources
+* System processes
+* Other system resources
 
-A few resources to get you started if this is your first Flutter project:
+This makes sense for a system administration tool that needs to manage GemStone databases, create configuration files, and interact with system processes.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Note: Apps distributed through the Mac App Store are required to be sandboxed, so this configuration is only suitable for direct distribution outside the App Store.

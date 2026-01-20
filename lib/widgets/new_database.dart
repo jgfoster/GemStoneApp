@@ -18,7 +18,7 @@ class NewDatabaseFormState extends State<NewDatabaseForm> {
   DropdownButtonFormField<String> baseImageField() {
     return DropdownButtonFormField<String>(
       decoration: const InputDecoration(labelText: 'Base Image'),
-      value: _database.baseExtent,
+      initialValue: _database.baseExtent,
       onChanged: (newValue) {
         setState(() {
           // _selectedBaseImage = newValue;
@@ -122,7 +122,7 @@ class NewDatabaseFormState extends State<NewDatabaseForm> {
   DropdownButtonFormField<Version> versionField() {
     return DropdownButtonFormField<Version>(
       decoration: const InputDecoration(labelText: 'Version'),
-      value: _database.version,
+      initialValue: _database.version,
       onChanged: (newValue) {
         setState(() {
           _database.version = newValue!;
