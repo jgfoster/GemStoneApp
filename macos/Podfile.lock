@@ -2,16 +2,12 @@ PODS:
   - FlutterMacOS (1.0.0)
   - screen_retriever_macos (0.0.1):
     - FlutterMacOS
-  - simple_native_logger (1.0.0):
-    - Flutter
-    - FlutterMacOS
   - window_manager (0.5.0):
     - FlutterMacOS
 
 DEPENDENCIES:
   - FlutterMacOS (from `Flutter/ephemeral`)
   - screen_retriever_macos (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos`)
-  - simple_native_logger (from `Flutter/ephemeral/.symlinks/plugins/simple_native_logger/darwin`)
   - window_manager (from `Flutter/ephemeral/.symlinks/plugins/window_manager/macos`)
 
 EXTERNAL SOURCES:
@@ -19,15 +15,12 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral
   screen_retriever_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos
-  simple_native_logger:
-    :path: Flutter/ephemeral/.symlinks/plugins/simple_native_logger/darwin
   window_manager:
     :path: Flutter/ephemeral/.symlinks/plugins/window_manager/macos
 
 SPEC CHECKSUMS:
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
   screen_retriever_macos: 452e51764a9e1cdb74b3c541238795849f21557f
-  simple_native_logger: 123f017243eacb00527cb0e5e42a3bf051e6a278
   window_manager: b729e31d38fb04905235df9ea896128991cad99e
 
 PODFILE CHECKSUM: 6e548dc99d29b0f0adb3733a874f8e577a72a510

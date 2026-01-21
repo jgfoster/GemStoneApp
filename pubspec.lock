@@ -371,14 +371,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.0"
-  simple_native_logger:
-    dependency: "direct main"
-    description:
-      name: simple_native_logger
-      sha256: "9f53cd7276cfb270c11493dab03ca3fa3513b70467c6924bdfea98c2b335d3d9"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   sky_engine:
     dependency: transitive
     description: flutter

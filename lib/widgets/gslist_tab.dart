@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gemstoneapp/domain/gslist.dart';
+import 'package:gemstoneapp/domain/platform.dart';
 
 class GsListTab extends StatelessWidget {
   const GsListTab({super.key});
@@ -35,6 +36,10 @@ class GsListTab extends StatelessWidget {
   }
 
   Future<String> _fetchData() async {
+    if (!await isHostnameInEtcHosts()) {
+      return 'Your hostname is not in /etc/hosts. '
+          'Please add it and restart this application.';
+    }
     await GsList().fetchData();
     return GsList().output ??
         'We are unable to find the gslist executable. '

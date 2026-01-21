@@ -8,7 +8,6 @@ import 'package:gemstoneapp/widgets/databases_tab.dart';
 import 'package:gemstoneapp/widgets/gslist_tab.dart';
 import 'package:gemstoneapp/widgets/shared_memory_tab.dart';
 import 'package:gemstoneapp/widgets/versions_tab.dart';
-// import 'package:simple_native_logger/simple_native_logger.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {

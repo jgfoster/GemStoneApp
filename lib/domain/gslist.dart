@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:gemstoneapp/domain/database.dart';
 import 'package:gemstoneapp/domain/platform.dart';
-// import 'package:simple_native_logger/simple_native_logger.dart';
 
 class GsList {
   factory GsList() {
@@ -13,17 +12,14 @@ class GsList {
   static final GsList _instance = GsList._privateConstructor();
   DateTime? lastUpdateTime;
   String? output;
-  // static final _logger = SimpleNativeLogger(tag: 'GemStone');
 
   Future<void> fetchData() async {
     try {
-      // _logger.i('Finding gslist executable...');
       final directory = Directory(gsPath);
       final fullList = directory.list(recursive: true);
       final gsList = await fullList.firstWhere(
         (file) => file.path.endsWith('/bin/gslist'),
       );
-      // _logger.i('Found gslist executable at ${gsList.path}');
       final result = await Process.run(
         gsList.path,
         ['-cvl'],
@@ -31,7 +27,6 @@ class GsList {
           'GEMSTONE_GLOBAL_DIR': gsPath,
         },
       );
-      // _logger.i('gslist output: ${result.stdout}');
       lastUpdateTime = DateTime.now();
       output = result.stdout;
       _parseOutput();
