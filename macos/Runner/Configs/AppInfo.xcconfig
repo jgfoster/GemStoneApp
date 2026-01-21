@@ -5,7 +5,7 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = GemStone/S 64 Bit SysAdmin Tools
+PRODUCT_NAME = GemStone SysAdmin
 
 // The application's bundle identifier
 PRODUCT_BUNDLE_IDENTIFIER = com.gemtalk.gemstoneapp

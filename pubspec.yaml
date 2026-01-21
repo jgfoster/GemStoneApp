@@ -1,5 +1,5 @@
 name: gemstoneapp
-description: "GemStone/S 64 Bit SysAdmin Tools"
+description: "GemStone SysAdmin"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 version: 2.0.0+1
