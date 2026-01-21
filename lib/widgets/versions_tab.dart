@@ -201,10 +201,7 @@ class DownloadTabState extends State<DownloadTab> with WidgetsBindingObserver {
                     '(macOS security requires that this be done manually.)'),
                 SizedBox(width: 16),
                 TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    setState(() {});
-                  },
+                  onPressed: () => Navigator.of(context).pop(),
                   child: Text('Ok'),
                 ),
               ],

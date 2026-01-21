@@ -8,6 +8,8 @@ import 'package:gemstoneapp/widgets/databases_tab.dart';
 import 'package:gemstoneapp/widgets/gslist_tab.dart';
 import 'package:gemstoneapp/widgets/shared_memory_tab.dart';
 import 'package:gemstoneapp/widgets/versions_tab.dart';
+// import 'package:simple_native_logger/simple_native_logger.dart';
+import 'package:window_manager/window_manager.dart';
 
 void main() async {
   await setup();
@@ -16,6 +18,17 @@ void main() async {
 
 Future<void> setup() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // SimpleNativeLogger.init();
+  await windowManager.ensureInitialized();
+  final WindowOptions windowOptions = const WindowOptions(
+    size: Size(900, 600),
+    center: true,
+    title: 'GemStone/S 64 Bit SysAdmin Tools',
+  );
+  await windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
   await getGsPath();
   if (!Directory('$gsPath/locks').existsSync()) {
     Directory('$gsPath/locks').createSync(recursive: true);

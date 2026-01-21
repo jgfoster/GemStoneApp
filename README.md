@@ -1,4 +1,4 @@
-# GemStone SysAdmin Tools
+# GemStone/S 64 Bit SysAdmin Tools
 
 ## Sandboxing
 
